@@ -20,12 +20,11 @@ function SetLibs( _configuration, _platform, _basepath )
 		platformname = "Win32"
 		archname = "x86"
 	end
-	local strGlew = string.format( "%s/3rdparty/glew-1.13.0/lib/%s/%s", _basepath, _configuration, platformname )
+	local strGlew = string.format( "%s/3rdparty/glew-1.13.0/lib/release/%s", _basepath, platformname )
 	local strSdl2 = string.format( "%s/3rdparty/SDL2-2.0.3/lib/%s/%s", _basepath, platformname, _configuration )
-	local strImgui = string.format( "%s/3rdparty/imgui/bin/%s-%s-Dll", _basepath, platformname, _configuration )
+	local strImgui = string.format( "%s/3rdparty/imgui/bin/%s_%s", _basepath, platformname, _configuration )
 
 	configuration {_configuration, _platform}
-		--libdirs { "../../3rdparty\SDL2-2.0.3/lib/x64\$(Configuration);..\..\3rdparty\glew-1.10.0\lib\release\x64;..\..\3rdparty\tinyxml2\tinyxml2\bin\$(Platform)-$(Configuration)-Dll;..\..\3rdparty\imgui\bin\$(Platform)-$(Configuration)-Dll;$(LibraryPath)
 		libdirs { strGlew, strSdl2, strImgui }
 end
 
@@ -46,7 +45,7 @@ workspace "fracstar"
 		language "C++"
 		files { "../../engine/src/**.h", "../../engine/src/**.cpp" }
 
-		includedirs { "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty" }
+		includedirs { "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/zlib-1.2.8", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty" }
 
 		defines { "_CRT_SECURE_NO_WARNINGS" }
 		
@@ -56,9 +55,19 @@ workspace "fracstar"
 			SetTarget( "Debug", "x64", targetpath )
 			SetTarget( "Release", "x32", targetpath )
 			SetTarget( "Release", "x64", targetpath )
+			
 		configuration "macosx"
 			SetTarget( "Debug", "native", targetpath )
 			SetTarget( "Release", "native", targetpath )
+			
+		configuration "Debug"
+			defines { "_DEBUG" }
+			flags { "Symbols", "MultiProcessorCompile" }
+ 
+		configuration "Release"
+			defines { "NDEBUG" }
+			flags { "Optimize", "Symbols", "MultiProcessorCompile" } 
+			optimize "On"
 
 	---------------------------------------------------------
 	project "fracstar"
@@ -72,8 +81,8 @@ workspace "fracstar"
 		defines { "_CRT_SECURE_NO_WARNINGS", "_WINDOWS", "_USRDLL" }
 		flags { "NoPCH", "NoNativeWChar", "NoEditAndContinue" }
 
-		includedirs { "../../engine/src/", "../../3rdparty", "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty/eigen3" }
-		links { "bigball" } --"user32", "gdi32" }
+		includedirs { "../../engine/src/", "../../3rdparty", "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/zlib-1.2.8", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty/eigen3" }
+		links { "bigball", "glew32", "sdl2", "imgui" } --"user32", "gdi32" }
 
 		local targetpath = ".."
 		local libpath = "../.."
@@ -86,6 +95,7 @@ workspace "fracstar"
 			SetLibs( "Debug", "x64", libpath )
 			SetLibs( "Release", "x32", libpath )
 			SetLibs( "Release", "x64", libpath )
+			
 		configuration "macosx"
 			SetTarget( "Debug", "native", targetpath )
 			SetTarget( "Release", "native", targetpath )
