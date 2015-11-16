@@ -69,6 +69,9 @@ workspace "fracstar"
 			flags { "Optimize", "Symbols", "MultiProcessorCompile" } 
 			optimize "On"
 
+		configuration "macosx"
+            		buildoptions { "-std=c++11" } --, "-stdlib=libc++" }
+
 	---------------------------------------------------------
 	project "fracstar"
 		kind "ConsoleApp"
@@ -112,7 +115,7 @@ workspace "fracstar"
 			optimize "On"
 
 		configuration "macosx"
-            linkoptions  { "-std=c++11" } --, "-stdlib=libc++" }
-            buildoptions { "-std=c++11" } --, "-stdlib=libc++" }
+            		linkoptions  { "-std=c++11" } --, "-stdlib=libc++" }
+            		buildoptions { "-std=c++11" } --, "-stdlib=libc++" }
 			
 
