@@ -23,9 +23,10 @@ function SetLibs( _configuration, _platform, _basepath )
 	local strGlew = string.format( "%s/3rdparty/glew-1.13.0/lib/release/%s", _basepath, platformname )
 	local strSdl2 = string.format( "%s/3rdparty/SDL2-2.0.3/lib/%s/%s", _basepath, platformname, _configuration )
 	local strImgui = string.format( "%s/3rdparty/imgui/bin/%s_%s", _basepath, platformname, _configuration )
+	local strJsmn = string.format( "%s/3rdparty/jsmn/bin/%s_%s", _basepath, platformname, _configuration )
 
 	configuration {_configuration, _platform}
-		libdirs { strGlew, strSdl2, strImgui }
+		libdirs { strGlew, strSdl2, strImgui, strJsmn }
 end
 
 
@@ -85,7 +86,7 @@ workspace "fracstar"
 		flags { "NoPCH", "NoNativeWChar", "NoEditAndContinue" }
 
 		includedirs { "../../engine/src/", "../../3rdparty", "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/zlib-1.2.8", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty/eigen3" }
-		links { "bigball", "glew32", "sdl2", "imgui" } --"user32", "gdi32" }
+		links { "bigball", "glew32", "sdl2", "opengl32", "imgui", "jsmn" }
 
 		local targetpath = ".."
 		local libpath = "../.."

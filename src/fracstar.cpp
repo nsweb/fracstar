@@ -3,6 +3,7 @@
 
 #include "fracstar.h"
 #include "system/profiler.h"
+#include "SDL_main.h"
 
 //#define KSVD_IMPLEMENTATION
 //#define KSVD_NO_MATH
@@ -11,7 +12,11 @@
 //#include "ksvd/trunk/ksvd.h"
 
 //int _tmain(int argc, _TCHAR* argv[])
-int main(int argc, char* argv[])
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int main(int argc, char *argv[])
 {
 	PROFILE_THREAD_SCOPE("MainThread");
 
