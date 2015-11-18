@@ -26,12 +26,12 @@ bool FSEngine::Init( bool bCreateWindow )
 {
 	bool bInit = Engine::Init( bCreateWindow );
 
+#if 0
 	//////////////////////////////////////////////////////////////////////////
 	// Scene description
 	Entity* pPlanet = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/planet.json", "Planet" );
 	EntityManager::GetStaticInstance()->AddEntityToWorld( pPlanet );
 
-#if 0
 	Entity* pSun = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/sun.json", "Sun" );
 	EntityManager::GetStaticInstance()->AddEntityToWorld( pSun );
 	CoDPosition* pSunCoPos = static_cast<CoDPosition*>( pSun->GetComponent( CoDPosition::StaticClass() ) );

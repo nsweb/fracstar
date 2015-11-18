@@ -38,7 +38,14 @@ workspace "fracstar"
 		platforms { "native" }
 	configuration "windows"
 		platforms { "x32", "x64" }
-	--location "src"
+		
+	filter { "platforms:x64" }
+		system "Windows"
+		architecture "x64"
+		
+	filter { "platforms:x32" }
+		system "Windows"
+		architecture "x32"
 
 	---------------------------------------------------------
 	project "bigball" 
@@ -86,7 +93,7 @@ workspace "fracstar"
 		flags { "NoPCH", "NoNativeWChar", "NoEditAndContinue" }
 
 		includedirs { "../../engine/src/", "../../3rdparty", "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/zlib-1.2.8", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty/eigen3" }
-		links { "bigball", "glew32", "sdl2", "opengl32", "imgui", "jsmn" }
+		links { "bigball", "glew32", "sdl2", "sdl2main", "opengl32", "imgui", "jsmn" }
 
 		local targetpath = ".."
 		local libpath = "../.."
