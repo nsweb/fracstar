@@ -5,8 +5,9 @@
 #include "engine/entity.h"
 #include "engine/entitymanager.h"
 #include "engine/controller.h"
+#include "engine/coposition.h"
 //#include "coblocks.h"
-//#include "blocksmanager.h"
+#include "dfmanager.h"
 //#include "../core/datastreammanager.h"
 //#include "codposition.h"
 #include "fscamera.h"
@@ -26,12 +27,13 @@ bool FSEngine::Init( bool bCreateWindow )
 {
 	bool bInit = Engine::Init( bCreateWindow );
 
-#if 0
+
 	//////////////////////////////////////////////////////////////////////////
 	// Scene description
-	Entity* pPlanet = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/planet.json", "Planet" );
-	EntityManager::GetStaticInstance()->AddEntityToWorld( pPlanet );
+	Entity* pShip = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
+	EntityManager::GetStaticInstance()->AddEntityToWorld( pShip );
 
+#if 0
 	Entity* pSun = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/sun.json", "Sun" );
 	EntityManager::GetStaticInstance()->AddEntityToWorld( pSun );
 	CoDPosition* pSunCoPos = static_cast<CoDPosition*>( pSun->GetComponent( CoDPosition::StaticClass() ) );
@@ -84,12 +86,10 @@ void FSEngine::DeclareComponentsAndEntities()
 {
 	Super::DeclareComponentsAndEntities();
 
-#if 0
-	DECLARE_COMPONENT_MGR( CoBlocks, BlocksManager );
-	DECLARE_COMPONENT( CoDPosition );
-	DECLARE_ENTITYPATTERN( Planet, Entity, (2, "CoDPosition", "CoBlocks"), (0) );
-	DECLARE_ENTITYPATTERN( Sun, Entity, (1, "CoDPosition"), (0) );
-#endif
+	//DECLARE_COMPONENT_MGR( CoPosition, DFManager );
+	//DECLARE_COMPONENT( CoDPosition );
+	//DECLARE_ENTITYPATTERN( Planet, Entity, (2, "CoDPosition", "CoBlocks"), (0) );
+	DECLARE_ENTITYPATTERN( Ship, Entity, (1, "CoPosition"), (0) );
 }
 
 void FSEngine::CreateGameCameras()
@@ -105,15 +105,9 @@ void FSEngine::InitManagers()
 {
 	Super::InitManagers();
 
-#if 0
-	BlocksManager* pBlocksManager = new BlocksManager();
-	pBlocksManager->Create();
-	m_Managers.push_back( pBlocksManager );
-
-	DataStreamManager* pDataStreamManager = new DataStreamManager();
-	pDataStreamManager->Create();
-	m_Managers.push_back( pDataStreamManager );
-#endif
+	DFManager* pDFManager = new DFManager();
+	pDFManager->Create();
+	m_Managers.push_back( pDFManager );
 }
 
 void FSEngine::DestroyManagers()
