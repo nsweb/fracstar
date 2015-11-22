@@ -30,8 +30,8 @@ bool FSEngine::Init( bool bCreateWindow )
 
 	//////////////////////////////////////////////////////////////////////////
 	// Scene description
-	Entity* pShip = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
-	EntityManager::GetStaticInstance()->AddEntityToWorld( pShip );
+	//Entity* pShip = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
+	//EntityManager::GetStaticInstance()->AddEntityToWorld( pShip );
 
 #if 0
 	Entity* pSun = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/sun.json", "Sun" );

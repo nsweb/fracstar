@@ -4,7 +4,11 @@
 #include "targetver.h"
 
 #include <stdio.h>
+#if !defined _MSC_VER
+
+#else
 #include <tchar.h>
+#endif
 
 #include "bigball.h"
 

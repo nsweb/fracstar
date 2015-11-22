@@ -1,5 +1,6 @@
 
 function SetTarget( _configuration, _platform, _basepath )
+	--print(_configuration .. _platform)
 	local platformname = _platform
 	local archname = _platform
 	if _platform == "x32" then
@@ -20,8 +21,25 @@ function SetLibs( _configuration, _platform, _basepath )
 		platformname = "Win32"
 		archname = "x86"
 	end
-	local strGlew = string.format( "%s/3rdparty/glew-1.13.0/lib/release/%s", _basepath, platformname )
+
+	local strGlew
+	if _platform == "native" then
+		strGlew = string.format( "%s/3rdparty/glew-1.13.0/lib", _basepath )
+	else
+		strGlew = string.format( "%s/3rdparty/glew-1.13.0/lib/release/%s", _basepath, platformname )
+	end
+
 	local strSdl2 = string.format( "%s/3rdparty/SDL2-2.0.3/lib/%s/%s", _basepath, platformname, _configuration )
+	local strSdl2Options = string.format( "-F %s/3rdparty/SDL2-2.0.3/lib/%s/%s", _basepath, platformname, _configuration )
+	
+	-- add framework search path for SDL2
+	if _platform == "native" then
+		configuration {_configuration, _platform}
+	    		linkoptions  { strSdl2Options }
+	else
+
+	end
+
 	local strImgui = string.format( "%s/3rdparty/imgui/bin/%s_%s", _basepath, platformname, _configuration )
 	local strJsmn = string.format( "%s/3rdparty/jsmn/bin/%s_%s", _basepath, platformname, _configuration )
 
@@ -93,7 +111,12 @@ workspace "fracstar"
 		flags { "NoPCH", "NoNativeWChar", "NoEditAndContinue" }
 
 		includedirs { "../../engine/src/", "../../3rdparty", "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/zlib-1.2.8", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty/eigen3" }
-		links { "bigball", "glew32", "sdl2", "sdl2main", "opengl32", "imgui", "jsmn" }
+
+		configuration "windows"	
+			links { "bigball", "glew32", "sdl2", "sdl2main", "opengl32", "imgui", "jsmn" }
+
+		configuration "macosx"
+			links { "bigball", "glew", "SDL2.framework", "OpenGL.framework", "imgui", "jsmn" }
 
 		local targetpath = ".."
 		local libpath = "../.."
@@ -123,7 +146,7 @@ workspace "fracstar"
 			optimize "On"
 
 		configuration "macosx"
-            		linkoptions  { "-std=c++11" } --, "-stdlib=libc++" }
-            		buildoptions { "-std=c++11" } --, "-stdlib=libc++" }
+            		linkoptions  { "-std=c++11" } 
+            		buildoptions { "-std=c++11" }
 			
 
