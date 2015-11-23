@@ -35,9 +35,7 @@ function SetLibs( _configuration, _platform, _basepath )
 	-- add framework search path for SDL2
 	if _platform == "native" then
 		configuration {_configuration, _platform}
-	    		linkoptions  { strSdl2Options }
-	else
-
+	    	linkoptions  { strSdl2Options }
 	end
 
 	local strImgui = string.format( "%s/3rdparty/imgui/bin/%s_%s", _basepath, platformname, _configuration )
@@ -96,7 +94,7 @@ workspace "fracstar"
 			optimize "On"
 
 		configuration "macosx"
-            		buildoptions { "-std=c++11" } --, "-stdlib=libc++" }
+            buildoptions { "-std=c++11" } --, "-stdlib=libc++" }
 
 	---------------------------------------------------------
 	project "fracstar"
@@ -146,7 +144,7 @@ workspace "fracstar"
 			optimize "On"
 
 		configuration "macosx"
-            		linkoptions  { "-std=c++11" } 
-            		buildoptions { "-std=c++11" }
+            linkoptions  { "-std=c++11" } 
+            buildoptions { "-std=c++11" }
 			
 

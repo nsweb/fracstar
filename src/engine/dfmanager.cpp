@@ -14,8 +14,9 @@
 STATIC_MANAGER_CPP(DFManager);
 
 DFManager::DFManager() :
-	m_DFShader(nullptr),
-	m_SampleShader(nullptr)
+	m_DF_VAO(0),
+	m_DF_VBO(0),
+	m_DFShader(nullptr)
 {
 	m_pStaticInstance = this;
 }
@@ -28,13 +29,31 @@ DFManager::~DFManager()
 void DFManager::Create()
 {
 	m_DFShader = GfxManager::GetStaticInstance()->LoadShader( "df" );
-	m_SampleShader = GfxManager::GetStaticInstance()->LoadShader( "samples" );
+
+	DFVertex ScreenVertices[] = { { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(-1.f,1.f), vec2(-1.f,1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) },
+								  { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) },	{ vec2(1.f,-1.f), vec2(1.f,-1.f) } };
+
+	glGenVertexArrays( 1, &m_DF_VAO);
+	glBindVertexArray( m_DF_VAO);
+
+	glGenBuffers(1, &m_DF_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_DF_VBO);
+	glBufferData( GL_ARRAY_BUFFER, sizeof(ScreenVertices), ScreenVertices, GL_STATIC_DRAW );
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer( 0, 2, GL_FLOAT, GL_FALSE, sizeof(DFVertex) /*stride*/, (void*)0 /*offset*/	);
+	glVertexAttribPointer( 1, 2, GL_FLOAT, GL_FALSE, sizeof(DFVertex) /*stride*/, (void*)8 /*offset*/	);
+
+	glBindVertexArray(0);
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 }
 
 void DFManager::Destroy()
 {
 	m_DFShader = nullptr;
-	m_SampleShader = nullptr;
 }
 
 
@@ -68,7 +87,18 @@ void DFManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
 
-	//m_BlockShader->Bind();
+	static float GlobalTime = 0.f;
+	GlobalTime += RenderCtxt.m_DeltaSeconds;
+
+	m_DFShader->Bind();
+	ShaderUniform UniGTime = m_DFShader->GetUniformLocation("global_time");
+	m_DFShader->SetUniform( UniGTime, GlobalTime );
+
+	glBindVertexArray( m_DF_VAO );
+
+	glDrawArrays( GL_TRIANGLES, 0, 8 );
+
+	glBindVertexArray(0);
 
 	//ShaderUniform UniProj = m_BlockShader->GetUniformLocation("proj_mat");
 	//m_BlockShader->SetUniform( UniProj, RenderCtxt.m_ProjMat );
@@ -83,6 +113,6 @@ void DFManager::_Render( RenderContext& RenderCtxt )
 	//	m_Blocks[i]->_Render( RenderCtxt, m_BlockShader, m_SampleShader );
 	//}
 
-	//m_BlockShader->Unbind();
+	m_DFShader->Unbind();
 }
 

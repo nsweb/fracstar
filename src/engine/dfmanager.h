@@ -17,6 +17,12 @@ class DFManager : public ComponentManager
 {
 	STATIC_MANAGER_H(DFManager);
 
+	struct DFVertex
+	{
+		vec2	Pos;
+		vec2	Tex;
+	};
+
 private:
 	typedef ComponentManager Super;
 
@@ -34,9 +40,10 @@ public:
 	//Array<CoBlocks*> const& GetBlocksArray()	{ return m_Blocks;	}
 
 protected:
-	//Array<CoBlocks*>	m_Blocks;
+
+	GLuint				m_DF_VAO;
+	GLuint				m_DF_VBO;
 	Shader*				m_DFShader;
-	Shader*				m_SampleShader;
 };
 
 

@@ -30,8 +30,8 @@ bool FSEngine::Init( bool bCreateWindow )
 
 	//////////////////////////////////////////////////////////////////////////
 	// Scene description
-	//Entity* pShip = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
-	//EntityManager::GetStaticInstance()->AddEntityToWorld( pShip );
+	Entity* pShip = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
+	EntityManager::GetStaticInstance()->AddEntityToWorld( pShip );
 
 #if 0
 	Entity* pSun = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/sun.json", "Sun" );
@@ -41,11 +41,12 @@ bool FSEngine::Init( bool bCreateWindow )
 	{
 		pSunCoPos->SetPosition( dvec3( 0, -162e9, -81e9 ) );	// 230 million km
 	}
-
+#endif
 	Entity* pEntCamera = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/defaultcamera.json" );
 	EntityManager::GetStaticInstance()->AddEntityToWorld( pEntCamera );
 	if( pEntCamera->IsA( Camera::StaticClass() ) )
 	{
+#if 0
 		double CameraDistance = 1000.0;
 		CoBlocks* pPlanetCoBlocks = static_cast<CoBlocks*>( pPlanet ? pPlanet->GetComponent( CoBlocks::StaticClass() ) : nullptr );
 		if( pPlanetCoBlocks )
@@ -58,16 +59,16 @@ bool FSEngine::Init( bool bCreateWindow )
 		pCamera->SetPosition( dvec3(0.f, CameraDistance, 0.f) );
 		quat CamRot( quat::fromeuler_xyz( 90.0f, 180.0f, 0.0f ) );
 		pCamera->SetRotation( CamRot );
+#endif
 	}
 
+
 	// Link scene objects
-	CameraCtrl_Base* pCamCtrl = Controller::GetStaticInstance()->GetCameraCtrl( MarsCameraCtrl_Fly::StaticClass() );
-	if( pCamCtrl && pCamCtrl->IsA( MarsCameraCtrl_Fly::StaticClass() ) )
+	CameraCtrl_Base* pCamCtrl = Controller::GetStaticInstance()->GetCameraCtrl( FSCameraCtrl_Fly::StaticClass() );
+	if( pCamCtrl && pCamCtrl->IsA( FSCameraCtrl_Fly::StaticClass() ) )
 	{
-		((MarsCameraCtrl_Fly*)pCamCtrl)->SetTargetPlanet( pPlanet );
+		((FSCameraCtrl_Fly*)pCamCtrl)->SetTarget( pShip );
 	}
-	
-#endif
 
 	return bInit;
 }
@@ -94,11 +95,9 @@ void FSEngine::DeclareComponentsAndEntities()
 
 void FSEngine::CreateGameCameras()
 {
-#if 0
 	Controller* pController = Controller::GetStaticInstance();
-	pController->RegisterCameraCtrl( new MarsCameraCtrl_Fly() );
-	pController->SetActiveCameraCtrl( MarsCameraCtrl_Fly::StaticClass() );
-#endif
+	pController->RegisterCameraCtrl( new FSCameraCtrl_Fly() );
+	pController->SetActiveCameraCtrl( FSCameraCtrl_Fly::StaticClass() );
 }
 
 void FSEngine::InitManagers()

@@ -8,13 +8,12 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-#if 0
-class BIGBALL_API MarsCameraCtrl_Fly : public CameraCtrl_Fly
+class BIGBALL_API FSCameraCtrl_Fly : public CameraCtrl_Base
 {
-	CLASS_EQUIP_H(MarsCameraCtrl_Fly, CameraCtrl_Fly)
+	CLASS_EQUIP_H(FSCameraCtrl_Fly, CameraCtrl_Base)
 
 public:
-					MarsCameraCtrl_Fly();
+					FSCameraCtrl_Fly();
 
 	//float			m_StrafeSpeed;
 	//float			m_RotationSpeed;
@@ -22,11 +21,10 @@ public:
 public:
 	virtual void		UpdateView( CameraView& CamView, float DeltaSeconds );
 	virtual bool		OnControllerInput( Camera* pCamera, struct ControllerInput const& Input );
-	void				SetTargetPlanet( Entity* pPlanet )		{ m_pTargetPlanet = pPlanet; }
+	void				SetTarget( Entity* pTarget )		{ m_pTarget = pTarget; }
 
 protected:
-	Entity*			m_pTargetPlanet;
+	Entity*			m_pTarget;
 };
-#endif
 
 #endif // FSCAMERA_H
