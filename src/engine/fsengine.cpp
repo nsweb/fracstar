@@ -1,4 +1,4 @@
-// engine.cpp
+// fsengine.cpp
 //
 
 #include "../fracstar.h"
@@ -6,10 +6,9 @@
 #include "engine/entitymanager.h"
 #include "engine/controller.h"
 #include "engine/coposition.h"
-//#include "coblocks.h"
+#include "copath.h"
+#include "pathmanager.h"
 #include "dfmanager.h"
-//#include "../core/datastreammanager.h"
-//#include "codposition.h"
 #include "fscamera.h"
 //#include "../cmd/cmdbuilddata.h"
 
@@ -87,10 +86,9 @@ void FSEngine::DeclareComponentsAndEntities()
 {
 	Super::DeclareComponentsAndEntities();
 
-	//DECLARE_COMPONENT_MGR( CoPosition, DFManager );
-	//DECLARE_COMPONENT( CoDPosition );
-	//DECLARE_ENTITYPATTERN( Planet, Entity, (2, "CoDPosition", "CoBlocks"), (0) );
-	DECLARE_ENTITYPATTERN( Ship, Entity, (1, "CoPosition"), (0) );
+	DECLARE_COMPONENT_MGR( CoPath, PathManager );
+	//DECLARE_COMPONENT( CoPath );
+	DECLARE_ENTITYPATTERN( Ship, Entity, (2, "CoPosition", "CoPath"), (0) );
 }
 
 void FSEngine::CreateGameCameras()
@@ -103,6 +101,10 @@ void FSEngine::CreateGameCameras()
 void FSEngine::InitManagers()
 {
 	Super::InitManagers();
+
+	PathManager* pPathManager = new PathManager();
+	pPathManager->Create();
+	m_Managers.push_back( pPathManager );
 
 	DFManager* pDFManager = new DFManager();
 	pDFManager->Create();
