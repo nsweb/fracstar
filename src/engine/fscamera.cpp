@@ -1,6 +1,7 @@
 
 #include "../fracstar.h"
 #include "fscamera.h"
+#include "engine/coposition.h"
 
 
 CLASS_EQUIP_CPP(FSCameraCtrl_Fly);
@@ -14,6 +15,12 @@ FSCameraCtrl_Fly::FSCameraCtrl_Fly() :
 
 void FSCameraCtrl_Fly::UpdateView( CameraView& CamView, float DeltaSeconds )
 {
+	// Retrieve frame along path (ship coposition)
+	CoPosition* pTargetCoPos = static_cast<CoPosition*>( m_pTarget ? m_pTarget->GetComponent( CoPosition::StaticClass() ) : nullptr );
+	CamView.m_Transform.SetTranslation( pTargetCoPos->GetPosition() );
+	CamView.m_Transform.SetRotation( pTargetCoPos->GetRotation() );
+
+
 	//CoDPosition* pTargetCoPos = static_cast<CoDPosition*>( m_pTargetPlanet ? m_pTargetPlanet->GetComponent( CoDPosition::StaticClass() ) : nullptr );
 	//CoBlocks* pTargetCoBlocks = static_cast<CoBlocks*>( m_pTargetPlanet ? m_pTargetPlanet->GetComponent( CoBlocks::StaticClass() ) : nullptr );
 	//if( pTargetCoPos && pTargetCoBlocks )

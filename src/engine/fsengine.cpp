@@ -8,6 +8,8 @@
 #include "engine/coposition.h"
 #include "copath.h"
 #include "pathmanager.h"
+#include "../game/coship.h"
+#include "../game/shipmanager.h"
 #include "dfmanager.h"
 #include "fscamera.h"
 //#include "../cmd/cmdbuilddata.h"
@@ -31,6 +33,9 @@ bool FSEngine::Init( bool bCreateWindow )
 	// Scene description
 	Entity* pShip = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
 	EntityManager::GetStaticInstance()->AddEntityToWorld( pShip );
+
+	Entity* pLevel = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/level_0.json", "Ship" );
+	EntityManager::GetStaticInstance()->AddEntityToWorld( pLevel );
 
 #if 0
 	Entity* pSun = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/sun.json", "Sun" );
@@ -87,8 +92,10 @@ void FSEngine::DeclareComponentsAndEntities()
 	Super::DeclareComponentsAndEntities();
 
 	DECLARE_COMPONENT_MGR( CoPath, PathManager );
+	DECLARE_COMPONENT_MGR( CoShip, ShipManager );
 	//DECLARE_COMPONENT( CoPath );
-	DECLARE_ENTITYPATTERN( Ship, Entity, (2, "CoPosition", "CoPath"), (0) );
+	DECLARE_ENTITYPATTERN( Ship, Entity, (2, "CoPosition", "CoShip"), (0) );
+	DECLARE_ENTITYPATTERN( Level, Entity, (2, "CoPosition", "CoPath"), (0) );
 }
 
 void FSEngine::CreateGameCameras()
@@ -101,6 +108,10 @@ void FSEngine::CreateGameCameras()
 void FSEngine::InitManagers()
 {
 	Super::InitManagers();
+
+	ShipManager* pShipManager = new ShipManager();
+	pShipManager->Create();
+	m_Managers.push_back( pShipManager );
 
 	PathManager* pPathManager = new PathManager();
 	pPathManager->Create();
