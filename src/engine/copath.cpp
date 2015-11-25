@@ -16,9 +16,50 @@
 //#include "math/intersections.h"
 #include "system/file.h"
 
-#define PRIORITY_LOAD 1
-
 CLASS_EQUIP_CPP(CoPath);
+
+LevelPath::LevelPath() :
+    m_SumDistance(0.f)
+{
+    
+}
+
+vec3 LevelPath::InterpPath( float tnorm )
+{
+    BB_ASSERT( m_Knots.size() >= 2 );
+    
+    float t = bigball::clamp( tnorm * m_SumDistance, 0.f, m_SumDistance );
+    
+    int k = 0;
+    for( ; k < m_Knots.size() - 1; k++ )
+    {
+        if( t <= m_Knots[k + 1] )
+            break;
+    }
+    
+    float t0, t1 = m_Knots[k], t2 = m_Knots[k + 1], t3;
+    vec3 A1, A2, A3;
+    if( k == 0 )
+        A1 = m_CPoints[0];
+    else
+    {
+        t0 = m_Knots[k - 1];
+        A1 = (t1 - t) / (t1 - t0) * m_CPoints[k - 1] + (t - t0) / (t1 - t0) * m_CPoints[k];
+    }
+    
+    A2 = (t2 - t) / (t2 - t1) * m_CPoints[k] + (t - t1) / (t2 - t1) * m_CPoints[k + 1];
+    
+    if( k == m_Knots.size() - 2 )
+        A3 = m_CPoints[m_Knots.size() - 1];
+    else
+    {
+        t3 = m_Knots[k + 2];
+        A3 = (t3 - t) / (t3 - t2) * m_CPoints[k - 1] + (t - t2) / (t3 - t2) * m_CPoints[k];
+    }
+    
+    vec3 B1, B2;
+    
+}
 
 CoPath::CoPath() 
 {
@@ -42,16 +83,18 @@ void CoPath::Create( Entity* Owner, class json::Object* Proto )
 	for( int i = 0; i < nCP; i++ )
 	{
 		float stime, ctime;
-		bigball::sincos( nCP * 0.1f, &stime, &ctime );
+		bigball::sincos( i * 0.1f, &stime, &ctime );
 		vec3 p = vec3( 3.0f*stime, 4.0f*ctime, -2.9f + 0.0f*stime );
 		LPath.m_CPoints.push_back( p );
 	}
 
-	float lastt = 0.f, newt; 
+	float lastt = 0.f, newt;
+    LPath.m_SumDistance = 0.f;
 	LPath.m_Knots.push_back( 0.f );
 	for( int i = 1; i < nCP; i++ )
 	{
 		float dist = bigball::distance( LPath.m_CPoints[i], LPath.m_CPoints[i-1] );
+        LPath.m_SumDistance += dist;
 		newt = lastt + bigball::sqrt( dist );
 		LPath.m_Knots.push_back( newt );
 		lastt = newt;
@@ -75,7 +118,7 @@ void CoPath::RemoveFromWorld()
 
 void CoPath::Tick( TickContext& TickCtxt )
 {
-	CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
+	//CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
 
 	// Retrieve current camp pos from path interpolation (centripetal catmull-rom spline)
 

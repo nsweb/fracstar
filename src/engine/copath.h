@@ -14,12 +14,19 @@ namespace bigball
 	struct BIGBALL_API RenderContext;
 };
 
-struct LevelPath
+class LevelPath
 {
+public:
+    LevelPath();
+    
 	/** Control points of the spline */
 	Array<vec3> m_CPoints;
 	/** Knot sequence for interpolation */
 	Array<float> m_Knots;
+    /* Sum of dist  between knots */
+    float m_SumDistance;
+    
+    vec3 InterpPath( float t );
 };
 
 class CoPath : public Component 
