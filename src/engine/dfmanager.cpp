@@ -89,10 +89,14 @@ void DFManager::_Render( RenderContext& RenderCtxt )
 
 	static float GlobalTime = 0.f;
 	GlobalTime += RenderCtxt.m_DeltaSeconds;
+    
+    vec3 CamPos = RenderCtxt.m_View.m_Transform.GetTranslation();
 
 	m_DFShader->Bind();
 	ShaderUniform UniGTime = m_DFShader->GetUniformLocation("global_time");
 	m_DFShader->SetUniform( UniGTime, GlobalTime );
+    ShaderUniform UniCamera = m_DFShader->GetUniformLocation("camera_pos");
+    m_DFShader->SetUniform( UniCamera, CamPos );
 
 	glBindVertexArray( m_DF_VAO );
 

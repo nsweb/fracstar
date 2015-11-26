@@ -22,7 +22,9 @@ CLASS_EQUIP_CPP(CoShip);
 
 CoShip::CoShip() :
 	m_pCurrentLevel(nullptr),
+    m_Speed(1.f),
 	m_PathDistLevel(0.f)
+
 {
 
 }
@@ -59,12 +61,22 @@ void CoShip::Tick( TickContext& TickCtxt )
 		return;
 
 	Name const& LevelName = m_pCurrentLevel->GetName();
-	CoPath* pCoPath = static_cast<CoPath*>( m_pCurrentLevel->GetComponent( CoPath::StaticClass() ) );
-	LevelPath* LPath = pCoPath->GetLevelPath( LevelName );
+	CoPath* CoP = static_cast<CoPath*>( m_pCurrentLevel->GetComponent( CoPath::StaticClass() ) );
+	LevelPath* LPath = CoP->GetLevelPath( LevelName );
 	if( ! LPath )
 		return;
+    
+    m_PathDistLevel += TickCtxt.m_DeltaSeconds * m_Speed;
+    if( m_PathDistLevel > LPath->m_ClampedSumDistance )
+        m_PathDistLevel -= LPath->m_ClampedSumDistance;
+    
+    vec3 Pos, Tan;
+    LPath->InterpPath( m_PathDistLevel, Pos, Tan );
 
 	CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
+    CoPos->SetPosition( Pos );
+    quat Rot = quat::rotate( vec3(1.f, 0.f, 0.f), Tan );
+    CoPos->SetRotation( Rot );
 
 	// Retrieve current camp pos from path interpolation (centripetal catmull-rom spline)
 

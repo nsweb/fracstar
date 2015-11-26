@@ -55,41 +55,23 @@ LevelPath::LevelPath() :
     
 }
 
-vec3 LevelPath::InterpPath( float tnorm )
+void LevelPath::InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan )
 {
     BB_ASSERT( m_Knots.size() >= 2 );
     
-    float t = bigball::clamp( tnorm * m_SumDistance, 0.f, m_SumDistance );
+    float udist = bigball::clamp( (DistAlongPath / m_ClampedSumDistance) * m_ClampedKnotDistance, 0.f, m_ClampedKnotDistance );
+    udist += m_Knots[1];
     
-    int k = 0;
+    int k = 1;
     for( ; k < m_Knots.size() - 1; k++ )
     {
-        if( t <= m_Knots[k + 1] )
+        if( udist <= m_Knots[k + 1] )
             break;
     }
     
-    float t0, t1 = m_Knots[k], t2 = m_Knots[k + 1], t3;
-    vec3 A1, A2, A3;
-    if( k == 0 )
-        A1 = m_CPoints[0];
-    else
-    {
-        t0 = m_Knots[k - 1];
-        A1 = (t1 - t) / (t1 - t0) * m_CPoints[k - 1] + (t - t0) / (t1 - t0) * m_CPoints[k];
-    }
-    
-    A2 = (t2 - t) / (t2 - t1) * m_CPoints[k] + (t - t1) / (t2 - t1) * m_CPoints[k + 1];
-    
-    if( k == m_Knots.size() - 2 )
-        A3 = m_CPoints[m_Knots.size() - 1];
-    else
-    {
-        t3 = m_Knots[k + 2];
-        A3 = (t3 - t) / (t3 - t2) * m_CPoints[k - 1] + (t - t2) / (t3 - t2) * m_CPoints[k];
-    }
-    
-    vec3 B1, B2;
-    return A3;
+    BB_ASSERT( k - 1 < m_Splines.size() );
+    udist = (udist - m_Knots[k]) / (m_Knots[k + 1] - m_Knots[k]);
+    m_Splines[k - 1].Eval( udist, Pos, Tan );
 }
 
 CoPath::CoPath() 
@@ -109,13 +91,14 @@ void CoPath::Create( Entity* Owner, class json::Object* Proto )
 	// Temp : creating a test path procedurally
 	m_LevelPaths.push_back( LevelPath() );
 	LevelPath& LPath = m_LevelPaths.Last();
+    LPath.m_LevelName = "Level_0";
 	
-	const int32 nCP = 10;
+	const int32 nCP = 20;
 	for( int i = 0; i < nCP; i++ )
 	{
 		float stime, ctime;
 		bigball::sincos( i * 0.1f, &stime, &ctime );
-		vec3 p = vec3( 3.0f*stime, 4.0f*ctime, -2.9f + 0.0f*stime );
+		vec3 p = vec3( 3.0f*stime, 4.0f*ctime, -2.9f + 2.f*stime );
 		LPath.m_CPoints.push_back( p );
 	}
 

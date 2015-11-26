@@ -18,11 +18,12 @@ namespace bigball
 struct CubicSpline
 {
 	vec3 c0, c1, c2, c3;
-	vec3 Eval( float u )
+	void Eval( float u, vec3& Pos, vec3& Tan )
 	{
 		float u2 = u * u;
 		float u3 = u2 * u;
-		return c0 + c1*u + c2*u2 + c3*u3;
+		Pos = c0 + c1*u + c2*u2 + c3*u3;
+        Tan = c1*u + 2.f*c2*u + 3.f*c3*u2;
 	}
 
 	void InitNonuniformCatmullRom( const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p3, float dt0, float dt1, float dt2 );
@@ -49,7 +50,7 @@ public:
 	/* Dist between m_Knots[nCP-2] and m_Knots[1] */
 	float m_ClampedKnotDistance;
     
-    vec3 InterpPath( float t );
+    void InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan );
 };
 
 class CoPath : public Component 

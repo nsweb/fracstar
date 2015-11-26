@@ -35,6 +35,8 @@ public:
 
 protected:
 	Entity*		m_pCurrentLevel;
+    
+    float       m_Speed;
 	/** Current distance along path in a given level */
 	float		m_PathDistLevel;
 };

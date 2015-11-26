@@ -6,6 +6,7 @@ smooth in vec2 vs_fs_texcoord;
 smooth in vec4 vs_fs_color;
 
 uniform mat4 model2cam_mat;
+uniform vec3 camera_pos;
 uniform float global_time;
 
 #define MaxSteps 		50
@@ -142,7 +143,7 @@ void main(void)
 	//color = rgba;//vec4( rgba.r, 0,0,1);
 	
 	    // Camera position (eye), and camera target
-	vec3 camPos = camera();///*0.5*global_time**/vec3(4.0, 0.0, 0.0);
+    vec3 camPos = camera_pos;//camera();///*0.5*global_time**/vec3(4.0, 0.0, 0.0);
 	vec3 target = cameraTarget();//vec3( 0.0, 0.0, -3.0 );//camPos + vec3(-1.0, 0.0*cos(0.4*global_time), 0.0*sin(0.4*global_time));
 	vec3 camUp  = vec3(0.0,1.0,0.0);
 	
