@@ -14,17 +14,40 @@ namespace bigball
 	struct BIGBALL_API RenderContext;
 };
 
+// From http://stackoverflow.com/questions/9489736/catmull-rom-curve-with-no-cusps-and-no-self-intersections/23980479#23980479
+struct CubicSpline
+{
+	vec3 c0, c1, c2, c3;
+	vec3 Eval( float u )
+	{
+		float u2 = u * u;
+		float u3 = u2 * u;
+		return c0 + c1*u + c2*u2 + c3*u3;
+	}
+
+	void InitNonuniformCatmullRom( const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p3, float dt0, float dt1, float dt2 );
+	void InitCubicSpline( const vec3& p0, const vec3& p1, const vec3& t0, const vec3& t1 );
+};
+
 class LevelPath
 {
 public:
     LevelPath();
+
+	Name m_LevelName;
     
 	/** Control points of the spline */
 	Array<vec3> m_CPoints;
+	/** Piecewise cubic splines - if nCP are defined, nCP-3 splines are required */
+	Array<CubicSpline> m_Splines;
 	/** Knot sequence for interpolation */
 	Array<float> m_Knots;
-    /* Sum of dist  between knots */
+    /* Sum of dist between control points */
     float m_SumDistance;
+	/* Sum of dist between control points, excluding first and last CP*/
+	float m_ClampedSumDistance;
+	/* Dist between m_Knots[nCP-2] and m_Knots[1] */
+	float m_ClampedKnotDistance;
     
     vec3 InterpPath( float t );
 };
@@ -45,6 +68,7 @@ public:
 	virtual void		RemoveFromWorld();
 	virtual void		Tick( TickContext& TickCtxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
+	LevelPath*			GetLevelPath( Name const& LevelName );
 
 protected:
 	Array<LevelPath>	m_LevelPaths;

@@ -34,7 +34,7 @@ bool FSEngine::Init( bool bCreateWindow )
 	Entity* pShip = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
 	EntityManager::GetStaticInstance()->AddEntityToWorld( pShip );
 
-	Entity* pLevel = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/level_0.json", "Ship" );
+	Entity* pLevel = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/level_0.json", "Level_0" );
 	EntityManager::GetStaticInstance()->AddEntityToWorld( pLevel );
 
 #if 0
@@ -73,6 +73,10 @@ bool FSEngine::Init( bool bCreateWindow )
 	{
 		((FSCameraCtrl_Fly*)pCamCtrl)->SetTarget( pShip );
 	}
+
+	CoShip* pCoShip = static_cast<CoShip*>( pShip->GetComponent( CoShip::StaticClass() ) );
+	if( pCoShip )
+		pCoShip->SetCurrentLevel( pLevel );
 
 	return bInit;
 }

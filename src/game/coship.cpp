@@ -58,8 +58,11 @@ void CoShip::Tick( TickContext& TickCtxt )
 	if( !m_pCurrentLevel )
 		return;
 
+	Name const& LevelName = m_pCurrentLevel->GetName();
 	CoPath* pCoPath = static_cast<CoPath*>( m_pCurrentLevel->GetComponent( CoPath::StaticClass() ) );
-
+	LevelPath* LPath = pCoPath->GetLevelPath( LevelName );
+	if( ! LPath )
+		return;
 
 	CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
 
