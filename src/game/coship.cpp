@@ -72,10 +72,20 @@ void CoShip::Tick( TickContext& TickCtxt )
     
     vec3 Pos, Tan;
     LPath->InterpPath( m_PathDistLevel, Pos, Tan );
-
-	CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
+    Tan = bigball::normalize( Tan );
+    
+    static vec3 GUp( 0.f, 0.f, 1.f );
+    mat3 CamRot;
+    // Back
+    CamRot.v2 = -Tan;
+    // Right
+    CamRot.v0 = bigball::normalize( bigball::cross(Tan, GUp) );
+    // Up
+    CamRot.v1 = bigball::cross(CamRot.v0, Tan);
+    
+    CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
     CoPos->SetPosition( Pos );
-    quat Rot = quat::rotate( vec3(1.f, 0.f, 0.f), Tan );
+    quat Rot( CamRot );
     CoPos->SetRotation( Rot );
 
 	// Retrieve current camp pos from path interpolation (centripetal catmull-rom spline)

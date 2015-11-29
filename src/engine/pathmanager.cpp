@@ -64,6 +64,11 @@ void PathManager::Tick( TickContext& TickCtxt )
 void PathManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
+    
+    for( int32 i = 0; i < m_Paths.size(); ++i )
+    {
+        m_Paths[i]->_DrawDebug( RenderCtxt );
+    }
 
 	//m_BlockShader->Bind();
 

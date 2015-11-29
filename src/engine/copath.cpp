@@ -12,6 +12,7 @@
 #include "gfx/gfxmanager.h"
 #include "gfx/shader.h"
 #include "gfx/rendercontext.h"
+#include "gfx/drawutils.h"
 //#include "math/frustum.h"
 //#include "math/intersections.h"
 #include "system/file.h"
@@ -55,7 +56,7 @@ LevelPath::LevelPath() :
     
 }
 
-void LevelPath::InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan )
+void LevelPath::InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan ) const
 {
     BB_ASSERT( m_Knots.size() >= 2 );
     
@@ -157,10 +158,48 @@ void CoPath::Tick( TickContext& TickCtxt )
 	//dvec3 CamPosBlock = EntityT.TransformPositionInverse( CamPos );
 }
 
-//void CoPath::_Render( RenderContext& RenderCtxt, Shader* BlockShader )
-//{
-//	
-//}
+void CoPath::_DrawDebug( RenderContext& RenderCtxt )
+{
+    static float SegDist = 0.1f;
+    static u8vec4 Color( 128, 0, 128, 255 );
+    Array<vec3> SegmentList;
+    vec3 Pos, Tan;
+    
+    for( int i = 0; i < m_LevelPaths.size(); i++ )
+    {
+        SegmentList.clear();
+        
+        LevelPath& LPath = m_LevelPaths[i];
+        int SegCount = (int)(LPath.m_ClampedSumDistance / SegDist) + 1;
+        for( int SegIdx = 0; SegIdx <= SegCount; SegIdx++ )
+        {
+            LPath.InterpPath( (SegIdx * LPath.m_ClampedSumDistance) / SegCount, Pos, Tan );
+            SegmentList.push_back( Pos );
+        }
+        DrawUtils::GetStaticInstance()->PushSegmentList( SegmentList, Color );
+    }
+    
+    // TEMP DEBUG
+    /*SegmentList.clear();
+    SegmentList.push_back(vec3(-10.f, -10.f, -10.f));
+    SegmentList.push_back(vec3(-10.f, 10.f, -10.f));
+    SegmentList.push_back(vec3(10.f, 10.f, -10.f));
+    SegmentList.push_back(vec3(10.f, 10.f, -10.f));
+    DrawUtils::GetStaticInstance()->PushSegmentList( SegmentList, u8vec4( 255, 255, 0, 255 ) );
+    
+    SegmentList.clear();
+    SegmentList.push_back(vec3(-10.f, -10.f, 10.f));
+    SegmentList.push_back(vec3(-10.f, 10.f, 10.f));
+    SegmentList.push_back(vec3(10.f, 10.f, 10.f));
+    SegmentList.push_back(vec3(10.f, 10.f, 10.f));
+    DrawUtils::GetStaticInstance()->PushSegmentList( SegmentList, u8vec4( 0, 255, 255, 255 ) );
+    
+    DrawUtils::GetStaticInstance()->PushSegment(vec3(-10.f, -10.f, -10.f), vec3(-10.f, -10.f, 10.f), u8vec4( 255, 0, 0, 255 ), u8vec4( 0, 0, 255, 255 ));
+    DrawUtils::GetStaticInstance()->PushSegment(vec3(-10.f, 10.f, -10.f), vec3(-10.f, 10.f, 10.f), u8vec4( 255, 0, 0, 255 ), u8vec4( 0, 0, 255, 255 ));
+    DrawUtils::GetStaticInstance()->PushSegment(vec3(10.f, 10.f, -10.f), vec3(10.f, 10.f, 10.f), u8vec4( 255, 0, 0, 255 ), u8vec4( 0, 0, 255, 255 ));
+    DrawUtils::GetStaticInstance()->PushSegment(vec3(10.f, -10.f, -10.f), vec3(10.f, -10.f, 10.f), u8vec4( 255, 0, 0, 255 ), u8vec4( 0, 0, 255, 255 ));
+*/
+}
 
 LevelPath* CoPath::GetLevelPath( Name const& LevelName )
 {

@@ -86,6 +86,8 @@ void DFManager::Tick( TickContext& TickCtxt )
 void DFManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
+    
+    return;
 
 	static float GlobalTime = 0.f;
 	GlobalTime += RenderCtxt.m_DeltaSeconds;

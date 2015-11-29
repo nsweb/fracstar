@@ -18,7 +18,7 @@ namespace bigball
 struct CubicSpline
 {
 	vec3 c0, c1, c2, c3;
-	void Eval( float u, vec3& Pos, vec3& Tan )
+	void Eval( float u, vec3& Pos, vec3& Tan ) const
 	{
 		float u2 = u * u;
 		float u3 = u2 * u;
@@ -50,7 +50,7 @@ public:
 	/* Dist between m_Knots[nCP-2] and m_Knots[1] */
 	float m_ClampedKnotDistance;
     
-    void InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan );
+    void InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan ) const;
 };
 
 class CoPath : public Component 
@@ -68,6 +68,7 @@ public:
 	virtual void		AddToWorld();
 	virtual void		RemoveFromWorld();
 	virtual void		Tick( TickContext& TickCtxt );
+    void                _DrawDebug( RenderContext& RenderCtxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
 	LevelPath*			GetLevelPath( Name const& LevelName );
 
