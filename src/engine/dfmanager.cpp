@@ -87,18 +87,22 @@ void DFManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
     
-    return;
+    //return;
 
 	static float GlobalTime = 0.f;
 	GlobalTime += RenderCtxt.m_DeltaSeconds;
     
     vec3 CamPos = RenderCtxt.m_View.m_Transform.GetTranslation();
+    mat4 ViewInvMat( RenderCtxt.m_View.m_Transform.GetRotation(), RenderCtxt.m_View.m_Transform.GetTranslation(), (float)RenderCtxt.m_View.m_Transform.GetScale() );
 
 	m_DFShader->Bind();
 	ShaderUniform UniGTime = m_DFShader->GetUniformLocation("global_time");
 	m_DFShader->SetUniform( UniGTime, GlobalTime );
     ShaderUniform UniCamera = m_DFShader->GetUniformLocation("camera_pos");
     m_DFShader->SetUniform( UniCamera, CamPos );
+    ShaderUniform UniViewInv = m_DFShader->GetUniformLocation("viewinv_mat");
+    m_DFShader->SetUniform( UniViewInv, ViewInvMat );
+    
 
 	glBindVertexArray( m_DF_VAO );
 

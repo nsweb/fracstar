@@ -76,6 +76,13 @@ void CoShip::Tick( TickContext& TickCtxt )
     
     static vec3 GUp( 0.f, 0.f, 1.f );
     mat3 CamRot;
+    // Right
+    //CamRot.v0 = Tan;
+    // Back
+    //CamRot.v2 = bigball::normalize( bigball::cross(Tan, GUp) );
+    // Up
+    //CamRot.v1 = bigball::normalize( bigball::cross(CamRot.v2, Tan) );
+
     // Back
     CamRot.v2 = -Tan;
     // Right

@@ -5,7 +5,7 @@ layout (location = 0) out vec4 frag_color;
 smooth in vec2 vs_fs_texcoord;
 smooth in vec4 vs_fs_color;
 
-uniform mat4 model2cam_mat;
+uniform mat4 viewinv_mat;
 uniform vec3 camera_pos;
 uniform float global_time;
 
@@ -139,18 +139,20 @@ vec3 cameraTarget()
 
 void main(void)
 {
-    //vec4 rgba = vec4(1.0,0.0,1.0,0.5);
-	//color = rgba;//vec4( rgba.r, 0,0,1);
+    vec3 camPos     = viewinv_mat[3].xyz;
+    vec3 camRight   = viewinv_mat[0].xyz;
+    vec3 camUp      = viewinv_mat[1].xyz;
+    vec3 camDir     = -viewinv_mat[2].xyz;
 	
-	    // Camera position (eye), and camera target
-    vec3 camPos = camera_pos;//camera();///*0.5*global_time**/vec3(4.0, 0.0, 0.0);
-	vec3 target = cameraTarget();//vec3( 0.0, 0.0, -3.0 );//camPos + vec3(-1.0, 0.0*cos(0.4*global_time), 0.0*sin(0.4*global_time));
-	vec3 camUp  = vec3(0.0,1.0,0.0);
+    // Camera position (eye), and camera target
+    //vec3 camPos = camera_pos;
+	//vec3 target = cameraTarget();/
+	//vec3 camUp  = vec3(0.0,1.0,0.0);
 	
 	// Calculate orthonormal camera reference system
-	vec3 camDir   = normalize(target-camPos); // direction for center ray
-	camUp = normalize(camUp-dot(camDir,camUp)*camDir); // orthogonalize
-	vec3 camRight = normalize(cross(camDir,camUp));
+	//vec3 camDir   = normalize(target-camPos); // direction for center ray
+	//camUp = normalize(camUp-dot(camDir,camUp)*camDir); // orthogonalize
+	//vec3 camRight = normalize(cross(camDir,camUp));
 	
 	vec2 coord = vs_fs_texcoord.xy;//-1.0+2.0*fragCoord.xy/iResolution.xy;
 	//coord.x *= iResolution.x/iResolution.y;

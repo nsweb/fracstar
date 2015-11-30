@@ -94,7 +94,7 @@ void CoPath::Create( Entity* Owner, class json::Object* Proto )
 	LevelPath& LPath = m_LevelPaths.Last();
     LPath.m_LevelName = "Level_0";
 	
-	const int32 nCP = 20;
+	const int32 nCP = 60;
 	for( int i = 0; i < nCP; i++ )
 	{
 		float stime, ctime;
@@ -161,22 +161,28 @@ void CoPath::Tick( TickContext& TickCtxt )
 void CoPath::_DrawDebug( RenderContext& RenderCtxt )
 {
     static float SegDist = 0.1f;
-    static u8vec4 Color( 128, 0, 128, 255 );
+    static u8vec4 BaseColor( 128, 0, 128, 255 );
+    u8vec4 Color( BaseColor );
     Array<vec3> SegmentList;
+    Array<u8vec4> ColorList;
     vec3 Pos, Tan;
     
     for( int i = 0; i < m_LevelPaths.size(); i++ )
     {
         SegmentList.clear();
+        ColorList.clear();
         
         LevelPath& LPath = m_LevelPaths[i];
         int SegCount = (int)(LPath.m_ClampedSumDistance / SegDist) + 1;
         for( int SegIdx = 0; SegIdx <= SegCount; SegIdx++ )
         {
-            LPath.InterpPath( (SegIdx * LPath.m_ClampedSumDistance) / SegCount, Pos, Tan );
+            float ratio = (float)SegIdx / (float)SegCount;
+            LPath.InterpPath( ratio * LPath.m_ClampedSumDistance, Pos, Tan );
+            Color.r = (uint8) (BaseColor.r * ratio);
             SegmentList.push_back( Pos );
+            ColorList.push_back( Color );
         }
-        DrawUtils::GetStaticInstance()->PushSegmentList( SegmentList, Color );
+        DrawUtils::GetStaticInstance()->PushSegmentList( SegmentList, ColorList );
     }
     
     // TEMP DEBUG
