@@ -23,7 +23,7 @@ struct CubicSpline
 		float u2 = u * u;
 		float u3 = u2 * u;
 		Pos = c0 + c1*u + c2*u2 + c3*u3;
-        Tan = c1*u + 2.f*c2*u + 3.f*c3*u2;
+        Tan = c1 + 2.f*c2*u + 3.f*c3*u2;
 	}
 
 	void InitNonuniformCatmullRom( const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p3, float dt0, float dt1, float dt2 );
