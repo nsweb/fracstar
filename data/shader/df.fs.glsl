@@ -8,10 +8,13 @@ smooth in vec4 vs_fs_color;
 uniform mat4 viewinv_mat;
 uniform vec3 camera_pos;
 uniform float global_time;
+// z_var.x = (far+near)/(far-near);
+// z_var.y = 2.0*far*near/(far-near);
+uniform vec2 z_var;	
+uniform vec2 screen_res;
 
 #define MaxSteps 		50
 #define PI 				3.141592
-#define FieldOfView 	1.0
 #define FudgeFactor 	0.6
 #define normalDistance  0.002
 #define MinimumDistance 0.001
@@ -144,21 +147,10 @@ void main(void)
     vec3 camUp      = viewinv_mat[1].xyz;
     vec3 camDir     = -viewinv_mat[2].xyz;
 	
-    // Camera position (eye), and camera target
-    //vec3 camPos = camera_pos;
-	//vec3 target = cameraTarget();/
-	//vec3 camUp  = vec3(0.0,1.0,0.0);
-	
-	// Calculate orthonormal camera reference system
-	//vec3 camDir   = normalize(target-camPos); // direction for center ray
-	//camUp = normalize(camUp-dot(camDir,camUp)*camDir); // orthogonalize
-	//vec3 camRight = normalize(cross(camDir,camUp));
-	
-	vec2 coord = vs_fs_texcoord.xy;//-1.0+2.0*fragCoord.xy/iResolution.xy;
-	//coord.x *= iResolution.x/iResolution.y;
+	vec2 screen_coord = vs_fs_texcoord.xy * screen_res;
 	
 	// Get direction for this pixel
-	vec3 rayDir = normalize(camDir + (coord.x*camRight + coord.y*camUp)*FieldOfView);
+	vec3 rayDir = normalize(camDir + screen_coord.x*camRight + screen_coord.y*camUp);
     
     //
 	vec3 l0 = vec3(1.0, 0.75, 0.05);
@@ -184,5 +176,6 @@ void main(void)
         frag_color = mix( vec4( col, 1.0 ), bg_color, res.y );
     }
 	
-	
+	float zeye = dot( camDir, rayDir ) * -res.x;
+	gl_FragDepth = z_var.x + z_var.y / zeye;
 }

@@ -2,21 +2,17 @@
 
 #include "../fracstar.h"
 #include "coship.h"
-#include "engine/coposition.h"
 #include "../engine/copath.h"
-//#include "core/sort.h"
+#include "core/json.h"
+#include "system/file.h"
+#include "engine/coposition.h"
 #include "engine/controller.h"
 #include "engine/camera.h"
 #include "engine/tickcontext.h"
-//#include "engine/entity.h"
 #include "engine/entitymanager.h"
 #include "gfx/gfxmanager.h"
 #include "gfx/shader.h"
 #include "gfx/rendercontext.h"
-//#include "math/frustum.h"
-//#include "math/intersections.h"
-#include "system/file.h"
-
 
 CLASS_EQUIP_CPP(CoShip);
 
@@ -38,6 +34,14 @@ void CoShip::Create( Entity* Owner, class json::Object* Proto )
 {
 	Super::Create( Owner, Proto );
 
+	json::TokenIdx EntTok = Proto->GetToken( "entity", json::OBJECT );
+	json::TokenIdx ShipTok = Proto->GetToken( "Ship", json::OBJECT, EntTok );
+	if( ShipTok != INDEX_NONE )
+	{
+		json::TokenIdx ParamTok = Proto->GetToken( "speed", json::PRIMITIVE, ShipTok );
+		if( ParamTok != INDEX_NONE )
+			m_Speed = Proto->GetFloatValue( ParamTok, m_Speed );
+	}
 }
 
 void CoShip::Destroy()

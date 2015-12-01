@@ -94,6 +94,18 @@ void DFManager::_Render( RenderContext& RenderCtxt )
     
     vec3 CamPos = RenderCtxt.m_View.m_Transform.GetTranslation();
     mat4 ViewInvMat( RenderCtxt.m_View.m_Transform.GetRotation(), RenderCtxt.m_View.m_Transform.GetTranslation(), (float)RenderCtxt.m_View.m_Transform.GetScale() );
+	
+	const float fov_y = RenderCtxt.m_View.m_fParameters[eCP_FOV] * (F_PI / 180.0f);
+	const float z_near = RenderCtxt.m_View.m_fParameters[eCP_NEAR];
+	const float z_far = RenderCtxt.m_View.m_fParameters[eCP_FAR];
+
+	vec2 screen_res;
+	screen_res.y = bigball::tan( fov_y * 0.5f );
+	screen_res.x = screen_res.y * RenderCtxt.m_View.m_fParameters[eCP_ASPECT];
+
+	vec2 z_var;	
+	z_var.x = (z_far + z_near) / (z_far - z_near);
+	z_var.y = 2.0f*z_far*z_near / (z_far - z_near);
 
 	m_DFShader->Bind();
 	ShaderUniform UniGTime = m_DFShader->GetUniformLocation("global_time");
@@ -102,26 +114,17 @@ void DFManager::_Render( RenderContext& RenderCtxt )
     m_DFShader->SetUniform( UniCamera, CamPos );
     ShaderUniform UniViewInv = m_DFShader->GetUniformLocation("viewinv_mat");
     m_DFShader->SetUniform( UniViewInv, ViewInvMat );
-    
+
+	ShaderUniform UniSR = m_DFShader->GetUniformLocation("screen_res");
+	m_DFShader->SetUniform( UniSR, screen_res );
+	ShaderUniform UniZVar = m_DFShader->GetUniformLocation("z_var");
+	m_DFShader->SetUniform( UniZVar, z_var );
 
 	glBindVertexArray( m_DF_VAO );
 
 	glDrawArrays( GL_TRIANGLES, 0, 8 );
 
 	glBindVertexArray(0);
-
-	//ShaderUniform UniProj = m_BlockShader->GetUniformLocation("proj_mat");
-	//m_BlockShader->SetUniform( UniProj, RenderCtxt.m_ProjMat );
-
-	//vec3 SunDir( 1.f, 0.f, 0.f );
-	//ShaderUniform UniSun = m_BlockShader->GetUniformLocation("sun_dir");
-	//m_BlockShader->SetUniform( UniSun, SunDir );
-
-
-	//for( int32 i = 0; i < m_Blocks.size(); ++i )
-	//{
-	//	m_Blocks[i]->_Render( RenderCtxt, m_BlockShader, m_SampleShader );
-	//}
 
 	m_DFShader->Unbind();
 }
