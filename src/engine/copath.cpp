@@ -100,7 +100,7 @@ void CoPath::Create( Entity* Owner, class json::Object* Proto )
 		float stime, ctime;
 		bigball::sincos( i * 0.1f, &stime, &ctime );
 		vec3 p = vec3( 3.0f*stime, 4.0f*ctime, -2.9f + 2.f*stime );
-		LPath.m_CPoints.push_back( p );
+        LPath.m_CPoints.push_back( p );
 	}
 
 	float lastt = 0.f, newt;
@@ -161,7 +161,7 @@ void CoPath::Tick( TickContext& TickCtxt )
 void CoPath::_DrawDebug( RenderContext& RenderCtxt )
 {
     static float SegDist = 0.1f;
-    static u8vec4 BaseColor( 128, 0, 128, 255 );
+    static u8vec4 BaseColor( 255, 255, 255, 255 );
     u8vec4 Color( BaseColor );
     Array<vec3> SegmentList;
     Array<u8vec4> ColorList;
@@ -178,7 +178,7 @@ void CoPath::_DrawDebug( RenderContext& RenderCtxt )
         {
             float ratio = (float)SegIdx / (float)SegCount;
             LPath.InterpPath( ratio * LPath.m_ClampedSumDistance, Pos, Tan );
-            Color.r = (uint8) (BaseColor.r * ratio);
+            Color.a = (uint8) (BaseColor.a * ratio);
             SegmentList.push_back( Pos );
             ColorList.push_back( Color );
         }
