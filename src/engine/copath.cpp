@@ -161,6 +161,7 @@ void CoPath::Tick( TickContext& TickCtxt )
 void CoPath::_DrawDebug( RenderContext& RenderCtxt )
 {
     static float SegDist = 0.1f;
+    static float Scale = 0.1f;
     static u8vec4 BaseColor( 255, 255, 255, 255 );
     u8vec4 Color( BaseColor );
     Array<vec3> SegmentList;
@@ -183,6 +184,11 @@ void CoPath::_DrawDebug( RenderContext& RenderCtxt )
             ColorList.push_back( Color );
         }
         DrawUtils::GetStaticInstance()->PushSegmentList( SegmentList, ColorList );
+        
+        for( int PIdx = 0; PIdx < LPath.m_CPoints.size(); PIdx++ )
+        {
+            DrawUtils::GetStaticInstance()->PushAABB( LPath.m_CPoints[PIdx], Scale, BaseColor );
+        }
     }
     
     // TEMP DEBUG
