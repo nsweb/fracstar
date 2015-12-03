@@ -114,6 +114,8 @@ void DFManager::_Render( RenderContext& RenderCtxt )
     m_DFShader->SetUniform( UniCamera, CamPos );
     ShaderUniform UniViewInv = m_DFShader->GetUniformLocation("viewinv_mat");
     m_DFShader->SetUniform( UniViewInv, ViewInvMat );
+    ShaderUniform UniProj = m_DFShader->GetUniformLocation("proj_mat");
+    m_DFShader->SetUniform( UniProj, RenderCtxt.m_ProjMat );
 
 	ShaderUniform UniSR = m_DFShader->GetUniformLocation("screen_res");
 	m_DFShader->SetUniform( UniSR, screen_res );

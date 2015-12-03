@@ -6,6 +6,7 @@ smooth in vec2 vs_fs_texcoord;
 smooth in vec4 vs_fs_color;
 
 uniform mat4 viewinv_mat;
+uniform mat4 proj_mat;
 uniform vec3 camera_pos;
 uniform float global_time;
 // z_var.x = (far+near)/(far-near);
@@ -147,7 +148,7 @@ void main(void)
     vec3 camUp      = viewinv_mat[1].xyz;
     vec3 camDir     = -viewinv_mat[2].xyz;
 	
-	vec2 screen_coord = vs_fs_texcoord.xy * screen_res;
+	vec2 screen_coord = vs_fs_texcoord.xy * screen_res * 1.0;
 	
 	// Get direction for this pixel
 	vec3 rayDir = normalize(camDir + screen_coord.x*camRight + screen_coord.y*camUp);
@@ -163,6 +164,7 @@ void main(void)
     if( res.x == -1.0 ) 
     {
         frag_color = bg_color;
+        gl_FragDepth = 0.9;
     }
     else
     {
@@ -174,8 +176,12 @@ void main(void)
         
     	//vec3 tmp = normal*0.5 + 0.5;
         frag_color = mix( vec4( col, 1.0 ), bg_color, res.y );
+        
+        float zeye = dot( camDir, rayDir ) * -res.x;
+        gl_FragDepth = z_var.x + z_var.y / zeye;
     }
 	
-	float zeye = dot( camDir, rayDir ) * -res.x;
-	gl_FragDepth = z_var.x + z_var.y / zeye;
+    //float zc = ( proj_mat * vec4( res.x * rayDir, 1.0 ) ).z;
+    //float wc = ( proj_mat * vec4( res.x * rayDir, 1.0 ) ).w;
+    //gl_FragDepth = zc/wc;
 }
