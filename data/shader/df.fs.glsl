@@ -38,7 +38,7 @@ void sphere_fold( inout vec3 z, inout float dz )
         z *= fixed2_over_min2;
         dz *= fixed2_over_min2;
     }
-    else if(r2 < fixed_radius2) 
+    else if(r2 < fixed_radius2)
     {
         float temp = (fixed_radius2 / r2);
         z *= temp;
@@ -51,20 +51,40 @@ void box_fold( inout vec3 z, inout float dz )
     z = clamp(z, -folding_limit, folding_limit) * 2.0 - z;
 }
 
-float mandelbox( in vec3 z ) 
+float mandelbox( in vec3 z )
 {
     vec3 offset = z;
-    float dr = 1.0;	// mb_scale ?
+    float dz = 1.0;	// mb_scale ?
     for(int n = 0; n < 10; ++n) 
     {
-        box_fold(z, dr);
-        sphere_fold(z, dr);
+        //box_fold(z, dr);
+        z = clamp(z, -folding_limit, folding_limit) * 2.0 - z;
+        
+        //sphere_fold(z, dr);
+        float r2 = dot(z, z);
+        if(r2 < min_radius2)
+        {
+            z *= fixed2_over_min2;
+            dz *= fixed2_over_min2;
+        }
+        else if(r2 < fixed_radius2)
+        {
+            float temp = (fixed_radius2 / r2);
+            z *= temp;
+            dz *= temp;
+        }
+        else if( r2 > 1e8f )
+        {
+            // prevent z to go over control (nan)
+            return 1000.0;
+        }
 
         z = mb_scale * z + offset;
-        dr = dr * abs(mb_scale) + 1.0;
+        dz = dz * abs(mb_scale) + 1.0;
     }
+	
     float r = length(z);
-    return r / abs(dr);
+    return r / abs(dz);
 }
 
 float DE(in vec3 Pos)
@@ -73,22 +93,22 @@ float DE(in vec3 Pos)
     
     // Folding 'tiling' of 3D space;
 	//Pos  = abs(20.0-mod(Pos,20.0));
-	vec3 v = Pos - vec3(10.0, 0.0, 0.0);
-	float d = -5.0+length(v);
+	// vec3 v = Pos - vec3(10.0, 0.0, 0.0);
+	// float d = -5.0+length(v);
 	
-	return d-0.001;
+	// return d-0.001;
 }
 
 // Finite difference normal
 vec3 getNormal(in vec3 pos) 
 {
 	vec3 e = vec3(0.0,normalDistance,0.0);
-	
-	return normalize(vec3(
+
+    return normalize(vec3(
 			DE(pos+e.yxx)-DE(pos-e.yxx),
 			DE(pos+e.xyx)-DE(pos-e.xyx),
 			DE(pos+e.xxy)-DE(pos-e.xxy)
-			)
+			 )
 		);
 }
 
@@ -102,7 +122,7 @@ vec2 rayMarch( in vec3 from, in vec3 dir, in float MaxDistance )
     for( int i=0; i<150; i++ )
     {
         pos = from + sum_dist * dir;
-	    dist = DE(pos);
+        dist = DE(pos);
         if( dist < MinimumDistance ) 
             break;
         sum_dist += dist * 1.0;
@@ -160,11 +180,11 @@ void main(void)
     vec3 d1 = normalize( vec3(1.0, -0.5, -1.0) );
     vec4 bg_color = vec4( vec3(0.05, 0.14, 0.27)*0.5, 1.0 );
     
-   	vec2 res = rayMarch( camPos, rayDir, 10.0 );
+   	vec2 res = rayMarch( camPos, rayDir, 100.0 );
+	float zn = 0.999;
     if( res.x == -1.0 ) 
     {
         frag_color = bg_color;
-        gl_FragDepth = 0.9;
     }
     else
     {
@@ -174,14 +194,15 @@ void main(void)
         vec3 normal = getNormal(pos);//-dir*normalDistance*3.0);
         vec3 col = l0 * max( 0.0, dot( d0, normal) ) + l1 * max( 0.0, dot( d1, normal) ); 
         
-    	//vec3 tmp = normal*0.5 + 0.5;
         frag_color = mix( vec4( col, 1.0 ), bg_color, res.y );
         
         float zeye = dot( camDir, rayDir ) * -res.x;
-        gl_FragDepth = z_var.x + z_var.y / zeye;
+        zn = z_var.x + z_var.y / zeye;
+		//frag_color = vec4( vec3( clamp( 0.5 + 0.5*zn , 0.0, 1.0) ), 1 );
     }
 	
     //float zc = ( proj_mat * vec4( res.x * rayDir, 1.0 ) ).z;
     //float wc = ( proj_mat * vec4( res.x * rayDir, 1.0 ) ).w;
     //gl_FragDepth = zc/wc;
+	gl_FragDepth = zn;
 }
