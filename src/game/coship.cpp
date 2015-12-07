@@ -18,6 +18,7 @@ CLASS_EQUIP_CPP(CoShip);
 
 CoShip::CoShip() :
 	m_pCurrentLevel(nullptr),
+    m_State(eShipState::Run),
     m_Speed(1.f),
 	m_PathDistLevel(0.f)
 
@@ -64,28 +65,22 @@ void CoShip::Tick( TickContext& TickCtxt )
 	if( !m_pCurrentLevel )
 		return;
 
-	Name const& LevelName = m_pCurrentLevel->GetName();
+	//Name const& LevelName = m_pCurrentLevel->GetName();
 	CoPath* CoP = static_cast<CoPath*>( m_pCurrentLevel->GetComponent( CoPath::StaticClass() ) );
-	LevelPath* LPath = CoP->GetLevelPath( LevelName );
-	if( ! LPath )
-		return;
     
-    m_PathDistLevel += TickCtxt.m_DeltaSeconds * m_Speed;
-    if( m_PathDistLevel > LPath->m_ClampedSumDistance )
-        m_PathDistLevel -= LPath->m_ClampedSumDistance;
+    if( m_State == eShipState::Run )
+    {
+        m_PathDistLevel += TickCtxt.m_DeltaSeconds * m_Speed;
+        if( m_PathDistLevel > CoP->m_ClampedSumDistance )
+            m_PathDistLevel -= CoP->m_ClampedSumDistance;
+    }
     
     vec3 Pos, Tan;
-    LPath->InterpPath( m_PathDistLevel, Pos, Tan );
+    CoP->InterpPath( m_PathDistLevel, Pos, Tan );
     Tan = bigball::normalize( Tan );
     
     static vec3 GUp( 0.f, 0.f, 1.f );
     mat3 CamRot;
-    // Right
-    //CamRot.v0 = Tan;
-    // Back
-    //CamRot.v2 = bigball::normalize( bigball::cross(Tan, GUp) );
-    // Up
-    //CamRot.v1 = bigball::normalize( bigball::cross(CamRot.v2, Tan) );
 
     // Back
     CamRot.v2 = -Tan;
@@ -108,7 +103,7 @@ void CoShip::Tick( TickContext& TickCtxt )
 	//dvec3 CamPosBlock = EntityT.TransformPositionInverse( CamPos );
 }
 
-//void CoShip::_Render( RenderContext& RenderCtxt, Shader* BlockShader )
-//{
-//	
-//}
+void CoShip::ChangeState( eShipState eNewState )
+{
+    m_State = eNewState;
+}

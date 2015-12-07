@@ -35,22 +35,9 @@ class LevelPath
 public:
     LevelPath();
 
-	Name m_LevelName;
+	
     
-	/** Control points of the spline */
-	Array<vec3> m_CPoints;
-	/** Piecewise cubic splines - if nCP are defined, nCP-3 splines are required */
-	Array<CubicSpline> m_Splines;
-	/** Knot sequence for interpolation */
-	Array<float> m_Knots;
-    /* Sum of dist between control points */
-    float m_SumDistance;
-	/* Sum of dist between control points, excluding first and last CP*/
-	float m_ClampedSumDistance;
-	/* Dist between m_Knots[nCP-2] and m_Knots[1] */
-	float m_ClampedKnotDistance;
     
-    void InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan ) const;
 };
 
 class CoPath : public Component 
@@ -70,10 +57,27 @@ public:
 	virtual void		Tick( TickContext& TickCtxt );
     void                _DrawDebug( RenderContext& RenderCtxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
-	LevelPath*			GetLevelPath( Name const& LevelName );
+	//LevelPath*			GetLevelPath( Name const& LevelName );
+    
+    void                InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan ) const;
 
-protected:
-	Array<LevelPath>	m_LevelPaths;
+public:
+	//Array<LevelPath>	m_LevelPaths;
+    
+    Name m_LevelName;
+    
+    /** Control points of the spline */
+    Array<vec3> m_CPoints;
+    /** Piecewise cubic splines - if nCP are defined, nCP-3 splines are required */
+    Array<CubicSpline> m_Splines;
+    /** Knot sequence for interpolation */
+    Array<float> m_Knots;
+    /* Sum of dist between control points */
+    float m_SumDistance;
+    /* Sum of dist between control points, excluding first and last CP*/
+    float m_ClampedSumDistance;
+    /* Dist between m_Knots[nCP-2] and m_Knots[1] */
+    float m_ClampedKnotDistance;
 };
 
 #endif // FSCOPATH_H

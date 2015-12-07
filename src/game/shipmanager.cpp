@@ -65,21 +65,6 @@ void ShipManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
 
-	//m_BlockShader->Bind();
 
-	//ShaderUniform UniProj = m_BlockShader->GetUniformLocation("proj_mat");
-	//m_BlockShader->SetUniform( UniProj, RenderCtxt.m_ProjMat );
-
-	//vec3 SunDir( 1.f, 0.f, 0.f );
-	//ShaderUniform UniSun = m_BlockShader->GetUniformLocation("sun_dir");
-	//m_BlockShader->SetUniform( UniSun, SunDir );
-
-
-	//for( int32 i = 0; i < m_Paths.size(); ++i )
-	//{
-	//	m_Blocks[i]->_Render( RenderCtxt, m_BlockShader, m_SampleShader );
-	//}
-
-	//m_BlockShader->Unbind();
 }
 

@@ -6,6 +6,7 @@
 #include "engine/entitymanager.h"
 #include "engine/controller.h"
 #include "engine/coposition.h"
+#include "ui/uimanager.h"
 #include "copath.h"
 #include "pathmanager.h"
 #include "../game/coship.h"
@@ -24,9 +25,66 @@ FSEngine::~FSEngine()
 
 }
 
+static void UIOnToggleEditor( bool bShowEditor )
+{
+    if( bShowEditor )
+    {
+        // Allow menu interaction
+        //SDL_SetRelativeMouseMode(SDL_FALSE);
+        //SDL_SetWindowGrab( g_pEngine->GetDisplayWindow(), SDL_FALSE );
+        Array<CoShip*> const& ShipArray = ShipManager::GetStaticInstance()->GetShipArray();
+        for( int SIdx=0; SIdx < ShipArray.size(); SIdx++ )
+        {
+            ShipArray[SIdx]->ChangeState(eShipState::Edit);
+        }
+        
+    }
+    else
+    {
+        // Allow FPS style mouse movement
+        //SDL_SetRelativeMouseMode(SDL_TRUE);
+        //SDL_SetWindowGrab( g_pEngine->GetDisplayWindow(), SDL_TRUE );
+        
+        Array<CoShip*> const& ShipArray = ShipManager::GetStaticInstance()->GetShipArray();
+        for( int SIdx=0; SIdx < ShipArray.size(); SIdx++ )
+        {
+            ShipArray[SIdx]->ChangeState(eShipState::Run);
+        }
+    }
+}
+
+static void UIDrawEditor( bool* bShowEditor )
+{
+    Array<CoPath*> const& PathArray = PathManager::GetStaticInstance()->GetPathArray();
+    
+    ImGui::Begin("Editor", bShowEditor, ImVec2(200,400), -1.f, 0/*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar*/ );
+    
+    for( int PIdx = 0; PIdx < PathArray.size(); PIdx++ )
+    {
+        Name const& LevelName = PathArray[PIdx]->m_LevelName;
+        
+        bool bTreeNode = ImGui::TreeNode(LevelName.c_str());
+        //ImGui::SameLine(0.f, 100.f);
+        //ImGui::Text( "[%d / %d] %.2f / %.2f ms", m_LastCallCount, m_MaxCallCount, m_fLastTimeSpent*100.0f, m_fMaxTimeSpent*100.0f );
+        
+        if( bTreeNode )
+        {
+            ImGui::TreePop();
+        }
+    }
+    
+    ImGui::End();
+    
+    //ImGui::ShowTestWindow();
+}
+
 bool FSEngine::Init( bool bCreateWindow )
 {
 	bool bInit = Engine::Init( bCreateWindow );
+    
+    //////////////////////////////////////////////////////////////////////////
+    UIManager::GetStaticInstance()->SetDrawEditorFn( &UIDrawEditor );
+    UIManager::GetStaticInstance()->SetToggleEditorFn( &UIOnToggleEditor );
 
 
 	//////////////////////////////////////////////////////////////////////////

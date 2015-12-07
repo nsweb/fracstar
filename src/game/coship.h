@@ -14,6 +14,12 @@ namespace bigball
 	struct BIGBALL_API RenderContext;
 };
 
+enum class eShipState
+{
+    Run = 0,
+    Edit,
+};
+
 class CoShip : public Component 
 {
 	CLASS_EQUIP_H(CoShip, Component)
@@ -32,10 +38,12 @@ public:
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
 
 	void				SetCurrentLevel( Entity* _pCurrentLevel ) { m_pCurrentLevel = _pCurrentLevel; }
+    void                ChangeState( eShipState eNewState );
 
 protected:
 	Entity*		m_pCurrentLevel;
     
+    eShipState  m_State;
     float       m_Speed;
 	/** Current distance along path in a given level */
 	float		m_PathDistLevel;

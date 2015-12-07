@@ -50,32 +50,9 @@ void CubicSpline::InitCubicSpline( const vec3& p0, const vec3& p1, const vec3& t
 }
 
 
-LevelPath::LevelPath() :
+
+CoPath::CoPath() :
     m_SumDistance(0.f)
-{
-    
-}
-
-void LevelPath::InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan ) const
-{
-    BB_ASSERT( m_Knots.size() >= 2 );
-    
-    float udist = bigball::clamp( (DistAlongPath / m_ClampedSumDistance) * m_ClampedKnotDistance, 0.f, m_ClampedKnotDistance );
-    udist += m_Knots[1];
-    
-    int k = 1;
-    for( ; k < m_Knots.size() - 1; k++ )
-    {
-        if( udist <= m_Knots[k + 1] )
-            break;
-    }
-    
-    BB_ASSERT( k - 1 < m_Splines.size() );
-    udist = (udist - m_Knots[k]) / (m_Knots[k + 1] - m_Knots[k]);
-    m_Splines[k - 1].Eval( udist, Pos, Tan );
-}
-
-CoPath::CoPath() 
 {
 
 }
@@ -90,9 +67,9 @@ void CoPath::Create( Entity* Owner, class json::Object* Proto )
 	Super::Create( Owner, Proto );
 
 	// Temp : creating a test path procedurally
-	m_LevelPaths.push_back( LevelPath() );
-	LevelPath& LPath = m_LevelPaths.Last();
-    LPath.m_LevelName = "Level_0";
+	//m_LevelPaths.push_back( LevelPath() );
+	//LevelPath& LPath = m_LevelPaths.Last();
+    m_LevelName = "Level_0";
 	
 	const int32 nCP = 60;
 	for( int i = 0; i < nCP; i++ )
@@ -100,33 +77,33 @@ void CoPath::Create( Entity* Owner, class json::Object* Proto )
 		float stime, ctime;
 		bigball::sincos( i * 0.1f, &stime, &ctime );
 		vec3 p = vec3( 3.0f*stime, 4.0f*ctime, -2.9f + 2.f*stime );
-        LPath.m_CPoints.push_back( p );
+        m_CPoints.push_back( p );
 	}
 
 	float lastt = 0.f, newt;
-    LPath.m_SumDistance = 0.f;
-	LPath.m_ClampedSumDistance = 0.f;
-	LPath.m_Knots.push_back( 0.f );
+    m_SumDistance = 0.f;
+	m_ClampedSumDistance = 0.f;
+	m_Knots.push_back( 0.f );
 	for( int i = 1; i < nCP; i++ )
 	{
-		float dist = bigball::distance( LPath.m_CPoints[i], LPath.m_CPoints[i-1] );
-        LPath.m_SumDistance += dist;
+		float dist = bigball::distance( m_CPoints[i], m_CPoints[i-1] );
+        m_SumDistance += dist;
 		if( i > 1 && i < nCP-1 )
-			LPath.m_ClampedSumDistance += dist;
+			m_ClampedSumDistance += dist;
 		newt = lastt + bigball::sqrt( dist );
-		LPath.m_Knots.push_back( newt );
+		m_Knots.push_back( newt );
 		lastt = newt;
 	}
-	LPath.m_ClampedKnotDistance = LPath.m_Knots[nCP-2] - LPath.m_Knots[1];
+	m_ClampedKnotDistance = m_Knots[nCP-2] - m_Knots[1];
 
 	// Compute cubic splines
-	LPath.m_Splines.resize(nCP - 3);
+	m_Splines.resize(nCP - 3);
 	for( int i = 0; i < nCP-3; i++ )
 	{
-		float dt0 = LPath.m_Knots[i+1] - LPath.m_Knots[i];
-		float dt1 = LPath.m_Knots[i+2] - LPath.m_Knots[i+1];
-		float dt2 = LPath.m_Knots[i+3] - LPath.m_Knots[i+2];
-		LPath.m_Splines[i].InitNonuniformCatmullRom( LPath.m_CPoints[i], LPath.m_CPoints[i+1], LPath.m_CPoints[i+2], LPath.m_CPoints[i+3], dt0, dt1, dt2 );
+		float dt0 = m_Knots[i+1] - m_Knots[i];
+		float dt1 = m_Knots[i+2] - m_Knots[i+1];
+		float dt2 = m_Knots[i+3] - m_Knots[i+2];
+		m_Splines[i].InitNonuniformCatmullRom( m_CPoints[i], m_CPoints[i+1], m_CPoints[i+2], m_CPoints[i+3], dt0, dt1, dt2 );
 	}
 }
 
@@ -158,6 +135,25 @@ void CoPath::Tick( TickContext& TickCtxt )
 	//dvec3 CamPosBlock = EntityT.TransformPositionInverse( CamPos );
 }
 
+void CoPath::InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan ) const
+{
+    BB_ASSERT( m_Knots.size() >= 2 );
+    
+    float udist = bigball::clamp( (DistAlongPath / m_ClampedSumDistance) * m_ClampedKnotDistance, 0.f, m_ClampedKnotDistance );
+    udist += m_Knots[1];
+    
+    int k = 1;
+    for( ; k < m_Knots.size() - 1; k++ )
+    {
+        if( udist <= m_Knots[k + 1] )
+            break;
+    }
+    
+    BB_ASSERT( k - 1 < m_Splines.size() );
+    udist = (udist - m_Knots[k]) / (m_Knots[k + 1] - m_Knots[k]);
+    m_Splines[k - 1].Eval( udist, Pos, Tan );
+}
+
 void CoPath::_DrawDebug( RenderContext& RenderCtxt )
 {
     static float SegDist = 0.1f;
@@ -168,39 +164,39 @@ void CoPath::_DrawDebug( RenderContext& RenderCtxt )
     Array<u8vec4> ColorList;
     vec3 Pos, Tan;
     
-    for( int i = 0; i < m_LevelPaths.size(); i++ )
+    //for( int i = 0; i < m_LevelPaths.size(); i++ )
     {
         SegmentList.clear();
         ColorList.clear();
         
-        LevelPath& LPath = m_LevelPaths[i];
-        int SegCount = (int)(LPath.m_ClampedSumDistance / SegDist) + 1;
+        //LevelPath& LPath = m_LevelPaths[i];
+        int SegCount = (int)(m_ClampedSumDistance / SegDist) + 1;
         for( int SegIdx = 0; SegIdx <= SegCount; SegIdx++ )
         {
             float ratio = (float)SegIdx / (float)SegCount;
-            LPath.InterpPath( ratio * LPath.m_ClampedSumDistance, Pos, Tan );
+            InterpPath( ratio * m_ClampedSumDistance, Pos, Tan );
             Color.a = (uint8) (BaseColor.a * ratio);
             SegmentList.push_back( Pos );
             ColorList.push_back( Color );
         }
         DrawUtils::GetStaticInstance()->PushSegmentList( SegmentList, ColorList );
         
-        const int PCount = LPath.m_CPoints.size();
+        const int PCount = m_CPoints.size();
         for( int PIdx = 0; PIdx < PCount; PIdx++ )
         {
             float ratio = (float)PIdx / (float)PCount;
             Color.r = (uint8) (BaseColor.r * ratio);
-            DrawUtils::GetStaticInstance()->PushAABB( LPath.m_CPoints[PIdx], Scale, Color );
+            DrawUtils::GetStaticInstance()->PushAABB( m_CPoints[PIdx], Scale, Color );
         }
     }
 }
 
-LevelPath* CoPath::GetLevelPath( Name const& LevelName )
-{
-	for( int i = 0; i < m_LevelPaths.size(); i++ )
-	{
-		if( m_LevelPaths[i].m_LevelName == LevelName )
-			return &m_LevelPaths[i];
-	}
-	return nullptr;
-}
+//LevelPath* CoPath::GetLevelPath( Name const& LevelName )
+//{
+	//for( int i = 0; i < m_LevelPaths.size(); i++ )
+	//{
+	//	if( m_LevelPaths[i].m_LevelName == LevelName )
+	//		return &m_LevelPaths[i];
+	//}
+	//return nullptr;
+//}

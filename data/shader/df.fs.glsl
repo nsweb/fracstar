@@ -205,4 +205,7 @@ void main(void)
     //float wc = ( proj_mat * vec4( res.x * rayDir, 1.0 ) ).w;
     //gl_FragDepth = zc/wc;
 	gl_FragDepth = zn;
+    
+    // output in gamma space
+    frag_color.rgb = pow( frag_color.rgb, vec3( 1.0/2.2 ) );
 }
