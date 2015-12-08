@@ -32,6 +32,7 @@ public:
 	virtual void		_Render( struct RenderContext& RenderCtxt );
 
 	Array<CoShip*> const& GetShipArray()	{ return m_Ships;	}
+	CoShip*				_GetShip()			{ if( m_Ships.size() > 0 ) { return m_Ships[0]; } return nullptr; }
 
 protected:
 	Array<CoShip*>		m_Ships;

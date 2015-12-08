@@ -31,12 +31,11 @@ public:
 	virtual void		Tick( struct TickContext& TickCtxt );
 	virtual void		_Render( struct RenderContext& RenderCtxt );
 
-	Array<CoPath*> const& GetPathArray()	{ return m_Paths;	}
+	Array<CoPath*> const& GetPathArray()	{ return m_paths;	}
+	CoPath*				_GetCurrentPath()	{ if( m_paths.size() > 0 ) { return m_paths[0]; } return nullptr; }
 
 protected:
-	Array<CoPath*>		m_Paths;
-	//Shader*				m_BlockShader;
-	//Shader*				m_SampleShader;
+	Array<CoPath*>		m_paths;
 };
 
 

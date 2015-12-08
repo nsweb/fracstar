@@ -39,7 +39,7 @@ void PathManager::AddComponentToWorld( Component* pComponent )
 {
 	if( pComponent->IsA( CoPath::StaticClass() ) )
 	{
-		m_Paths.push_back( reinterpret_cast<CoPath*>( pComponent ) );
+		m_paths.push_back( reinterpret_cast<CoPath*>( pComponent ) );
 	}
 }
 
@@ -47,7 +47,7 @@ void PathManager::RemoveComponentFromWorld( Component* pComponent )
 {
 	if( pComponent->IsA( CoPath::StaticClass() ) )
 	{
-		m_Paths.remove( reinterpret_cast<CoPath*>( pComponent ) );
+		m_paths.remove( reinterpret_cast<CoPath*>( pComponent ) );
 	}
 }
 
@@ -55,9 +55,9 @@ void PathManager::Tick( TickContext& TickCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
 
-	for( int32 i = 0; i < m_Paths.size(); ++i )
+	for( int32 i = 0; i < m_paths.size(); ++i )
 	{
-		m_Paths[i]->Tick( TickCtxt );
+		m_paths[i]->Tick( TickCtxt );
 	}
 }
 
@@ -65,9 +65,9 @@ void PathManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
     
-    for( int32 i = 0; i < m_Paths.size(); ++i )
+    for( int32 i = 0; i < m_paths.size(); ++i )
     {
-        m_Paths[i]->_DrawDebug( RenderCtxt );
+        m_paths[i]->_DrawDebug( RenderCtxt );
     }
 
 	//m_BlockShader->Bind();

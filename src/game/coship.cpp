@@ -17,10 +17,10 @@
 CLASS_EQUIP_CPP(CoShip);
 
 CoShip::CoShip() :
-	m_pCurrentLevel(nullptr),
-    m_State(eShipState::Run),
-    m_Speed(1.f),
-	m_PathDistLevel(0.f)
+	m_pcurrent_level(nullptr),
+    m_state(eShipState::Run),
+    m_speed(1.f),
+	m_path_dist_level(0.f)
 
 {
 
@@ -31,17 +31,17 @@ CoShip::~CoShip()
 
 }
 
-void CoShip::Create( Entity* Owner, class json::Object* Proto )
+void CoShip::Create( Entity* owner, class json::Object* proto )
 {
-	Super::Create( Owner, Proto );
+	Super::Create( owner, proto );
 
-	json::TokenIdx EntTok = Proto->GetToken( "entity", json::OBJECT );
-	json::TokenIdx ShipTok = Proto->GetToken( "Ship", json::OBJECT, EntTok );
+	json::TokenIdx EntTok = proto->GetToken( "entity", json::OBJECT );
+	json::TokenIdx ShipTok = proto->GetToken( "Ship", json::OBJECT, EntTok );
 	if( ShipTok != INDEX_NONE )
 	{
-		json::TokenIdx ParamTok = Proto->GetToken( "speed", json::PRIMITIVE, ShipTok );
+		json::TokenIdx ParamTok = proto->GetToken( "speed", json::PRIMITIVE, ShipTok );
 		if( ParamTok != INDEX_NONE )
-			m_Speed = Proto->GetFloatValue( ParamTok, m_Speed );
+			m_speed = proto->GetFloatValue( ParamTok, m_speed );
 	}
 }
 
@@ -60,23 +60,23 @@ void CoShip::RemoveFromWorld()
 	Super::RemoveFromWorld();
 }
 
-void CoShip::Tick( TickContext& TickCtxt )
+void CoShip::Tick( TickContext& tick_ctxt )
 {
-	if( !m_pCurrentLevel )
+	if( !m_pcurrent_level )
 		return;
 
 	//Name const& LevelName = m_pCurrentLevel->GetName();
-	CoPath* CoP = static_cast<CoPath*>( m_pCurrentLevel->GetComponent( CoPath::StaticClass() ) );
+	CoPath* CoP = static_cast<CoPath*>( m_pcurrent_level->GetComponent( CoPath::StaticClass() ) );
     
-    if( m_State == eShipState::Run )
+    if( m_state == eShipState::Run )
     {
-        m_PathDistLevel += TickCtxt.m_DeltaSeconds * m_Speed;
-        if( m_PathDistLevel > CoP->m_ClampedSumDistance )
-            m_PathDistLevel -= CoP->m_ClampedSumDistance;
+        m_path_dist_level += tick_ctxt.m_DeltaSeconds * m_speed;
+        if( m_path_dist_level > CoP->m_clamped_sum_distance )
+            m_path_dist_level -= CoP->m_clamped_sum_distance;
     }
     
     vec3 Pos, Tan;
-    CoP->InterpPath( m_PathDistLevel, Pos, Tan );
+    CoP->InterpPath( m_path_dist_level, Pos, Tan );
     Tan = bigball::normalize( Tan );
     
     static vec3 GUp( 0.f, 0.f, 1.f );
@@ -103,7 +103,7 @@ void CoShip::Tick( TickContext& TickCtxt )
 	//dvec3 CamPosBlock = EntityT.TransformPositionInverse( CamPos );
 }
 
-void CoShip::ChangeState( eShipState eNewState )
+void CoShip::ChangeState( eShipState new_state )
 {
-    m_State = eNewState;
+    m_state = new_state;
 }

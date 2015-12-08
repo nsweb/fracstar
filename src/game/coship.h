@@ -30,23 +30,23 @@ public:
 
 	static Component*	NewComponent()		{ return new CoShip();	}
 
-	virtual void		Create( Entity* Owner, class json::Object* Proto = nullptr );
+	virtual void		Create( Entity* owner, class json::Object* proto = nullptr );
 	virtual void		Destroy();	
 	virtual void		AddToWorld();
 	virtual void		RemoveFromWorld();
-	virtual void		Tick( TickContext& TickCtxt );
+	virtual void		Tick( TickContext& tick_ctxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
 
-	void				SetCurrentLevel( Entity* _pCurrentLevel ) { m_pCurrentLevel = _pCurrentLevel; }
-    void                ChangeState( eShipState eNewState );
+	void				SetCurrentLevel( Entity* pcurrent_level ) { m_pcurrent_level = pcurrent_level; }
+    void                ChangeState( eShipState new_state );
 
-protected:
-	Entity*		m_pCurrentLevel;
+public:
+	Entity*		m_pcurrent_level;
     
-    eShipState  m_State;
-    float       m_Speed;
+    eShipState  m_state;
+    float       m_speed;
 	/** Current distance along path in a given level */
-	float		m_PathDistLevel;
+	float		m_path_dist_level;
 };
 
 #endif // FSCOSHIP_H

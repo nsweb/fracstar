@@ -50,34 +50,34 @@ public:
 
 	static Component*	NewComponent()		{ return new CoPath();	}
 
-	virtual void		Create( Entity* Owner, class json::Object* Proto = nullptr );
+	virtual void		Create( Entity* owner, class json::Object* proto = nullptr );
 	virtual void		Destroy();	
 	virtual void		AddToWorld();
 	virtual void		RemoveFromWorld();
-	virtual void		Tick( TickContext& TickCtxt );
-    void                _DrawDebug( RenderContext& RenderCtxt );
+	virtual void		Tick( TickContext& tick_ctxt );
+    void                _DrawDebug( RenderContext& render_ctxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
 	//LevelPath*			GetLevelPath( Name const& LevelName );
     
-    void                InterpPath( float DistAlongPath, vec3& Pos, vec3& Tan ) const;
+    void                InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const;
 
 public:
 	//Array<LevelPath>	m_LevelPaths;
     
-    Name m_LevelName;
+    Name m_level_name;
     
     /** Control points of the spline */
-    Array<vec3> m_CPoints;
+    Array<vec3> m_ctrl_points;
     /** Piecewise cubic splines - if nCP are defined, nCP-3 splines are required */
-    Array<CubicSpline> m_Splines;
+    Array<CubicSpline> m_splines;
     /** Knot sequence for interpolation */
-    Array<float> m_Knots;
+    Array<float> m_knots;
     /* Sum of dist between control points */
-    float m_SumDistance;
+    float m_sum_distance;
     /* Sum of dist between control points, excluding first and last CP*/
-    float m_ClampedSumDistance;
+    float m_clamped_sum_distance;
     /* Dist between m_Knots[nCP-2] and m_Knots[1] */
-    float m_ClampedKnotDistance;
+    float m_clamped_knot_dDistance;
 };
 
 #endif // FSCOPATH_H
