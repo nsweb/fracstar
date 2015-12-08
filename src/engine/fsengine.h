@@ -19,9 +19,9 @@ public:
 	virtual bool		Init( bool bCreateWindow );
 	virtual void		Shutdown();
 	virtual void		MainLoop();
-	virtual bool		RunCommand( String const& CmdType, Array<String> const& Switches, Array<String> const& Tokens );
+	virtual bool		RunCommand( String const& cmd_type, Array<String> const& switches, Array<String> const& tokens );
 
-	static FSEngine*	Get()		{ return ms_pEngine;	}	
+	static FSEngine*	Get()		{ return ms_pengine;	}
 
 protected:
 	virtual void		DeclareComponentsAndEntities();
@@ -29,8 +29,8 @@ protected:
 	virtual void		InitManagers();
 	virtual void		DestroyManagers();
 
-	static FSEngine*	ms_pEngine;
-	class FSEditor*		m_pEditor;
+	static FSEngine*	ms_pengine;
+	class FSEditor*		m_peditor;
 };
 
 

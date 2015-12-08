@@ -18,19 +18,22 @@
 //#include "fscamera.h"
 ////#include "../cmd/cmdbuilddata.h"
 
-FSEditor::FSEditor()
-{
+FSEditor* FSEditor::ms_peditor = nullptr;
 
+FSEditor::FSEditor() :
+    m_current_cp_edit(0)
+{
+    ms_peditor = this;
 }
 
 FSEditor::~FSEditor()
 {
-
+    ms_peditor = nullptr;
 }
 
-static void UIOnToggleEditor( bool bShowEditor )
+static void UIOnToggleEditorCB( bool bshow_editor )
 {
-    if( bShowEditor )
+    if( bshow_editor )
     {
         // Allow menu interaction
         //SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -56,14 +59,19 @@ static void UIOnToggleEditor( bool bShowEditor )
     }
 }
 
-static void UIDrawEditor( bool* bShowEditor )
+static void UIDrawEditorCB( bool* bshow_editor )
+{
+    FSEditor::Get()->UIDrawEditor( bshow_editor );
+}
+
+void FSEditor::UIDrawEditor( bool* bshow_editor )
 {
 	CoShip* pShip = ShipManager::GetStaticInstance()->_GetShip();
     CoPath* pPath = PathManager::GetStaticInstance()->_GetCurrentPath();
     
-    ImGui::Begin("Editor", bShowEditor, ImVec2(200,400), -1.f, 0/*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar*/ );
+    ImGui::Begin("Editor", bshow_editor, ImVec2(200,400), -1.f, 0/*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar*/ );
 
-#if 1
+#if 0
 	ImGui::ShowTestWindow();
 #else
 
@@ -76,32 +84,37 @@ static void UIDrawEditor( bool* bShowEditor )
 	}
 	if( ImGui::CollapsingHeader("Path") )
 	{
-		for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++)
-		{
-			String str_cp = String::Printf( "cp_%d", cp_idx );
-			bool bTreeNode = ImGui::TreeNode(str_cp.c_str());
-			ImGui::SameLine();
-			if( ImGui::Button( "here" ) )
-			{
-				float new_dist = pPath->m_knots[cp_idx] - pPath->m_knots[1];
-				pShip->m_path_dist_level = new_dist;
-			}
-			ImGui::SameLine();
-			if( ImGui::Button( "new" ) )
-			{
-
-			}
-			ImGui::SameLine();
-			if( ImGui::Button( "del" ) )
-			{
-
-			}
-
-			if( bTreeNode )
-			{
-				ImGui::TreePop();
-			}
-		}
+        String str_cp;
+        Array<char> cb_buffer;
+        for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++ )
+        {
+            str_cp = String::Printf( "%d", cp_idx );
+            cb_buffer += *(Array<char>*)&str_cp;
+        }
+        cb_buffer.push_back( '\0' );
+        
+        ImGui::Combo("CP", &m_current_cp_edit, cb_buffer.Data());
+        
+        ImGui::SameLine();
+        if( ImGui::Button( "here" ) )
+        {
+            if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
+            {
+                float new_dist = pPath->m_knots[m_current_cp_edit] - pPath->m_knots[1];
+                pShip->m_path_dist_level = new_dist;
+            }
+        }
+        ImGui::SameLine();
+        if( ImGui::Button( "new" ) )
+        {
+            
+        }
+        ImGui::SameLine();
+        if( ImGui::Button( "del" ) )
+        {
+            
+        }
+        
 	}
     
     //for( int PIdx = 0; PIdx < PathArray.size(); PIdx++ )
@@ -124,8 +137,8 @@ static void UIDrawEditor( bool* bShowEditor )
 
 bool FSEditor::Init()
 {
-	UIManager::GetStaticInstance()->SetDrawEditorFn( &UIDrawEditor );
-	UIManager::GetStaticInstance()->SetToggleEditorFn( &UIOnToggleEditor );
+	UIManager::GetStaticInstance()->SetDrawEditorFn( &UIDrawEditorCB );
+	UIManager::GetStaticInstance()->SetToggleEditorFn( &UIOnToggleEditorCB );
 
 	return true;
 }

@@ -15,16 +15,16 @@
 #include "../engine/fscamera.h"
 #include "../editor/fseditor.h"
 
-FSEngine* FSEngine::ms_pEngine = nullptr;
+FSEngine* FSEngine::ms_pengine = nullptr;
 
 FSEngine::FSEngine()
 {
-	ms_pEngine = this;
+	ms_pengine = this;
 }
 
 FSEngine::~FSEngine()
 {
-	ms_pEngine = nullptr;
+	ms_pengine = nullptr;
 }
 
 bool FSEngine::Init( bool bCreateWindow )
@@ -32,8 +32,8 @@ bool FSEngine::Init( bool bCreateWindow )
 	bool bInit = Engine::Init( bCreateWindow );
     
     //////////////////////////////////////////////////////////////////////////
-	m_pEditor = new FSEditor();
-	m_pEditor->Init();
+	m_peditor = new FSEditor();
+	m_peditor->Init();
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -90,8 +90,8 @@ bool FSEngine::Init( bool bCreateWindow )
 
 void FSEngine::Shutdown()
 {
-	m_pEditor->Shutdown();
-	BB_DELETE( m_pEditor );
+	m_peditor->Shutdown();
+	BB_DELETE( m_peditor );
 
 	Engine::Shutdown();
 }
