@@ -38,10 +38,10 @@ static void UIOnToggleEditorCB( bool bshow_editor )
         // Allow menu interaction
         //SDL_SetRelativeMouseMode(SDL_FALSE);
         //SDL_SetWindowGrab( g_pEngine->GetDisplayWindow(), SDL_FALSE );
-        Array<CoShip*> const& ShipArray = ShipManager::GetStaticInstance()->GetShipArray();
-        for( int SIdx=0; SIdx < ShipArray.size(); SIdx++ )
+        Array<CoShip*> const& ship_array = ShipManager::GetStaticInstance()->GetShipArray();
+        for( int SIdx=0; SIdx < ship_array.size(); SIdx++ )
         {
-            ShipArray[SIdx]->ChangeState(eShipState::Edit);
+            ship_array[SIdx]->ChangeState(eShipState::Edit);
         }
         
     }
@@ -64,6 +64,18 @@ static void UIDrawEditorCB( bool* bshow_editor )
     FSEditor::Get()->UIDrawEditor( bshow_editor );
 }
 
+bool FSEditor::GetItemStringArray( void* data, int idx, const char** out_text )
+{
+	Array<String>* str_array = (Array<String>*)data;
+	if( idx >= 0 && idx < str_array->size() )
+	{
+		*out_text = (*str_array)[idx].c_str();
+		return true;
+	}
+
+	return false;
+}
+
 void FSEditor::UIDrawEditor( bool* bshow_editor )
 {
 	CoShip* pShip = ShipManager::GetStaticInstance()->_GetShip();
@@ -84,36 +96,80 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 	}
 	if( ImGui::CollapsingHeader("Path") )
 	{
-        String str_cp;
-        Array<char> cb_buffer;
-        for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++ )
-        {
-            str_cp = String::Printf( "%d", cp_idx );
-            cb_buffer += *(Array<char>*)&str_cp;
-        }
-        cb_buffer.push_back( '\0' );
+		ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, 5.0f);
+		ImGui::BeginChild("Sub2", ImVec2(0,300), true);
+		ImGui::Text("Control points");
+
+		Array<String> str_cp_array;
+		for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++ )
+			str_cp_array.push_back( String::Printf( "%d", cp_idx ) );
+
+		if( ImGui::ListBox( "", &m_current_cp_edit, GetItemStringArray, &str_cp_array, str_cp_array.size(), 10 ) )
+		{
+			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
+			{
+				pShip->m_path_dist_level = pPath->GetClampedNodeDistance( m_current_cp_edit );
+			}
+		}
+		//ImGui::ListBoxHeader("List", ImVec2(50,80));
+		//String str_cp;
+		//for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++ )
+		//{
+		//	str_cp = String::Printf( "%d", cp_idx );
+		//	ImGui::Selectable(str_cp.c_str(), true);
+		//}
+		//ImGui::ListBoxFooter();
+
+		ImGui::SameLine();
+		if( ImGui::Button( "here" ) )
+		{
+			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
+			{
+				pShip->m_path_dist_level = pPath->GetClampedNodeDistance( m_current_cp_edit );
+			}
+		}
+		ImGui::SameLine();
+		if( ImGui::Button( "new" ) )
+		{
+
+		}
+		ImGui::SameLine();
+		if( ImGui::Button( "del" ) )
+		{
+			pPath->DeleteControlPoint( m_current_cp_edit );
+		}
+
+		//ImGui::Columns(2);
+		//for (int i = 0; i < 100; i++)
+		//{
+		//	if (i == 50)
+		//		ImGui::NextColumn();
+		//	char buf[32];
+		//	sprintf(buf, "%08x", i*5731);
+		//	ImGui::Button(buf, ImVec2(-1.0f, 0.0f));
+		//}
+		ImGui::EndChild();
+		ImGui::PopStyleVar();
+
+
+        //String str_cp;
+        //Array<char> cb_buffer;
+        //for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++ )
+        //{
+        //    str_cp = String::Printf( "%d", cp_idx );
+        //    cb_buffer += *(Array<char>*)&str_cp;
+        //}
+        //cb_buffer.push_back( '\0' );
+        //
+        //ImGui::Combo("CP", &m_current_cp_edit, cb_buffer.Data());
         
-        ImGui::Combo("CP", &m_current_cp_edit, cb_buffer.Data());
-        
-        ImGui::SameLine();
-        if( ImGui::Button( "here" ) )
-        {
-            if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
-            {
-                float new_dist = pPath->m_knots[m_current_cp_edit] - pPath->m_knots[1];
-                pShip->m_path_dist_level = new_dist;
-            }
-        }
-        ImGui::SameLine();
-        if( ImGui::Button( "new" ) )
-        {
-            
-        }
-        ImGui::SameLine();
-        if( ImGui::Button( "del" ) )
-        {
-            
-        }
+       
+
+
+
+
+
+
         
 	}
     

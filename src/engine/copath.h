@@ -30,14 +30,16 @@ struct CubicSpline
 	void InitCubicSpline( const vec3& p0, const vec3& p1, const vec3& t0, const vec3& t1 );
 };
 
-class LevelPath
+class ControlPoint
 {
 public:
-    LevelPath();
+    ControlPoint()
+	{
+	}
 
-	
-    
-    
+	vec3 m_pos;
+
+	float m_knot;
 };
 
 class CoPath : public Component 
@@ -60,6 +62,8 @@ public:
 	//LevelPath*			GetLevelPath( Name const& LevelName );
     
     void                InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const;
+	void				DeleteControlPoint( int cp_idx );
+	float				GetClampedNodeDistance( int at_cp_idx ) const;
 
 public:
 	//Array<LevelPath>	m_LevelPaths;
@@ -67,17 +71,17 @@ public:
     Name m_level_name;
     
     /** Control points of the spline */
-    Array<vec3> m_ctrl_points;
+    Array<ControlPoint> m_ctrl_points;
     /** Piecewise cubic splines - if nCP are defined, nCP-3 splines are required */
     Array<CubicSpline> m_splines;
     /** Knot sequence for interpolation */
-    Array<float> m_knots;
+	//Array<float> m_knots;
     /* Sum of dist between control points */
     float m_sum_distance;
     /* Sum of dist between control points, excluding first and last CP*/
     float m_clamped_sum_distance;
     /* Dist between m_Knots[nCP-2] and m_Knots[1] */
-    float m_clamped_knot_dDistance;
+    float m_clamped_knot_distance;
 };
 
 #endif // FSCOPATH_H

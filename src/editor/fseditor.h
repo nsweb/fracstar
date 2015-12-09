@@ -25,6 +25,8 @@ private:
     static FSEditor*    ms_peditor;
     int                 m_current_cp_edit;
 
+	static bool			GetItemStringArray( void* data, int idx, const char** out_text );
+
 };
 
 
