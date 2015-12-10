@@ -51,8 +51,7 @@ void CubicSpline::InitCubicSpline( const vec3& p0, const vec3& p1, const vec3& t
 
 
 
-CoPath::CoPath() :
-    m_sum_distance(0.f)
+CoPath::CoPath()
 {
 
 }
@@ -71,9 +70,9 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
 	//LevelPath& LPath = m_LevelPaths.Last();
     m_level_name = "Level_0";
 	
-	const int32 nCP = 10;
-	m_ctrl_points.resize( nCP );
-	for( int i = 0; i < nCP; i++ )
+	const int32 cp_count = 10;
+	m_ctrl_points.resize( cp_count );
+	for( int i = 0; i < cp_count; i++ )
 	{
 		float stime, ctime;
 		bigball::sincos( i * 0.6f, &stime, &ctime );
@@ -81,25 +80,11 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
         m_ctrl_points[i].m_pos = p;
 	}
 
-	float lastt = 0.f, newt;
-    m_sum_distance = 0.f;
-	m_clamped_sum_distance = 0.f;
-	m_ctrl_points[0].m_knot = 0.f;
-	for( int i = 1; i < nCP; i++ )
-	{
-		float dist = bigball::distance( m_ctrl_points[i].m_pos, m_ctrl_points[i-1].m_pos );
-        m_sum_distance += dist;
-		if( i > 1 && i < nCP-1 )
-			m_clamped_sum_distance += dist;
-		newt = lastt + bigball::sqrt( dist );
-		m_ctrl_points[i].m_knot = newt;
-		lastt = newt;
-	}
-	m_clamped_knot_distance = GetClampedNodeDistance( nCP - 2 );
+    ComputeKnotDistances( 0 );
 
 	// Compute cubic splines
-	m_splines.resize(nCP - 3);
-	for( int i = 0; i < nCP-3; i++ )
+	m_splines.resize(cp_count - 3);
+	for( int i = 0; i < cp_count-3; i++ )
 	{
 		float dt0 = m_ctrl_points[i+1].m_knot - m_ctrl_points[i].m_knot;
 		float dt1 = m_ctrl_points[i+2].m_knot - m_ctrl_points[i+1].m_knot;
@@ -108,11 +93,39 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
 	}
 }
 
-float CoPath::GetClampedNodeDistance( int at_cp_idx ) const
+void CoPath::ComputeKnotDistances( int from_cp_idx )
+{
+    const int cp_count = m_ctrl_points.size();
+    
+    float lastt = 0.f, newt, lastd = 0.f, newd;
+    m_clamped_sum_distance = 0.f;
+    m_ctrl_points[0].m_knot = 0.f;
+    m_ctrl_points[0].m_dist = 0.f;
+    for( int i = bigball::max(1,from_cp_idx); i < cp_count; i++ )
+    {
+        newd = bigball::distance( m_ctrl_points[i].m_pos, m_ctrl_points[i-1].m_pos );
+        newt = lastt + bigball::sqrt( newd );
+        m_ctrl_points[i].m_knot = newt;
+        m_ctrl_points[i].m_dist = newd;
+        lastt = newt;
+        lastd = newd;
+    }
+    m_clamped_knot_distance = GetClampedKnotDistance( cp_count - 2 );
+    m_clamped_sum_distance = GetClampedSumDistance( cp_count - 2 );
+}
+
+float CoPath::GetClampedKnotDistance( int at_cp_idx ) const
 {
 	BB_ASSERT( at_cp_idx >= 0 && at_cp_idx < m_ctrl_points.size() );
 
 	return m_ctrl_points[at_cp_idx].m_knot - m_ctrl_points[1].m_knot;
+}
+
+float CoPath::GetClampedSumDistance( int at_cp_idx ) const
+{
+    BB_ASSERT( at_cp_idx >= 0 && at_cp_idx < m_ctrl_points.size() );
+    
+    return m_ctrl_points[at_cp_idx].m_dist - m_ctrl_points[1].m_dist;
 }
 
 void CoPath::Destroy()
@@ -160,6 +173,30 @@ void CoPath::InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const
     BB_ASSERT( k - 1 < m_splines.size() );
     udist = (udist - m_ctrl_points[k].m_knot) / (m_ctrl_points[k + 1].m_knot - m_ctrl_points[k].m_knot);
     m_splines[k - 1].Eval( udist, pos, tan );
+}
+
+bool CoPath::InsertControlPointMidWay( int cp_idx )
+{
+    BB_ASSERT( cp_idx < m_ctrl_points.size() - 1 );
+    if( m_ctrl_points.size() < 3 )
+        return false;
+    
+    float t0 = GetClampedKnotDistance( cp_idx );
+    float t1 = GetClampedKnotDistance( cp_idx+1 );
+    ControlPoint new_cp;
+    vec3 tan;
+    InterpPath( 0.5f*(t0 + t1), new_cp.m_pos, tan );
+    
+    m_ctrl_points.insert( new_cp, cp_idx+1 );
+    
+    ComputeKnotDistances( cp_idx+1 );
+    
+    return  true;
+}
+
+void CoPath::InsertControlPoint( int cp_idx, vec3& pos )
+{
+    
 }
 
 void CoPath::DeleteControlPoint( int cp_idx )

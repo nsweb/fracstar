@@ -40,6 +40,7 @@ public:
 	vec3 m_pos;
 
 	float m_knot;
+    float m_dist;
 };
 
 class CoPath : public Component 
@@ -59,29 +60,28 @@ public:
 	virtual void		Tick( TickContext& tick_ctxt );
     void                _DrawDebug( RenderContext& render_ctxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
-	//LevelPath*			GetLevelPath( Name const& LevelName );
     
     void                InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const;
-	void				DeleteControlPoint( int cp_idx );
-	float				GetClampedNodeDistance( int at_cp_idx ) const;
+    bool                InsertControlPointMidWay( int cp_idx );
+    void                InsertControlPoint( int cp_idx, vec3& pos );
+    void				DeleteControlPoint( int cp_idx );
+	float				GetClampedKnotDistance( int at_cp_idx ) const;
+    float               GetClampedSumDistance( int at_cp_idx ) const;
 
 public:
-	//Array<LevelPath>	m_LevelPaths;
-    
     Name m_level_name;
     
     /** Control points of the spline */
     Array<ControlPoint> m_ctrl_points;
-    /** Piecewise cubic splines - if nCP are defined, nCP-3 splines are required */
+    /** Piecewise cubic splines - if cp_count are defined, cp_count-3 splines are required */
     Array<CubicSpline> m_splines;
-    /** Knot sequence for interpolation */
-	//Array<float> m_knots;
-    /* Sum of dist between control points */
-    float m_sum_distance;
     /* Sum of dist between control points, excluding first and last CP*/
     float m_clamped_sum_distance;
-    /* Dist between m_Knots[nCP-2] and m_Knots[1] */
+    /* Sum of knot dist between control points, excluding first and last CP*/
     float m_clamped_knot_distance;
+    
+private:
+    void                ComputeKnotDistances( int from_cp_idx );
 };
 
 #endif // FSCOPATH_H

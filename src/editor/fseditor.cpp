@@ -104,34 +104,31 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 		for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++ )
 			str_cp_array.push_back( String::Printf( "%d", cp_idx ) );
 
-		if( ImGui::ListBox( "", &m_current_cp_edit, GetItemStringArray, &str_cp_array, str_cp_array.size(), 10 ) )
+        ImGui::PushItemWidth( 50 );
+		if( ImGui::ListBox( "", &m_current_cp_edit, GetItemStringArray, &str_cp_array, str_cp_array.size(), 5 ) )
 		{
 			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
 			{
-				pShip->m_path_dist_level = pPath->GetClampedNodeDistance( m_current_cp_edit );
+				pShip->m_path_dist_level = pPath->GetClampedKnotDistance( m_current_cp_edit );
 			}
 		}
-		//ImGui::ListBoxHeader("List", ImVec2(50,80));
-		//String str_cp;
-		//for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++ )
-		//{
-		//	str_cp = String::Printf( "%d", cp_idx );
-		//	ImGui::Selectable(str_cp.c_str(), true);
-		//}
-		//ImGui::ListBoxFooter();
+        ImGui::PopItemWidth();
 
 		ImGui::SameLine();
 		if( ImGui::Button( "here" ) )
 		{
 			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
 			{
-				pShip->m_path_dist_level = pPath->GetClampedNodeDistance( m_current_cp_edit );
+				pShip->m_path_dist_level = pPath->GetClampedKnotDistance( m_current_cp_edit );
 			}
 		}
 		ImGui::SameLine();
 		if( ImGui::Button( "new" ) )
 		{
-
+            if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
+            {
+                pPath->InsertControlPointMidWay(m_current_cp_edit );
+            }
 		}
 		ImGui::SameLine();
 		if( ImGui::Button( "del" ) )
