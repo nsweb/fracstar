@@ -105,11 +105,12 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 			str_cp_array.push_back( String::Printf( "%d", cp_idx ) );
 
         ImGui::PushItemWidth( 50 );
-		if( ImGui::ListBox( "", &m_current_cp_edit, GetItemStringArray, &str_cp_array, str_cp_array.size(), 5 ) )
+		if( ImGui::ListBox( "", &m_current_cp_edit, GetItemStringArray, &str_cp_array, str_cp_array.size(), 8 ) )
 		{
 			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
 			{
-				pShip->m_path_dist_level = pPath->GetClampedKnotDistance( m_current_cp_edit );
+				float knot_dist = pPath->GetClampedKnotDistance( m_current_cp_edit );
+				pShip->m_path_dist_level = pPath->m_clamped_sum_distance * (knot_dist / pPath->m_clamped_knot_distance);
 			}
 		}
         ImGui::PopItemWidth();
@@ -119,7 +120,8 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 		{
 			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
 			{
-				pShip->m_path_dist_level = pPath->GetClampedKnotDistance( m_current_cp_edit );
+				float knot_dist = pPath->GetClampedKnotDistance( m_current_cp_edit );
+				pShip->m_path_dist_level = pPath->m_clamped_sum_distance * (knot_dist / pPath->m_clamped_knot_distance);
 			}
 		}
 		ImGui::SameLine();
@@ -136,54 +138,12 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 			pPath->DeleteControlPoint( m_current_cp_edit );
 		}
 
-		//ImGui::Columns(2);
-		//for (int i = 0; i < 100; i++)
-		//{
-		//	if (i == 50)
-		//		ImGui::NextColumn();
-		//	char buf[32];
-		//	sprintf(buf, "%08x", i*5731);
-		//	ImGui::Button(buf, ImVec2(-1.0f, 0.0f));
-		//}
+
 		ImGui::EndChild();
 		ImGui::PopStyleVar();
 
-
-        //String str_cp;
-        //Array<char> cb_buffer;
-        //for( int cp_idx = 0; cp_idx < pPath->m_ctrl_points.size(); cp_idx++ )
-        //{
-        //    str_cp = String::Printf( "%d", cp_idx );
-        //    cb_buffer += *(Array<char>*)&str_cp;
-        //}
-        //cb_buffer.push_back( '\0' );
-        //
-        //ImGui::Combo("CP", &m_current_cp_edit, cb_buffer.Data());
-        
-       
-
-
-
-
-
-
-        
 	}
     
-    //for( int PIdx = 0; PIdx < PathArray.size(); PIdx++ )
-    //{
-    //    Name const& LevelName = PathArray[PIdx]->m_level_name;
-    //    
-    //    bool bTreeNode = ImGui::TreeNode(LevelName.c_str());
-    //    //ImGui::SameLine(0.f, 100.f);
-    //    //ImGui::Text( "[%d / %d] %.2f / %.2f ms", m_LastCallCount, m_MaxCallCount, m_fLastTimeSpent*100.0f, m_fMaxTimeSpent*100.0f );
-    //    
-    //    if( bTreeNode )
-    //    {
-    //        ImGui::TreePop();
-    //    }
-    //}
-
 #endif
     ImGui::End();
 }

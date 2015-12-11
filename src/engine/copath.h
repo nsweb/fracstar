@@ -64,7 +64,7 @@ public:
     void                InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const;
     bool                InsertControlPointMidWay( int cp_idx );
     void                InsertControlPoint( int cp_idx, vec3& pos );
-    void				DeleteControlPoint( int cp_idx );
+    bool				DeleteControlPoint( int cp_idx );
 	float				GetClampedKnotDistance( int at_cp_idx ) const;
     float               GetClampedSumDistance( int at_cp_idx ) const;
 
@@ -81,7 +81,8 @@ public:
     float m_clamped_knot_distance;
     
 private:
-    void                ComputeKnotDistances( int from_cp_idx );
+    void                ComputeKnotDistances();
+	void				ComputeSplines( int from_sp_idx, int to_sp_idx );
 };
 
 #endif // FSCOPATH_H
