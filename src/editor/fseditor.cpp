@@ -129,7 +129,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 		{
             if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
             {
-                pPath->InsertControlPointMidWay(m_current_cp_edit );
+                pPath->InsertControlPoint( m_current_cp_edit, true );
             }
 		}
 		ImGui::SameLine();

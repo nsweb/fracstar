@@ -182,17 +182,43 @@ void CoPath::InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const
     m_splines[k - 1].Eval( udist, pos, tan );
 }
 
-bool CoPath::InsertControlPointMidWay( int cp_idx )
+bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
 {
-    if( m_ctrl_points.size() < 3 || cp_idx < 0 || cp_idx >= m_ctrl_points.size() )
+	if( !insert_after )
+		cp_idx--;
+
+	const int cp_count = m_ctrl_points.size();
+    if( cp_count < 3 || cp_idx < -1 || cp_idx >= cp_count )
         return false;
     
-	// TODO: insert at middle of segment if cp_idx == 0 || cp_idx == m_ctrl_points.size() - 2
-
 	ControlPoint new_cp;
-    vec3 tan, p0, p1;
-	m_splines[cp_idx - 1].Eval( 0.5f, new_cp.m_pos, tan );
+	int sp_idx = cp_idx - 1;
+	float eval_value = 0.5f;
+	if( cp_idx == 0 || cp_idx == cp_count - 2 )
+	{
+		// Insert at middle of first / last segment (can't evaluate curve nearest spline there)
+		new_cp.m_pos = (m_ctrl_points[cp_idx].m_pos + m_ctrl_points[cp_idx + 1].m_pos) * 0.5f;
+	}
+	else if( cp_idx == -1 || cp_idx == cp_count - 1 )
+	{
+		// Insert a new point a the end by extrapolating from last spline
+		vec3 pos, t0, t1, t2;
+		CubicSpline const& last_spline = m_splines.Last();
+		last_spline.Eval( 0.f, pos, t0 );
+		last_spline.Eval( 1.f, pos, t1 );
+		quat qrot = quat::rotate( t0, t1 );
+		t2 = qrot.transform( t1 );
+		t2 = normalize( t2 );
+		float dt1 = m_ctrl_points[cp_idx].m_knot - m_ctrl_points[cp_idx-1].m_knot;
 
+	}
+	else
+	{
+		// Splines are well defined in all other cases
+		vec3 tan, p0, p1;
+		m_splines[sp_idx].Eval( eval_value, new_cp.m_pos, tan );
+	}
+	
     m_ctrl_points.insert( new_cp, cp_idx+1 );
     ComputeKnotDistances();
     
