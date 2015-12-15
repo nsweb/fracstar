@@ -103,8 +103,9 @@ void CoPath::ComputeKnotDistances()
         m_ctrl_points[i].m_knot = sumt;
         m_ctrl_points[i].m_dist = sumd;
     }
-    m_clamped_knot_distance = GetClampedKnotDistance( cp_count - 2 );
-    m_clamped_sum_distance = GetClampedSumDistance( cp_count - 2 );
+
+	m_clamped_knot_distance = (cp_count >= 2 ? GetClampedKnotDistance( cp_count - 2 ) : 0.0f);
+	m_clamped_sum_distance = (cp_count >= 2 ? GetClampedSumDistance( cp_count - 2 ) : 0.0f);
 }
 
 void CoPath::ComputeSplines( int from_sp_idx, int to_sp_idx )
@@ -123,16 +124,24 @@ void CoPath::ComputeSplines( int from_sp_idx, int to_sp_idx )
 
 float CoPath::GetClampedKnotDistance( int at_cp_idx ) const
 {
-	BB_ASSERT( at_cp_idx >= 0 && at_cp_idx < m_ctrl_points.size() );
+	const int cp_count = m_ctrl_points.size();
+	if( cp_count > 2 && at_cp_idx > 0 )
+	{
+		return m_ctrl_points[at_cp_idx].m_knot - m_ctrl_points[1].m_knot;
+	}
 
-	return m_ctrl_points[at_cp_idx].m_knot - m_ctrl_points[1].m_knot;
+	return 0.f;
 }
 
 float CoPath::GetClampedSumDistance( int at_cp_idx ) const
 {
-    BB_ASSERT( at_cp_idx >= 0 && at_cp_idx < m_ctrl_points.size() );
-    
-    return m_ctrl_points[at_cp_idx].m_dist - m_ctrl_points[1].m_dist;
+	const int cp_count = m_ctrl_points.size();
+	if( cp_count > 2 && at_cp_idx > 0 )
+	{
+		return m_ctrl_points[at_cp_idx].m_dist - m_ctrl_points[1].m_dist;
+	}
+
+	return 0.f;
 }
 
 void CoPath::Destroy()
@@ -165,21 +174,43 @@ void CoPath::Tick( TickContext& tick_ctxt )
 
 void CoPath::InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const
 {
-    BB_ASSERT( m_ctrl_points.size() >= 2 );
-    
-    float udist = bigball::clamp( (dist_along_path / m_clamped_sum_distance) * m_clamped_knot_distance, 0.f, m_clamped_knot_distance );
-    udist += m_ctrl_points[1].m_knot;
-    
-    int k = 1;
-    for( ; k < m_ctrl_points.size() - 1; k++ )
-    {
-        if( udist <= m_ctrl_points[k + 1].m_knot )
-            break;
-    }
-    
-    BB_ASSERT( k - 1 < m_splines.size() );
-    udist = (udist - m_ctrl_points[k].m_knot) / (m_ctrl_points[k + 1].m_knot - m_ctrl_points[k].m_knot);
-    m_splines[k - 1].Eval( udist, pos, tan );
+	const int cp_count = m_ctrl_points.size();
+	if( cp_count >= 4 )
+	{
+		float udist = bigball::clamp( (dist_along_path / m_clamped_sum_distance) * m_clamped_knot_distance, 0.f, m_clamped_knot_distance );
+		udist += m_ctrl_points[1].m_knot;
+
+		int k = 1;
+		for( ; k < m_ctrl_points.size() - 1; k++ )
+		{
+			if( udist <= m_ctrl_points[k + 1].m_knot )
+				break;
+		}
+
+		BB_ASSERT( k - 1 < m_splines.size() );
+		udist = (udist - m_ctrl_points[k].m_knot) / (m_ctrl_points[k + 1].m_knot - m_ctrl_points[k].m_knot);
+		m_splines[k - 1].Eval( udist, pos, tan );
+	}
+	else if( cp_count == 3 )
+	{
+		pos = m_ctrl_points[1].m_pos;
+		tan = m_ctrl_points[2].m_pos - m_ctrl_points[0].m_pos;
+	}
+	else if( cp_count == 2 )
+	{
+		pos = (m_ctrl_points[0].m_pos + m_ctrl_points[1].m_pos) * 0.5f;
+		tan = m_ctrl_points[1].m_pos - m_ctrl_points[0].m_pos;
+	}
+	else if( cp_count == 1 )
+	{
+		pos = m_ctrl_points[0].m_pos;
+		tan = vec3( 1.f, 0.f, 0.f );
+	}
+	else
+	{
+		pos = vec3( 0.f, 0.f, 0.f );
+		tan = vec3( 1.f, 0.f, 0.f );
+	}
 }
 
 bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
@@ -188,12 +219,10 @@ bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
 		cp_idx--;
 
 	const int cp_count = m_ctrl_points.size();
-    if( cp_count < 3 || cp_idx < -1 || cp_idx >= cp_count )
+    if( cp_idx < -1 || cp_idx >= cp_count )
         return false;
     
 	ControlPoint new_cp;
-	int sp_idx = cp_idx - 1;
-	float eval_value = 0.5f;
 	if( cp_idx == 0 || cp_idx == cp_count - 2 )
 	{
 		// Insert at middle of first / last segment (can't evaluate curve nearest spline there)
@@ -201,20 +230,27 @@ bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
 	}
 	else if( cp_idx == -1 || cp_idx == cp_count - 1 )
 	{
+		if( cp_idx == -1 )
+			new_cp.m_pos = 2.f*m_ctrl_points[0].m_pos - m_ctrl_points[1].m_pos;
+		else
+			new_cp.m_pos = 2.f*m_ctrl_points[cp_count - 1].m_pos - m_ctrl_points[cp_count - 2].m_pos;
+
 		// Insert a new point a the end by extrapolating from last spline
-		vec3 pos, t0, t1, t2;
-		CubicSpline const& last_spline = m_splines.Last();
-		last_spline.Eval( 0.f, pos, t0 );
-		last_spline.Eval( 1.f, pos, t1 );
-		quat qrot = quat::rotate( t0, t1 );
-		t2 = qrot.transform( t1 );
-		t2 = normalize( t2 );
-		float dt1 = m_ctrl_points[cp_idx].m_knot - m_ctrl_points[cp_idx-1].m_knot;
+		//vec3 pos, t0, t1, t2;
+		//CubicSpline const& last_spline = m_splines.Last();
+		//last_spline.Eval( 0.f, pos, t0 );
+		//last_spline.Eval( 1.f, pos, t1 );
+		//quat qrot = quat::rotate( t0, t1 );
+		//t2 = qrot.transform( t1 );
+		//t2 = normalize( t2 );
+		//float dt1 = m_ctrl_points[cp_idx].m_knot - m_ctrl_points[cp_idx-1].m_knot;
 
 	}
 	else
 	{
 		// Splines are well defined in all other cases
+		int sp_idx = cp_idx - 1;
+		float eval_value = 0.5f;
 		vec3 tan, p0, p1;
 		m_splines[sp_idx].Eval( eval_value, new_cp.m_pos, tan );
 	}
@@ -222,9 +258,17 @@ bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
     m_ctrl_points.insert( new_cp, cp_idx+1 );
     ComputeKnotDistances();
     
-	CubicSpline new_sp;
-	m_splines.insert( new_sp, cp_idx );
-    ComputeSplines( cp_idx - 3, cp_idx + 2 );
+	if( cp_count >= 3 )
+	{
+		CubicSpline new_sp;
+		if( cp_idx <= 0 )
+			m_splines.insert( new_sp, 0 );
+		else if( cp_idx >= cp_count - 2 )
+			m_splines.push_back( new_sp );
+		else
+			m_splines.insert( new_sp, cp_idx );
+		ComputeSplines( cp_idx - 3, cp_idx + 2 );
+	}
 
 	return true;
 }
@@ -236,15 +280,24 @@ void CoPath::InsertControlPoint( int cp_idx, vec3& pos )
 
 bool CoPath::DeleteControlPoint( int cp_idx )
 {
-	if( cp_idx < 0 || cp_idx >= m_ctrl_points.size() )
+	const int cp_count = m_ctrl_points.size();
+	if( cp_idx < 0 || cp_idx >= cp_count )
 		return false;
 
 	m_ctrl_points.erase( cp_idx );
 	ComputeKnotDistances();
 
-	m_splines.erase( cp_idx - 1 );
-	ComputeSplines( cp_idx - 3, cp_idx + 2 );
-
+	if( m_splines.size() )
+	{
+		if( cp_idx <= 0 )
+			m_splines.erase( 0 );
+		else if( cp_idx >= cp_count - 2 )
+			m_splines.pop_back();
+		else
+			m_splines.erase( cp_idx - 1 );
+		ComputeSplines( cp_idx - 3, cp_idx + 2 );
+	}
+	
 	return true;
 }
 

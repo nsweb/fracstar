@@ -110,26 +110,35 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
 			{
 				float knot_dist = pPath->GetClampedKnotDistance( m_current_cp_edit );
-				pShip->m_path_dist_level = pPath->m_clamped_sum_distance * (knot_dist / pPath->m_clamped_knot_distance);
+				if( pPath->m_clamped_knot_distance > 0.f )
+					pShip->m_path_dist_level = pPath->m_clamped_sum_distance * (knot_dist / pPath->m_clamped_knot_distance);
+				else
+					pShip->m_path_dist_level = 0.f;
 			}
 		}
         ImGui::PopItemWidth();
 
 		ImGui::SameLine();
+		// TODO: disable if one remaining ctrl point...
 		if( ImGui::Button( "here" ) )
 		{
 			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
 			{
 				float knot_dist = pPath->GetClampedKnotDistance( m_current_cp_edit );
-				pShip->m_path_dist_level = pPath->m_clamped_sum_distance * (knot_dist / pPath->m_clamped_knot_distance);
+				if( pPath->m_clamped_knot_distance > 0.f )
+					pShip->m_path_dist_level = pPath->m_clamped_sum_distance * (knot_dist / pPath->m_clamped_knot_distance);
+				else
+					pShip->m_path_dist_level = 0.f;
 			}
 		}
 		ImGui::SameLine();
-		if( ImGui::Button( "new" ) )
+		bool insert_before = ImGui::Button( "insert before" );
+		bool insert_after = ImGui::Button( "insert after" );
+		if( insert_before || insert_after )
 		{
             if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
             {
-                pPath->InsertControlPoint( m_current_cp_edit, true );
+                pPath->InsertControlPoint( m_current_cp_edit, insert_after );
             }
 		}
 		ImGui::SameLine();

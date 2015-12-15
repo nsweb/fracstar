@@ -74,6 +74,7 @@ void CoShip::Tick( TickContext& tick_ctxt )
         if( m_path_dist_level > CoP->m_clamped_sum_distance )
             m_path_dist_level -= CoP->m_clamped_sum_distance;
     }
+	m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, CoP->m_clamped_sum_distance );
     
     vec3 Pos, Tan;
     CoP->InterpPath( m_path_dist_level, Pos, Tan );
