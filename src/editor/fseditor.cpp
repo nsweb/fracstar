@@ -119,36 +119,56 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
         ImGui::PopItemWidth();
 
 		ImGui::SameLine();
-		// TODO: disable if one remaining ctrl point...
-		if( ImGui::Button( "here" ) )
-		{
-			if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
-			{
-				float knot_dist = pPath->GetClampedKnotDistance( m_current_cp_edit );
-				if( pPath->m_clamped_knot_distance > 0.f )
-					pShip->m_path_dist_level = pPath->m_clamped_sum_distance * (knot_dist / pPath->m_clamped_knot_distance);
-				else
-					pShip->m_path_dist_level = 0.f;
-			}
-		}
-		ImGui::SameLine();
-		bool insert_before = ImGui::Button( "insert before" );
-		bool insert_after = ImGui::Button( "insert after" );
-		if( insert_before || insert_after )
-		{
-            if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
+        ImGui::BeginChild("Action", ImVec2(0,100), true);
+        if( m_current_cp_edit >= 0 && m_current_cp_edit < pPath->m_ctrl_points.size() )
+        {
+            if( ImGui::Button( "here" ) )
+            {
+                float knot_dist = pPath->GetClampedKnotDistance( m_current_cp_edit );
+                if( pPath->m_clamped_knot_distance > 0.f )
+                    pShip->m_path_dist_level = pPath->m_clamped_sum_distance * (knot_dist / pPath->m_clamped_knot_distance);
+                else
+                    pShip->m_path_dist_level = 0.f;
+            }
+            ImGui::SameLine();
+            bool insert_before = ImGui::Button( "ins. before" );
+            ImGui::SameLine();
+            bool insert_after = ImGui::Button( "ins. after" );
+            if( insert_before || insert_after )
             {
                 pPath->InsertControlPoint( m_current_cp_edit, insert_after );
             }
-		}
-		ImGui::SameLine();
-		if( ImGui::Button( "del" ) )
-		{
-			pPath->DeleteControlPoint( m_current_cp_edit );
-		}
-
-
-		ImGui::EndChild();
+            ImGui::SameLine();
+            bool edit_button = ImGui::Button( "edit" );
+            if( edit_button )
+            {
+                if( !m_edit_mode )
+                {
+                    // Open edit mode
+                }
+                else
+                {
+                    // Close edit mode
+                }
+                m_edit_mode = !m_edit_mode;
+            }
+            ImGui::SameLine();
+            // disable if one remaining ctrl point...
+            if( pPath->m_ctrl_points.size() > 1 && ImGui::Button( "del" ) )
+            {
+                pPath->DeleteControlPoint( m_current_cp_edit );
+            }
+            if( m_edit_mode)
+            {
+                ImGui::SliderFloat("slide", &m_edit_slide, -1.f, 1.f);
+                ImGui::InputFloat3("pos", (float*)&pPath->m_ctrl_points[m_current_cp_edit].m_pos);
+                ImGui::InputFloat("knot", (float*)&pPath->m_ctrl_points[m_current_cp_edit].m_knot);
+                //static float val = 0.f;
+                //ImGui::VSliderFloat("slide2", ImVec2(20,50),  &val, 0.f, 1.f);
+            }
+        }
+        ImGui::EndChild();  // Action
+		ImGui::EndChild();  // Sub2
 		ImGui::PopStyleVar();
 
 	}

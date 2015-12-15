@@ -24,6 +24,8 @@ public:
 private:
     static FSEditor*    ms_peditor;
     int                 m_current_cp_edit;
+    bool                m_edit_mode;
+    float               m_edit_slide;
 
 	static bool			GetItemStringArray( void* data, int idx, const char** out_text );
 
