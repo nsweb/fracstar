@@ -77,9 +77,7 @@ bool FSEngine::Init( bool bCreateWindow )
 	// Link scene objects
 	CameraCtrl_Base* pCamCtrl = Controller::GetStaticInstance()->GetCameraCtrl( FSCameraCtrl_Fly::StaticClass() );
 	if( pCamCtrl && pCamCtrl->IsA( FSCameraCtrl_Fly::StaticClass() ) )
-	{
 		((FSCameraCtrl_Fly*)pCamCtrl)->SetTarget( pShip );
-	}
 
 	CoShip* pCoShip = static_cast<CoShip*>( pShip->GetComponent( CoShip::StaticClass() ) );
 	if( pCoShip )
@@ -116,6 +114,7 @@ void FSEngine::CreateGameCameras()
 {
 	Controller* pController = Controller::GetStaticInstance();
 	pController->RegisterCameraCtrl( new FSCameraCtrl_Fly() );
+	pController->RegisterCameraCtrl( new FSCameraCtrl_EditPath() );
 	pController->SetActiveCameraCtrl( FSCameraCtrl_Fly::StaticClass() );
 }
 
