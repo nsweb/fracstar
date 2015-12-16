@@ -4,8 +4,7 @@
 #define FSCAMERA_H
 
 #include "engine/camera.h"
-
-class CoPath;
+#include "../engine/copath.h"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +46,7 @@ public:
 	float			m_rotation_speed;
 	CoPath*			m_ptarget;
 
+    ControlPoint    m_backup_cp;
 	int             m_current_cp_edit;
 	float           m_edit_slide;
 };

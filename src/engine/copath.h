@@ -62,11 +62,12 @@ public:
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
     
     void                InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const;
+    void                InterpPath( float dist_along_path, transform& tf ) const;
     bool                InsertControlPoint( int cp_idx, bool insert_after );
-    void                InsertControlPoint( int cp_idx, vec3& pos );
     bool				DeleteControlPoint( int cp_idx );
 	float				GetClampedKnotDistance( int at_cp_idx ) const;
     float               GetClampedSumDistance( int at_cp_idx ) const;
+    void                OnControlPointChanged( int at_cp_idx );
 
 public:
     Name m_level_name;

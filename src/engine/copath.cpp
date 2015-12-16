@@ -172,6 +172,25 @@ void CoPath::Tick( TickContext& tick_ctxt )
 	//dvec3 CamPosBlock = EntityT.TransformPositionInverse( CamPos );
 }
 
+void CoPath::InterpPath( float dist_along_path, transform& tf ) const
+{
+    vec3 pos, tan;
+    InterpPath( dist_along_path, pos, tan );
+    tan = bigball::normalize( tan );
+    
+    const vec3 up( 0.f, 0.f, 1.f ); // TODO: should be defined per ctrl point
+    mat3 cam_rot;
+    
+    // Back
+    cam_rot.v2 = -tan;
+    // Right
+    cam_rot.v0 = bigball::normalize( bigball::cross(tan, up) );
+    // Up
+    cam_rot.v1 = bigball::cross(cam_rot.v0, tan);
+    
+    tf.Set( quat(cam_rot), pos );
+}
+
 void CoPath::InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const
 {
 	const int cp_count = m_ctrl_points.size();
@@ -273,11 +292,6 @@ bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
 	return true;
 }
 
-void CoPath::InsertControlPoint( int cp_idx, vec3& pos )
-{
-	
-}
-
 bool CoPath::DeleteControlPoint( int cp_idx )
 {
 	const int cp_count = m_ctrl_points.size();
@@ -299,6 +313,13 @@ bool CoPath::DeleteControlPoint( int cp_idx )
 	}
 	
 	return true;
+}
+
+void CoPath::OnControlPointChanged( int at_cp_idx )
+{
+    ComputeKnotDistances();
+    ComputeSplines( at_cp_idx - 3, at_cp_idx + 2 );
+    
 }
 
 void CoPath::_DrawDebug( RenderContext& render_ctxt )

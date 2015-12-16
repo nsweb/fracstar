@@ -76,32 +76,12 @@ void CoShip::Tick( TickContext& tick_ctxt )
     }
 	m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, CoP->m_clamped_sum_distance );
     
-    vec3 Pos, Tan;
-    CoP->InterpPath( m_path_dist_level, Pos, Tan );
-    Tan = bigball::normalize( Tan );
-    
-    static vec3 GUp( 0.f, 0.f, 1.f );
-    mat3 CamRot;
+    transform tf;
+    CoP->InterpPath( m_path_dist_level, tf );
 
-    // Back
-    CamRot.v2 = -Tan;
-    // Right
-    CamRot.v0 = bigball::normalize( bigball::cross(Tan, GUp) );
-    // Up
-    CamRot.v1 = bigball::cross(CamRot.v0, Tan);
-    
     CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
-    CoPos->SetPosition( Pos );
-    quat Rot( CamRot );
-    CoPos->SetRotation( Rot );
-
-	// Retrieve current camp pos from path interpolation (centripetal catmull-rom spline)
-
-
-	//CameraView const& CamView = Controller::GetStaticInstance()->GetRenderView();
-	//dvec3 CamPos = CamView.m_Transform.GetTranslation();
-	//dtransform const& EntityT = CoPos->GetTransform();
-	//dvec3 CamPosBlock = EntityT.TransformPositionInverse( CamPos );
+    CoPos->SetPosition( tf.GetTranslation() );
+    CoPos->SetRotation( tf.GetRotation() );
 }
 
 void CoShip::ChangeState( eShipState new_state )
