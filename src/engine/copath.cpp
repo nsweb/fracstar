@@ -92,7 +92,8 @@ void CoPath::ComputeKnotDistances()
     const int cp_count = m_ctrl_points.size();
     
     float sumt = 0.f, sumd = 0.f;
-    m_clamped_sum_distance = 0.f;
+    m_sum_distance = 0.f;
+	m_sum_knot_distance = 0.f;
     m_ctrl_points[0].m_knot = 0.f;
     m_ctrl_points[0].m_dist = 0.f;
     for( int i = 1; i < cp_count; i++ )
@@ -104,8 +105,8 @@ void CoPath::ComputeKnotDistances()
         m_ctrl_points[i].m_dist = sumd;
     }
 
-	m_clamped_knot_distance = (cp_count >= 2 ? GetClampedKnotDistance( cp_count - 2 ) : 0.0f);
-	m_clamped_sum_distance = (cp_count >= 2 ? GetClampedSumDistance( cp_count - 2 ) : 0.0f);
+	m_sum_distance = GetSumDistance( cp_count - 1 );
+	m_sum_knot_distance = GetSumKnotDistance( cp_count - 1 );
 }
 
 void CoPath::ComputeSplines( int from_sp_idx, int to_sp_idx )
@@ -122,26 +123,32 @@ void CoPath::ComputeSplines( int from_sp_idx, int to_sp_idx )
 	}
 }
 
-float CoPath::GetClampedKnotDistance( int at_cp_idx ) const
+float CoPath::GetSumKnotDistance( int at_cp_idx ) const
 {
 	const int cp_count = m_ctrl_points.size();
-	if( cp_count > 2 && at_cp_idx > 0 )
+	if( at_cp_idx > 0 && at_cp_idx < cp_count  )
 	{
-		return m_ctrl_points[at_cp_idx].m_knot - m_ctrl_points[1].m_knot;
+		return m_ctrl_points[at_cp_idx].m_knot;
 	}
 
 	return 0.f;
 }
 
-float CoPath::GetClampedSumDistance( int at_cp_idx ) const
+float CoPath::GetSumDistance( int at_cp_idx ) const
 {
 	const int cp_count = m_ctrl_points.size();
-	if( cp_count > 2 && at_cp_idx > 0 )
+	if( at_cp_idx > 0 && at_cp_idx < cp_count  )
 	{
-		return m_ctrl_points[at_cp_idx].m_dist - m_ctrl_points[1].m_dist;
+		return m_ctrl_points[at_cp_idx].m_dist;
 	}
 
 	return 0.f;
+}
+
+float CoPath::ConvertDistanceToKnot( float dist_along_path ) const
+{
+	float knot_dist = (m_sum_distance > 1e-4f ? bigball::clamp( (dist_along_path / m_sum_distance) * m_sum_knot_distance, 0.f, m_sum_knot_distance ) : 0.f);
+	return knot_dist;
 }
 
 void CoPath::Destroy()
@@ -172,10 +179,17 @@ void CoPath::Tick( TickContext& tick_ctxt )
 	//dvec3 CamPosBlock = EntityT.TransformPositionInverse( CamPos );
 }
 
-void CoPath::InterpPath( float dist_along_path, transform& tf ) const
+
+void CoPath::InterpPathDist( float dist_along_path, transform& tf ) const
+{
+	float knot_dist = (m_sum_distance > 1e-4f ? bigball::clamp( (dist_along_path / m_sum_distance) * m_sum_knot_distance, 0.f, m_sum_knot_distance ) : 0.f);
+	InterpPathKnotDist( knot_dist, tf );
+}
+
+void CoPath::InterpPathKnotDist( float knot_dist_along_path, transform& tf ) const
 {
     vec3 pos, tan;
-    InterpPath( dist_along_path, pos, tan );
+    InterpPathKnotDist( knot_dist_along_path, pos, tan );
     tan = bigball::normalize( tan );
     
     const vec3 up( 0.f, 0.f, 1.f ); // TODO: should be defined per ctrl point
@@ -188,37 +202,35 @@ void CoPath::InterpPath( float dist_along_path, transform& tf ) const
     // Up
     cam_rot.v1 = bigball::cross(cam_rot.v0, tan);
     
-    tf.Set( quat(cam_rot), pos );
+    tf.Set( quat(cam_rot), pos, 1.f );
 }
 
-void CoPath::InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const
+void CoPath::InterpPathDist( float dist_along_path, vec3& pos, vec3& tan ) const
+{
+	float knot_dist = (m_sum_distance > 1e-4f ? bigball::clamp( (dist_along_path / m_sum_distance) * m_sum_knot_distance, 0.f, m_sum_knot_distance ) : 0.f);
+	InterpPathKnotDist( knot_dist, pos, tan );
+}
+
+void CoPath::InterpPathKnotDist( float knot_dist_along_path, vec3& pos, vec3& tan ) const
 {
 	const int cp_count = m_ctrl_points.size();
-	if( cp_count >= 4 )
+	int cp_idx = 0;
+	for( ; cp_idx < m_ctrl_points.size()-1; cp_idx++ )
 	{
-		float udist = bigball::clamp( (dist_along_path / m_clamped_sum_distance) * m_clamped_knot_distance, 0.f, m_clamped_knot_distance );
-		udist += m_ctrl_points[1].m_knot;
-
-		int k = 1;
-		for( ; k < m_ctrl_points.size() - 1; k++ )
-		{
-			if( udist <= m_ctrl_points[k + 1].m_knot )
-				break;
-		}
-
-		BB_ASSERT( k - 1 < m_splines.size() );
-		udist = (udist - m_ctrl_points[k].m_knot) / (m_ctrl_points[k + 1].m_knot - m_ctrl_points[k].m_knot);
-		m_splines[k - 1].Eval( udist, pos, tan );
+		if( knot_dist_along_path <= m_ctrl_points[cp_idx + 1].m_knot )
+			break;
 	}
-	else if( cp_count == 3 )
+	
+	if( cp_count >= 4 && cp_idx > 0 && cp_idx < cp_count - 2 )
 	{
-		pos = m_ctrl_points[1].m_pos;
-		tan = m_ctrl_points[2].m_pos - m_ctrl_points[0].m_pos;
+		float udist = (knot_dist_along_path - m_ctrl_points[cp_idx].m_knot) / (m_ctrl_points[cp_idx + 1].m_knot - m_ctrl_points[cp_idx].m_knot);
+		m_splines[cp_idx - 1].Eval( udist, pos, tan );
 	}
-	else if( cp_count == 2 )
+	else if( cp_count > 1 )
 	{
-		pos = (m_ctrl_points[0].m_pos + m_ctrl_points[1].m_pos) * 0.5f;
-		tan = m_ctrl_points[1].m_pos - m_ctrl_points[0].m_pos;
+		float udist = (knot_dist_along_path - m_ctrl_points[cp_idx].m_knot) / (m_ctrl_points[cp_idx + 1].m_knot - m_ctrl_points[cp_idx].m_knot);
+		pos = bigball::lerp( m_ctrl_points[cp_idx].m_pos, m_ctrl_points[cp_idx+1].m_pos, udist );
+		tan = m_ctrl_points[cp_idx + 1].m_pos - m_ctrl_points[cp_idx].m_pos;
 	}
 	else if( cp_count == 1 )
 	{
@@ -245,7 +257,10 @@ bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
 	if( cp_idx == 0 || cp_idx == cp_count - 2 )
 	{
 		// Insert at middle of first / last segment (can't evaluate curve nearest spline there)
-		new_cp.m_pos = (m_ctrl_points[cp_idx].m_pos + m_ctrl_points[cp_idx + 1].m_pos) * 0.5f;
+		if( cp_count > 1 )
+			new_cp.m_pos = (m_ctrl_points[cp_idx].m_pos + m_ctrl_points[cp_idx + 1].m_pos) * 0.5f;
+		else
+			new_cp.m_pos = m_ctrl_points[cp_idx].m_pos + vec3( 0.2f, 0.f, 0.f );
 	}
 	else if( cp_idx == -1 || cp_idx == cp_count - 1 )
 	{
@@ -338,11 +353,11 @@ void CoPath::_DrawDebug( RenderContext& render_ctxt )
         col_list.clear();
         
         //LevelPath& LPath = m_LevelPaths[i];
-        int SegCount = (int)(m_clamped_sum_distance / seg_dist) + 1;
+        int SegCount = (int)(m_sum_distance / seg_dist) + 1;
         for( int SegIdx = 0; SegIdx <= SegCount; SegIdx++ )
         {
             float ratio = (float)SegIdx / (float)SegCount;
-            InterpPath( ratio * m_clamped_sum_distance, Pos, Tan );
+            InterpPathDist( ratio * m_sum_distance, Pos, Tan );
             color.a = (uint8) (base_color.a * ratio);
             seg_list.push_back( Pos );
             col_list.push_back( color );

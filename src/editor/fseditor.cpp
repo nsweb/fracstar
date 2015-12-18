@@ -92,7 +92,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 
 	if( ImGui::CollapsingHeader("Camera") )
 	{
-		ImGui::SliderFloat("PathDist", &pcoship->m_path_dist_level, 0.f, pcopath->m_clamped_sum_distance);
+		ImGui::SliderFloat("PathDist", &pcoship->m_path_dist_level, 0.f, pcopath->m_sum_distance);
 	}
 	if( ImGui::CollapsingHeader("Path") )
 	{
@@ -109,26 +109,27 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 		{
 			if( m_current_cp_idx >= 0 && m_current_cp_idx < pcopath->m_ctrl_points.size() )
 			{
-				float knot_dist = pcopath->GetClampedKnotDistance( m_current_cp_idx );
-				if( pcopath->m_clamped_knot_distance > 0.f )
-					pcoship->m_path_dist_level = pcopath->m_clamped_sum_distance * (knot_dist / pcopath->m_clamped_knot_distance);
-				else
-					pcoship->m_path_dist_level = 0.f;
+				pcoship->m_path_dist_level = pcopath->GetSumDistance( m_current_cp_idx );
+
+				// if already in edit, simply change the current cp
+				CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetActiveCameraCtrl();
+				if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_EditPath::StaticClass() ) )
+				{
+					FSCameraCtrl_EditPath* cam_edit = static_cast<FSCameraCtrl_EditPath*>( cam_ctrl );
+					cam_edit->SetTarget( pcopath );
+					cam_edit->ResetEdit( m_current_cp_idx );
+				}
 			}
 		}
         ImGui::PopItemWidth();
 
 		ImGui::SameLine();
-        ImGui::BeginChild("Action", ImVec2(0,100), true);
+        ImGui::BeginChild("Action", ImVec2(0,200), true);
         if( m_current_cp_idx >= 0 && m_current_cp_idx < pcopath->m_ctrl_points.size() )
         {
             if( ImGui::Button( "here" ) )
             {
-                float knot_dist = pcopath->GetClampedKnotDistance( m_current_cp_idx );
-                if( pcopath->m_clamped_knot_distance > 0.f )
-                    pcoship->m_path_dist_level = pcopath->m_clamped_sum_distance * (knot_dist / pcopath->m_clamped_knot_distance);
-                else
-                    pcoship->m_path_dist_level = 0.f;
+                pcoship->m_path_dist_level = pcopath->GetSumDistance( m_current_cp_idx );
             }
             ImGui::SameLine();
             bool insert_before = ImGui::Button( "ins. before" );

@@ -71,13 +71,13 @@ void CoShip::Tick( TickContext& tick_ctxt )
     if( m_state == eShipState::Run )
     {
         m_path_dist_level += tick_ctxt.m_DeltaSeconds * m_speed;
-        if( m_path_dist_level > CoP->m_clamped_sum_distance )
-            m_path_dist_level -= CoP->m_clamped_sum_distance;
+        if( m_path_dist_level > CoP->m_sum_distance )
+            m_path_dist_level -= CoP->m_sum_distance;
     }
-	m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, CoP->m_clamped_sum_distance );
+	m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, CoP->m_sum_distance );
     
     transform tf;
-    CoP->InterpPath( m_path_dist_level, tf );
+    CoP->InterpPathDist( m_path_dist_level, tf );
 
     CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
     CoPos->SetPosition( tf.GetTranslation() );

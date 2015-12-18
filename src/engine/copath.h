@@ -61,12 +61,15 @@ public:
     void                _DrawDebug( RenderContext& render_ctxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
     
-    void                InterpPath( float dist_along_path, vec3& pos, vec3& tan ) const;
-    void                InterpPath( float dist_along_path, transform& tf ) const;
+	void                InterpPathKnotDist( float knot_dist_along_path, vec3& pos, vec3& tan ) const;
+    void                InterpPathDist( float dist_along_path, vec3& pos, vec3& tan ) const;
+	void                InterpPathKnotDist( float dist_along_path, transform& tf ) const;
+    void                InterpPathDist( float dist_along_path, transform& tf ) const;
     bool                InsertControlPoint( int cp_idx, bool insert_after );
     bool				DeleteControlPoint( int cp_idx );
-	float				GetClampedKnotDistance( int at_cp_idx ) const;
-    float               GetClampedSumDistance( int at_cp_idx ) const;
+	float				GetSumKnotDistance( int at_cp_idx ) const;
+    float               GetSumDistance( int at_cp_idx ) const;
+	float				ConvertDistanceToKnot( float dist_along_path ) const;
     void                OnControlPointChanged( int at_cp_idx );
 
 public:
@@ -76,10 +79,10 @@ public:
     Array<ControlPoint> m_ctrl_points;
     /** Piecewise cubic splines - if cp_count are defined, cp_count-3 splines are required */
     Array<CubicSpline> m_splines;
-    /* Sum of dist between control points, excluding first and last CP*/
-    float m_clamped_sum_distance;
-    /* Sum of knot dist between control points, excluding first and last CP*/
-    float m_clamped_knot_distance;
+    /* Sum of dist between control points*/
+    float m_sum_distance;
+    /* Sum of knot dist between control points*/
+    float m_sum_knot_distance;
     
 private:
     void                ComputeKnotDistances();

@@ -49,6 +49,10 @@ public:
     ControlPoint    m_backup_cp;
 	int             m_current_cp_edit;
 	float           m_edit_slide;
+	vec3			m_interp_pos;
+	vec3			m_interp_tan;
+	float			m_dist_before;
+	float			m_dist_after;
 };
 
 #endif // FSCAMERA_H
