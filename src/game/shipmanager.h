@@ -31,11 +31,11 @@ public:
 	virtual void		Tick( struct TickContext& TickCtxt );
 	virtual void		_Render( struct RenderContext& RenderCtxt );
 
-	Array<CoShip*> const& GetShipArray()	{ return m_Ships;	}
-	CoShip*				_GetShip()			{ if( m_Ships.size() > 0 ) { return m_Ships[0]; } return nullptr; }
+	Array<CoShip*> const& GetShipArray()	{ return m_ships;	}
+	CoShip*				_GetShip()			{ if( m_ships.size() > 0 ) { return m_ships[0]; } return nullptr; }
 
 protected:
-	Array<CoShip*>		m_Ships;
+	Array<CoShip*>		m_ships;
 };
 
 

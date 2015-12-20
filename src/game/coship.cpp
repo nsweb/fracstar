@@ -66,22 +66,23 @@ void CoShip::Tick( TickContext& tick_ctxt )
 		return;
 
 	//Name const& LevelName = m_pCurrentLevel->GetName();
-	CoPath* CoP = static_cast<CoPath*>( m_pcurrent_level->GetComponent( CoPath::StaticClass() ) );
+	CoPath* ppath = static_cast<CoPath*>( m_pcurrent_level->GetComponent( CoPath::StaticClass() ) );
     
     if( m_state == eShipState::Run )
     {
-        m_path_dist_level += tick_ctxt.m_DeltaSeconds * m_speed;
-        if( m_path_dist_level > CoP->m_sum_distance )
-            m_path_dist_level -= CoP->m_sum_distance;
+        m_path_dist_level += tick_ctxt.m_delta_seconds * m_speed;
+        if( m_path_dist_level > ppath->m_sum_distance )
+            m_path_dist_level -= ppath->m_sum_distance;
     }
-	m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, CoP->m_sum_distance );
+	m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, ppath->m_sum_distance );
+    m_path_knot_dist_level = ppath->ConvertDistanceToKnot(m_path_dist_level);
     
     transform tf;
-    CoP->InterpPathDist( m_path_dist_level, tf );
+    ppath->InterpPathKnotDist( m_path_knot_dist_level, tf );
 
-    CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
-    CoPos->SetPosition( tf.GetTranslation() );
-    CoPos->SetRotation( tf.GetRotation() );
+    CoPosition* ppos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
+    ppos->SetPosition( tf.GetTranslation() );
+    ppos->SetRotation( tf.GetRotation() );
 }
 
 void CoShip::ChangeState( eShipState new_state )

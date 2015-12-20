@@ -47,6 +47,7 @@ public:
     float       m_speed;
 	/** Current distance along path in a given level */
 	float		m_path_dist_level;
+    float       m_path_knot_dist_level;
 };
 
 #endif // FSCOSHIP_H

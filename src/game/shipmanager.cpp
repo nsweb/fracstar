@@ -39,7 +39,7 @@ void ShipManager::AddComponentToWorld( Component* pComponent )
 {
 	if( pComponent->IsA( CoShip::StaticClass() ) )
 	{
-		m_Ships.push_back( reinterpret_cast<CoShip*>( pComponent ) );
+		m_ships.push_back( reinterpret_cast<CoShip*>( pComponent ) );
 	}
 }
 
@@ -47,7 +47,7 @@ void ShipManager::RemoveComponentFromWorld( Component* pComponent )
 {
 	if( pComponent->IsA( CoShip::StaticClass() ) )
 	{
-		m_Ships.remove( reinterpret_cast<CoShip*>( pComponent ) );
+		m_ships.remove( reinterpret_cast<CoShip*>( pComponent ) );
 	}
 }
 
@@ -55,9 +55,9 @@ void ShipManager::Tick( TickContext& TickCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
 
-	for( int32 i = 0; i < m_Ships.size(); ++i )
+	for( int32 i = 0; i < m_ships.size(); ++i )
 	{
-		m_Ships[i]->Tick( TickCtxt );
+		m_ships[i]->Tick( TickCtxt );
 	}
 }
 

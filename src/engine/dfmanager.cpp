@@ -14,9 +14,9 @@
 STATIC_MANAGER_CPP(DFManager);
 
 DFManager::DFManager() :
-	m_DF_VAO(0),
-	m_DF_VBO(0),
-	m_DFShader(nullptr)
+	m_df_vao(0),
+	m_df_vbo(0),
+	m_df_shader(nullptr)
 {
 	m_pStaticInstance = this;
 }
@@ -28,16 +28,16 @@ DFManager::~DFManager()
 
 void DFManager::Create()
 {
-	m_DFShader = GfxManager::GetStaticInstance()->LoadShader( "df" );
+	m_df_shader = GfxManager::GetStaticInstance()->LoadShader( "df" );
 
 	DFVertex ScreenVertices[] = { { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(-1.f,1.f), vec2(-1.f,1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) },
 								  { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) },	{ vec2(1.f,-1.f), vec2(1.f,-1.f) } };
 
-	glGenVertexArrays( 1, &m_DF_VAO);
-	glBindVertexArray( m_DF_VAO);
+	glGenVertexArrays( 1, &m_df_vao);
+	glBindVertexArray( m_df_vao);
 
-	glGenBuffers(1, &m_DF_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_DF_VBO);
+	glGenBuffers(1, &m_df_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, m_df_vbo);
 	glBufferData( GL_ARRAY_BUFFER, sizeof(ScreenVertices), ScreenVertices, GL_STATIC_DRAW );
 
 	glEnableVertexAttribArray(0);
@@ -53,7 +53,7 @@ void DFManager::Create()
 
 void DFManager::Destroy()
 {
-	m_DFShader = nullptr;
+	m_df_shader = nullptr;
 }
 
 
@@ -107,27 +107,27 @@ void DFManager::_Render( RenderContext& RenderCtxt )
 	z_var.x = (z_far + z_near) / (z_far - z_near);
 	z_var.y = 2.0f*z_far*z_near / (z_far - z_near);
 
-	m_DFShader->Bind();
-	ShaderUniform UniGTime = m_DFShader->GetUniformLocation("global_time");
-	m_DFShader->SetUniform( UniGTime, GlobalTime );
-    ShaderUniform UniCamera = m_DFShader->GetUniformLocation("camera_pos");
-    m_DFShader->SetUniform( UniCamera, CamPos );
-    ShaderUniform UniViewInv = m_DFShader->GetUniformLocation("viewinv_mat");
-    m_DFShader->SetUniform( UniViewInv, ViewInvMat );
-    ShaderUniform UniProj = m_DFShader->GetUniformLocation("proj_mat");
-    m_DFShader->SetUniform( UniProj, RenderCtxt.m_ProjMat );
+	m_df_shader->Bind();
+	ShaderUniform UniGTime = m_df_shader->GetUniformLocation("global_time");
+	m_df_shader->SetUniform( UniGTime, GlobalTime );
+    ShaderUniform UniCamera = m_df_shader->GetUniformLocation("camera_pos");
+    m_df_shader->SetUniform( UniCamera, CamPos );
+    ShaderUniform UniViewInv = m_df_shader->GetUniformLocation("viewinv_mat");
+    m_df_shader->SetUniform( UniViewInv, ViewInvMat );
+    ShaderUniform UniProj = m_df_shader->GetUniformLocation("proj_mat");
+    m_df_shader->SetUniform( UniProj, RenderCtxt.m_ProjMat );
 
-	ShaderUniform UniSR = m_DFShader->GetUniformLocation("screen_res");
-	m_DFShader->SetUniform( UniSR, screen_res );
-	ShaderUniform UniZVar = m_DFShader->GetUniformLocation("z_var");
-	m_DFShader->SetUniform( UniZVar, z_var );
+	ShaderUniform UniSR = m_df_shader->GetUniformLocation("screen_res");
+	m_df_shader->SetUniform( UniSR, screen_res );
+	ShaderUniform UniZVar = m_df_shader->GetUniformLocation("z_var");
+	m_df_shader->SetUniform( UniZVar, z_var );
 
-	glBindVertexArray( m_DF_VAO );
+	glBindVertexArray( m_df_vao );
 
 	glDrawArrays( GL_TRIANGLES, 0, 8 );
 
 	glBindVertexArray(0);
 
-	m_DFShader->Unbind();
+	m_df_shader->Unbind();
 }
 

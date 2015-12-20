@@ -19,8 +19,8 @@ class DFManager : public ComponentManager
 
 	struct DFVertex
 	{
-		vec2	Pos;
-		vec2	Tex;
+		vec2	pos;
+		vec2	tex;
 	};
 
 private:
@@ -32,18 +32,18 @@ public:
 
 	virtual void		Create();
 	virtual void		Destroy();	
-	virtual void		AddComponentToWorld( Component* pComponent );
-	virtual void		RemoveComponentFromWorld( Component* pComponent );
-	virtual void		Tick( struct TickContext& TickCtxt );
-	virtual void		_Render( struct RenderContext& RenderCtxt );
+	virtual void		AddComponentToWorld( Component* pcomponent );
+	virtual void		RemoveComponentFromWorld( Component* pcomponent );
+	virtual void		Tick( struct TickContext& tick_ctxt );
+	virtual void		_Render( struct RenderContext& render_ctxt );
 
 	//Array<CoBlocks*> const& GetBlocksArray()	{ return m_Blocks;	}
 
 protected:
 
-	GLuint				m_DF_VAO;
-	GLuint				m_DF_VBO;
-	Shader*				m_DFShader;
+	GLuint				m_df_vao;
+	GLuint				m_df_vbo;
+	Shader*				m_df_shader;
 };
 
 
