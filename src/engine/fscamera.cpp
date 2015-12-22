@@ -103,7 +103,7 @@ bool FSCameraCtrl_EditPath::OnControllerInput( Camera* pcamera, ControllerInput 
         vec3& cp_pos = m_ptarget->m_ctrl_points[m_current_cp_edit].m_pos;
         
         cp_pos += (right * input.m_delta.x + up * input.m_delta.z + front * input.m_delta.y) * m_strafe_speed;
-        m_ptarget->OnControlPointChanged( m_current_cp_edit );
+        m_ptarget->OnControlPointMoved( m_current_cp_edit );
     }
     else if( input.m_type == eCIT_Mouse )
     {
@@ -136,7 +136,7 @@ void FSCameraCtrl_EditPath::BuildGui()
 		m_edit_slide = 0.f;
 	if( ImGui::InputFloat3("cp_pos", (float*)&m_ptarget->m_ctrl_points[m_current_cp_edit].m_pos) )
     {
-        m_ptarget->OnControlPointChanged( m_current_cp_edit );
+        m_ptarget->OnControlPointMoved( m_current_cp_edit );
     }
 	ImGui::InputFloat("knot", (float*)&m_ptarget->m_ctrl_points[m_current_cp_edit].m_knot);
 

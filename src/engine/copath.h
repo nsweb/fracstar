@@ -73,12 +73,15 @@ public:
     void                InterpPathDist( float dist_along_path, vec3& pos, vec3& tan ) const;
 	void                InterpPathKnotDist( float dist_along_path, transform& tf ) const;
     void                InterpPathDist( float dist_along_path, transform& tf ) const;
+    /** Get delta knot distance necessary to move of desired real distance  */
+    float               GetDeltaKnotDist( float from_knot_dist_along_path, float desired_delta_dist_along_path );
+    
     bool                InsertControlPoint( int cp_idx, bool insert_after );
     bool				DeleteControlPoint( int cp_idx );
 	float				GetSumKnotDistance( int at_cp_idx ) const;
     float               GetSumDistance( int at_cp_idx ) const;
 	float				ConvertDistanceToKnot( float dist_along_path ) const;
-    void                OnControlPointChanged( int at_cp_idx );
+    void                OnControlPointMoved( int at_cp_idx );
 
 public:
     Name m_level_name;
@@ -94,6 +97,7 @@ public:
     
 private:
     void                ComputeKnotDistances();
+    void                ComputeSplineDistances();
 	void				ComputeSplines( int from_sp_idx, int to_sp_idx );
 };
 
