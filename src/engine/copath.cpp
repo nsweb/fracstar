@@ -114,33 +114,55 @@ void CoPath::ComputeKnotDistances()
 void CoPath::ComputeSplineDistances()
 {
     const int cp_count = m_ctrl_points.size();
-    const int sp_step_count = 10;
     
     float sumd = 0.f, dist;
     m_sum_distance = 0.f;
     m_ctrl_points[0].m_dist = 0.f;
-    for( int i = 1; i < cp_count; i++ )
+    for( int i = 1; i < m_sp_step_count; i++ )
     {
         if( i == 1 || i == cp_count - 1 )
             dist = bigball::distance( m_ctrl_points[i].m_pos, m_ctrl_points[i-1].m_pos );
         else
-        {
-            // Sample spline to evaluate arc distance
-            dist = 0.f;
-            vec3 lastp = m_ctrl_points[i-1].m_pos, pos, tan;
-            for( int j = 1 ; j <= sp_step_count; j++ )
-            {
-                m_splines[i-2].Eval( (float)j / sp_step_count, pos, tan );
-                dist += bigball::distance( pos, lastp );
-                lastp = pos;
-            }
-        }
+            dist = EvaluateSplineArcDistance( i-2, 1.f );
+
         sumd += dist;
         m_ctrl_points[i].m_dist = sumd;
     }
     
     m_sum_distance = GetSumDistance( cp_count - 1 );
     //m_sum_knot_distance = GetSumKnotDistance( cp_count - 1 );
+}
+
+/** Evaluate signed arc distance in knot range on a given spline */
+float CoPath::EvaluateSplineArcDistance( int spline_idx, float from_knot_ratio, float to_knot_ratio ) const
+{
+	return EvaluateSplineArcDistance( spline_idx, to_knot_ratio ) - EvaluateSplineArcDistance( spline_idx, from_knot_ratio );
+}
+
+/** Evaluate arc distance from 0 to knot_ratio on a given spline */
+float CoPath::EvaluateSplineArcDistance( int spline_idx, float knot_ratio ) const
+{
+	bool interval_found = false;
+	float dist = 0.f;
+	vec3 lastp = m_ctrl_points[spline_idx+1].m_pos, pos, tan;
+	for( int j = 1 ; j <= m_sp_step_count && !interval_found; j++ )
+	{
+		float ratio = (float)j / m_sp_step_count;
+		if( knot_ratio <= ratio )
+		{
+			m_splines[spline_idx].Eval( knot_ratio, pos, tan );
+			interval_found = true;
+		}
+		else
+		{
+			m_splines[spline_idx].Eval( ratio, pos, tan );
+		}
+			
+		dist += bigball::distance( pos, lastp );
+		lastp = pos;
+	}
+
+	return dist;
 }
 
 void CoPath::ComputeSplines( int from_sp_idx, int to_sp_idx )
@@ -202,20 +224,60 @@ void CoPath::RemoveFromWorld()
 
 void CoPath::Tick( TickContext& tick_ctxt )
 {
-	//CoPosition* CoPos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
 
-	// Retrieve current camp pos from path interpolation (centripetal catmull-rom spline)
-
-
-	//CameraView const& CamView = Controller::GetStaticInstance()->GetRenderView();
-	//dvec3 CamPos = CamView.m_Transform.GetTranslation();
-	//dtransform const& EntityT = CoPos->GetTransform();
-	//dvec3 CamPosBlock = EntityT.TransformPositionInverse( CamPos );
 }
 
 float CoPath::GetDeltaKnotDist( float from_knot_dist_along_path, float desired_delta_dist_along_path )
 {
-    // TODO
+#if 0
+	// Find where we are now
+	const int cp_count = m_ctrl_points.size();
+	if( cp_count <= 1 )
+		return 0.f;
+
+	int from_cp_idx = 0;
+	for( ; from_cp_idx < cp_count-1; from_cp_idx++ )
+	{
+		if( from_knot_dist_along_path <= m_ctrl_points[from_cp_idx + 1].m_knot )
+			break;
+	}
+
+	float delta_knot = from_knot_dist_along_path - m_ctrl_points[from_cp_idx].m_knot;
+
+	if( cp_count >= 4 && from_cp_idx > 0 && from_cp_idx < cp_count - 2 )
+	{
+		float arc_dist = EvaluateSplineArcDistance( from_cp_idx - 1, delta_knot );
+		float to_dist = m_ctrl_points[from_cp_idx].m_dist + arc_dist + desired_delta_dist_along_path;
+
+		// Find where we'll land
+		int to_cp_idx = 0;
+		for( ; to_cp_idx < cp_count-1; to_cp_idx++ )
+		{
+			if( to_dist <= m_ctrl_points[to_cp_idx + 1].m_knot )
+				break;
+		}
+
+
+		float udist = (knot_dist_along_path - m_ctrl_points[cp_idx].m_knot) / (m_ctrl_points[cp_idx + 1].m_knot - m_ctrl_points[cp_idx].m_knot);
+		m_splines[cp_idx - 1].Eval( udist, pos, tan );
+	}
+	else if( cp_count > 1 )
+	{
+		float udist = (knot_dist_along_path - m_ctrl_points[cp_idx].m_knot) / (m_ctrl_points[cp_idx + 1].m_knot - m_ctrl_points[cp_idx].m_knot);
+		pos = bigball::lerp( m_ctrl_points[cp_idx].m_pos, m_ctrl_points[cp_idx+1].m_pos, udist );
+		tan = m_ctrl_points[cp_idx + 1].m_pos - m_ctrl_points[cp_idx].m_pos;
+	}
+	else if( cp_count == 1 )
+	{
+		pos = m_ctrl_points[0].m_pos;
+		tan = vec3( 1.f, 0.f, 0.f );
+	}
+	else
+	{
+		pos = vec3( 0.f, 0.f, 0.f );
+		tan = vec3( 1.f, 0.f, 0.f );
+	}
+#endif
     return 0.f;
 }
 
@@ -307,17 +369,6 @@ bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
 			new_cp.m_pos = 2.f*m_ctrl_points[0].m_pos - m_ctrl_points[1].m_pos;
 		else
 			new_cp.m_pos = 2.f*m_ctrl_points[cp_count - 1].m_pos - m_ctrl_points[cp_count - 2].m_pos;
-
-		// Insert a new point a the end by extrapolating from last spline
-		//vec3 pos, t0, t1, t2;
-		//CubicSpline const& last_spline = m_splines.Last();
-		//last_spline.Eval( 0.f, pos, t0 );
-		//last_spline.Eval( 1.f, pos, t1 );
-		//quat qrot = quat::rotate( t0, t1 );
-		//t2 = qrot.transform( t1 );
-		//t2 = normalize( t2 );
-		//float dt1 = m_ctrl_points[cp_idx].m_knot - m_ctrl_points[cp_idx-1].m_knot;
-
 	}
 	else
 	{

@@ -94,11 +94,17 @@ public:
     float m_sum_distance;
     /* Sum of knot dist between control points*/
     float m_sum_knot_distance;
+	/** Number of steps needed to evaluate arc distance on a spline */
+	static const int m_sp_step_count = 10;
     
 private:
     void                ComputeKnotDistances();
     void                ComputeSplineDistances();
 	void				ComputeSplines( int from_sp_idx, int to_sp_idx );
+	/** Evaluate signed arc distance in knot range on a given spline */
+	float				EvaluateSplineArcDistance( int spline_idx, float from_knot_ratio, float to_knot_ratio ) const;
+	/** Evaluate arc distance from 0 to knot_ratio on a given spline */
+	float				EvaluateSplineArcDistance( int spline_idx, float knot_ratio ) const;
 };
 
 #endif // FSCOPATH_H
