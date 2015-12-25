@@ -73,9 +73,16 @@ void CoShip::Tick( TickContext& tick_ctxt )
         m_path_dist_level += tick_ctxt.m_delta_seconds * m_speed;
         if( m_path_dist_level > ppath->m_sum_distance )
             m_path_dist_level -= ppath->m_sum_distance;
+        
+        m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, ppath->m_sum_distance );
+        m_path_knot_dist_level = ppath->ConvertDistanceToKnot(m_path_dist_level);
     }
-	m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, ppath->m_sum_distance );
-    m_path_knot_dist_level = ppath->ConvertDistanceToKnot(m_path_dist_level);
+    else
+    {
+        // Ensure path dist in sync with knot dist
+        m_path_knot_dist_level = bigball::clamp( m_path_knot_dist_level, 0.f, ppath->m_sum_knot_distance );
+        m_path_dist_level = ppath->ConvertKnotToDistance(m_path_knot_dist_level);
+    }
     
     transform tf;
     ppath->InterpPathKnotDist( m_path_knot_dist_level, tf );

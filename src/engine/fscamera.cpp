@@ -115,7 +115,7 @@ bool FSCameraCtrl_EditPath::OnControllerInput( Camera* pcamera, ControllerInput 
 	return Super::OnControllerInput( pcamera, input );
 }
 
-void FSCameraCtrl_EditPath::ResetEdit( int at_cp_idx )
+/*void FSCameraCtrl_EditPath::ResetEdit( int at_cp_idx )
 {
 	m_current_cp_edit = at_cp_idx;
 	m_edit_slide = 0.f;
@@ -126,6 +126,14 @@ void FSCameraCtrl_EditPath::ResetEdit( int at_cp_idx )
 void FSCameraCtrl_EditPath::ResetEdit( float nearest_dist_level )
 {
 
+}*/
+int FSCameraCtrl_EditPath::ResetEdit( float knot_dist_along_path )
+{
+    int cp_idx = m_ptarget->GetNearestControlPointIdx( knot_dist_along_path );
+    m_current_cp_edit = cp_idx;
+    m_edit_slide = knot_dist_along_path - m_ptarget->GetSumKnotDistance( cp_idx );
+    
+    return cp_idx;
 }
 
 void FSCameraCtrl_EditPath::BuildGui()

@@ -70,17 +70,17 @@ public:
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
     
 	void                InterpPathKnotDist( float knot_dist_along_path, vec3& pos, vec3& tan ) const;
-    void                InterpPathDist( float dist_along_path, vec3& pos, vec3& tan ) const;
+    void                __InterpPathDist( float dist_along_path, vec3& pos, vec3& tan ) const;
 	void                InterpPathKnotDist( float dist_along_path, transform& tf ) const;
-    void                InterpPathDist( float dist_along_path, transform& tf ) const;
-    /** Get delta knot distance necessary to move of desired real distance  */
-    float               GetDeltaKnotDist( float from_knot_dist_along_path, float desired_delta_dist_along_path );
+    void                __InterpPathDist( float dist_along_path, transform& tf ) const;
     
     bool                InsertControlPoint( int cp_idx, bool insert_after );
     bool				DeleteControlPoint( int cp_idx );
 	float				GetSumKnotDistance( int at_cp_idx ) const;
     float               GetSumDistance( int at_cp_idx ) const;
 	float				ConvertDistanceToKnot( float dist_along_path ) const;
+    float				ConvertKnotToDistance( float knot_dist_along_path ) const;
+    int                 GetNearestControlPointIdx( float knot_dist_along_path ) const;
     void                OnControlPointMoved( int at_cp_idx );
 
 public:
@@ -101,10 +101,17 @@ private:
     void                ComputeKnotDistances();
     void                ComputeSplineDistances();
 	void				ComputeSplines( int from_sp_idx, int to_sp_idx );
-	/** Evaluate signed arc distance in knot range on a given spline */
+    
+	/** Evaluate signed arc distance in knot range on a given spline 
+     * @from_knot_ratio, to_knot_ratio : should be in range [0, 1]
+     */
 	float				EvaluateSplineArcDistance( int spline_idx, float from_knot_ratio, float to_knot_ratio ) const;
-	/** Evaluate arc distance from 0 to knot_ratio on a given spline */
+	/** Evaluate arc distance from 0 to knot_ratio on a given spline 
+     * @knot_ratio : should be in range [0, 1]
+     */
 	float				EvaluateSplineArcDistance( int spline_idx, float knot_ratio ) const;
+    /** */
+    float				EvaluateSplineKnotRatioFromArcDistance( int spline_idx, float arc_dist ) const;
 };
 
 #endif // FSCOPATH_H

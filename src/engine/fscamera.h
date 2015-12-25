@@ -37,8 +37,9 @@ public:
 	virtual void		UpdateView( CameraView& cam_view, float delta_seconds );
 	virtual bool		OnControllerInput( Camera* pcamera, struct ControllerInput const& input );
 	void				SetTarget( CoPath* ptarget )		{ m_ptarget = ptarget; }
-	void				ResetEdit( int at_cp_idx );
-	void				ResetEdit( float nearest_dist_level );
+	//void				ResetEdit( int at_cp_idx );
+	//void				ResetEdit( float nearest_dist_level );
+    int                 ResetEdit( float knot_dist_along_path );
 	void				BuildGui();
 
 public:

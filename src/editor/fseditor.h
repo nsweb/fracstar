@@ -21,9 +21,10 @@ public:
     
     void                UIDrawEditor( bool* bshow_editor );
     
+    int                 m_current_cp_idx;
+    
 private:
     static FSEditor*    ms_peditor;
-    int                 m_current_cp_idx;
 
 	static bool			GetItemStringArray( void* data, int idx, const char** out_text );
 

@@ -33,29 +33,35 @@ FSEditor::~FSEditor()
 
 static void UIOnToggleEditorCB( bool bshow_editor )
 {
+    CoShip* pcoship = ShipManager::GetStaticInstance()->_GetShip();
+    CoPath* pcopath = PathManager::GetStaticInstance()->_GetCurrentPath();
+    
     if( bshow_editor )
     {
         // Allow menu interaction
         //SDL_SetRelativeMouseMode(SDL_FALSE);
         //SDL_SetWindowGrab( g_pEngine->GetDisplayWindow(), SDL_FALSE );
-        Array<CoShip*> const& ship_array = ShipManager::GetStaticInstance()->GetShipArray();
-        for( int SIdx=0; SIdx < ship_array.size(); SIdx++ )
-        {
-            ship_array[SIdx]->ChangeState(eShipState::Edit);
-        }
+        pcoship->ChangeState(eShipState::Edit);
         
+        // Open edit mode camera
+        Controller::GetStaticInstance()->SetActiveCameraCtrl( "FSCameraCtrl_EditPath" );
+        FSCameraCtrl_EditPath* cam_edit = static_cast<FSCameraCtrl_EditPath*>( Controller::GetStaticInstance()->GetActiveCameraCtrl() );
+        if( cam_edit )
+        {
+            cam_edit->SetTarget( pcopath );
+            FSEditor::Get()->m_current_cp_idx = cam_edit->ResetEdit( pcoship->m_path_knot_dist_level );
+            //cam_edit->ResetEdit( m_current_cp_idx );
+        }
     }
     else
     {
         // Allow FPS style mouse movement
         //SDL_SetRelativeMouseMode(SDL_TRUE);
         //SDL_SetWindowGrab( g_pEngine->GetDisplayWindow(), SDL_TRUE );
+        pcoship->ChangeState(eShipState::Run);
         
-        Array<CoShip*> const& ShipArray = ShipManager::GetStaticInstance()->GetShipArray();
-        for( int SIdx=0; SIdx < ShipArray.size(); SIdx++ )
-        {
-            ShipArray[SIdx]->ChangeState(eShipState::Run);
-        }
+        // Close edit mode camera
+        Controller::GetStaticInstance()->SetActiveCameraCtrl( "FSCameraCtrl_Fly" );
     }
 }
 
@@ -87,15 +93,21 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 	ImGui::ShowTestWindow();
 #else
 
-	//float dist_level = pShip->m_path_dist_level;
-	//float max_dist_level = pPath->m_clamped_sum_distance;
-
-	if( ImGui::CollapsingHeader("Camera") )
-	{
-		ImGui::SliderFloat("PathDist", &pcoship->m_path_dist_level, 0.f, pcopath->m_sum_distance);
-	}
 	if( ImGui::CollapsingHeader("Path") )
 	{
+        CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetActiveCameraCtrl();
+        FSCameraCtrl_EditPath* cam_edit = nullptr;
+        if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_EditPath::StaticClass() ) )
+            cam_edit = static_cast<FSCameraCtrl_EditPath*>( cam_ctrl );
+            
+        if( ImGui::SliderFloat("knot_dist", &pcoship->m_path_knot_dist_level, 0.f, pcopath->m_sum_knot_distance) )
+        {
+            pcoship->m_path_knot_dist_level = bigball::clamp( pcoship->m_path_knot_dist_level, 0.f, pcopath->m_sum_knot_distance );
+            if( cam_edit )
+                m_current_cp_idx = cam_edit->ResetEdit( pcoship->m_path_knot_dist_level );
+        }
+        ImGui::InputFloat("sum_dist", &pcoship->m_path_dist_level, -1, ImGuiInputTextFlags_ReadOnly);
+        
 		ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, 5.0f);
 		ImGui::BeginChild("Sub2", ImVec2(0,300), true);
 		ImGui::Text("Control points");
@@ -109,16 +121,9 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 		{
 			if( m_current_cp_idx >= 0 && m_current_cp_idx < pcopath->m_ctrl_points.size() )
 			{
-				pcoship->m_path_dist_level = pcopath->GetSumDistance( m_current_cp_idx );
-
-				// if already in edit, simply change the current cp
-				CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetActiveCameraCtrl();
-				if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_EditPath::StaticClass() ) )
-				{
-					FSCameraCtrl_EditPath* cam_edit = static_cast<FSCameraCtrl_EditPath*>( cam_ctrl );
-					cam_edit->SetTarget( pcopath );
-					cam_edit->ResetEdit( m_current_cp_idx );
-				}
+				pcoship->m_path_knot_dist_level = pcopath->GetSumKnotDistance( m_current_cp_idx );
+				if( cam_edit )
+					m_current_cp_idx = cam_edit->ResetEdit( pcoship->m_path_knot_dist_level );
 			}
 		}
         ImGui::PopItemWidth();
@@ -127,11 +132,11 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
         ImGui::BeginChild("Action", ImVec2(0,200), true);
         if( m_current_cp_idx >= 0 && m_current_cp_idx < pcopath->m_ctrl_points.size() )
         {
-            if( ImGui::Button( "here" ) )
-            {
-                pcoship->m_path_dist_level = pcopath->GetSumDistance( m_current_cp_idx );
-            }
-            ImGui::SameLine();
+            //if( ImGui::Button( "here" ) )
+            //{
+            //    pcoship->m_path_dist_level = pcopath->GetSumDistance( m_current_cp_idx );
+            //}
+            //ImGui::SameLine();
             bool insert_before = ImGui::Button( "ins. before" );
             ImGui::SameLine();
             bool insert_after = ImGui::Button( "ins. after" );
@@ -141,7 +146,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
             }
             ImGui::SameLine();
 
-			CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetActiveCameraCtrl();
+			/*CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetActiveCameraCtrl();
 			FSCameraCtrl_EditPath* cam_edit = nullptr;
 			if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_EditPath::StaticClass() ) )
 				cam_edit = static_cast<FSCameraCtrl_EditPath*>( cam_ctrl );
@@ -167,12 +172,13 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 					cam_edit = nullptr;
                 }
             }
-            ImGui::SameLine();
+            ImGui::SameLine();*/
             // disable if one remaining ctrl point...
             if( pcopath->m_ctrl_points.size() > 1 && ImGui::Button( "del" ) )
             {
                 pcopath->DeleteControlPoint( m_current_cp_idx );
             }
+            //FSCameraCtrl_EditPath* cam_edit = static_cast<FSCameraCtrl_EditPath*>( Controller::GetStaticInstance()->GetActiveCameraCtrl() );
             if( cam_edit)
             {
 				cam_edit->BuildGui();
