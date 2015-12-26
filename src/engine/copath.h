@@ -5,6 +5,7 @@
 #define FSCOPATH_H
 
 #include "engine/component.h"
+#include "system/file.h"
 
 
 namespace bigball
@@ -75,6 +76,7 @@ public:
     void                __InterpPathDist( float dist_along_path, transform& tf ) const;
     
     bool                InsertControlPoint( int cp_idx, bool insert_after );
+    bool                InsertControlPoint( float knot_dist_along_path );
     bool				DeleteControlPoint( int cp_idx );
 	float				GetSumKnotDistance( int at_cp_idx ) const;
     float               GetSumDistance( int at_cp_idx ) const;
@@ -82,6 +84,8 @@ public:
     float				ConvertKnotToDistance( float knot_dist_along_path ) const;
     int                 GetNearestControlPointIdx( float knot_dist_along_path ) const;
     void                OnControlPointMoved( int at_cp_idx );
+    
+    bool                Serialize( bigball::Archive& file );
 
 public:
     Name m_level_name;

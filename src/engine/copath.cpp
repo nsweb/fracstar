@@ -15,7 +15,7 @@
 #include "gfx/drawutils.h"
 //#include "math/frustum.h"
 //#include "math/intersections.h"
-#include "system/file.h"
+
 
 CLASS_EQUIP_CPP(CoPath);
 
@@ -438,6 +438,51 @@ bool CoPath::InsertControlPoint( int cp_idx, bool insert_after )
 	return true;
 }
 
+bool CoPath::InsertControlPoint( float knot_dist_along_path )
+{
+    // Find where we are now
+    const int cp_count = m_ctrl_points.size();
+    if( cp_count <= 1 )
+        return 0.f;
+    
+    int cp_idx = 0;
+    for( ; cp_idx < cp_count-1; cp_idx++ )
+    {
+        if( knot_dist_along_path <= m_ctrl_points[cp_idx + 1].m_knot )
+            break;
+    }
+    
+    float udist = (knot_dist_along_path - m_ctrl_points[cp_idx].m_knot) / (m_ctrl_points[cp_idx + 1].m_knot - m_ctrl_points[cp_idx].m_knot);
+    
+    ControlPoint new_cp;
+    if( cp_idx == 0 || cp_idx == cp_count - 2 )
+    {
+        // Insert inside first / last segment (can't evaluate curve nearest spline there)
+        new_cp.m_pos = bigball::lerp( m_ctrl_points[cp_idx].m_pos, m_ctrl_points[cp_idx + 1].m_pos, udist );
+    }
+    else
+    {
+        // Splines are well defined in all other cases
+        int sp_idx = cp_idx - 1;
+        vec3 tan, p0, p1;
+        m_splines[sp_idx].Eval( udist, new_cp.m_pos, tan );
+    }
+    
+    m_ctrl_points.insert( new_cp, cp_idx+1 );
+    ComputeKnotDistances();
+    
+    if( cp_count >= 3 )
+    {
+        CubicSpline new_sp;
+        m_splines.insert( new_sp, cp_idx );
+        ComputeSplines( cp_idx - 3, cp_idx + 2 );
+    }
+    
+    ComputeSplineDistances();
+    
+    return true;
+}
+
 bool CoPath::DeleteControlPoint( int cp_idx )
 {
 	const int cp_count = m_ctrl_points.size();
@@ -469,6 +514,11 @@ void CoPath::OnControlPointMoved( int at_cp_idx )
     ComputeSplines( at_cp_idx - 3, at_cp_idx + 2 );
     ComputeSplineDistances();
     
+}
+
+bool CoPath::Serialize( bigball::Archive& file )
+{
+    return true;
 }
 
 void CoPath::_DrawDebug( RenderContext& render_ctxt )

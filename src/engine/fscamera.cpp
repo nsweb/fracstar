@@ -138,10 +138,10 @@ int FSCameraCtrl_EditPath::ResetEdit( float knot_dist_along_path )
 
 void FSCameraCtrl_EditPath::BuildGui()
 {
-	ImGui::SliderFloat("slide", &m_edit_slide, -1.f, 1.f);
-	ImGui::SameLine();
-	if( ImGui::Button("reset slider") )
-		m_edit_slide = 0.f;
+    float kdist_before = m_ptarget->GetSumKnotDistance(m_current_cp_edit) - m_ptarget->GetSumKnotDistance(m_current_cp_edit-1) - 1e-2f;
+    float kdist_after = m_ptarget->GetSumKnotDistance(m_current_cp_edit+1) - m_ptarget->GetSumKnotDistance(m_current_cp_edit) - 1e-2f;
+	ImGui::SliderFloat("slide", &m_edit_slide, -kdist_before, kdist_after);
+
 	if( ImGui::InputFloat3("cp_pos", (float*)&m_ptarget->m_ctrl_points[m_current_cp_edit].m_pos) )
     {
         m_ptarget->OnControlPointMoved( m_current_cp_edit );
@@ -156,6 +156,4 @@ void FSCameraCtrl_EditPath::BuildGui()
 	ImGui::InputFloat("dist_before", (float*)&m_dist_before, -1, ImGuiInputTextFlags_ReadOnly);
 	ImGui::InputFloat("dist_after", (float*)&m_dist_after, -1, ImGuiInputTextFlags_ReadOnly);
 
-	//static float val = 0.f;
-	//ImGui::VSliderFloat("slide2", ImVec2(20,50),  &val, 0.f, 1.f);
 }
