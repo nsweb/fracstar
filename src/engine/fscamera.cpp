@@ -115,18 +115,6 @@ bool FSCameraCtrl_EditPath::OnControllerInput( Camera* pcamera, ControllerInput 
 	return Super::OnControllerInput( pcamera, input );
 }
 
-/*void FSCameraCtrl_EditPath::ResetEdit( int at_cp_idx )
-{
-	m_current_cp_edit = at_cp_idx;
-	m_edit_slide = 0.f;
-    
-    // Back up control point params, in case the modifications are cancelled
-    m_backup_cp = m_ptarget->m_ctrl_points[at_cp_idx];
-}
-void FSCameraCtrl_EditPath::ResetEdit( float nearest_dist_level )
-{
-
-}*/
 int FSCameraCtrl_EditPath::ResetEdit( float knot_dist_along_path )
 {
     int cp_idx = m_ptarget->GetNearestControlPointIdx( knot_dist_along_path );

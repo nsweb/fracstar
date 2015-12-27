@@ -90,18 +90,18 @@ void DFManager::_Render( RenderContext& RenderCtxt )
     //return;
 
 	static float GlobalTime = 0.f;
-	GlobalTime += RenderCtxt.m_DeltaSeconds;
+	GlobalTime += RenderCtxt.m_delta_seconds;
     
-    vec3 CamPos = RenderCtxt.m_View.m_Transform.GetTranslation();
-    mat4 ViewInvMat( RenderCtxt.m_View.m_Transform.GetRotation(), RenderCtxt.m_View.m_Transform.GetTranslation(), (float)RenderCtxt.m_View.m_Transform.GetScale() );
+    vec3 CamPos = RenderCtxt.m_view.m_Transform.GetTranslation();
+    mat4 ViewInvMat( RenderCtxt.m_view.m_Transform.GetRotation(), RenderCtxt.m_view.m_Transform.GetTranslation(), (float)RenderCtxt.m_view.m_Transform.GetScale() );
 	
-	const float fov_y = RenderCtxt.m_View.m_fParameters[eCP_FOV] * (F_PI / 180.0f);
-	const float z_near = RenderCtxt.m_View.m_fParameters[eCP_NEAR];
-	const float z_far = RenderCtxt.m_View.m_fParameters[eCP_FAR];
+	const float fov_y = RenderCtxt.m_view.m_fParameters[eCP_FOV] * (F_PI / 180.0f);
+	const float z_near = RenderCtxt.m_view.m_fParameters[eCP_NEAR];
+	const float z_far = RenderCtxt.m_view.m_fParameters[eCP_FAR];
 
 	vec2 screen_res;
 	screen_res.y = bigball::tan( fov_y * 0.5f );
-	screen_res.x = screen_res.y * RenderCtxt.m_View.m_fParameters[eCP_ASPECT];
+	screen_res.x = screen_res.y * RenderCtxt.m_view.m_fParameters[eCP_ASPECT];
 
 	vec2 z_var;	
 	z_var.x = (z_far + z_near) / (z_far - z_near);
@@ -115,7 +115,7 @@ void DFManager::_Render( RenderContext& RenderCtxt )
     ShaderUniform UniViewInv = m_df_shader->GetUniformLocation("viewinv_mat");
     m_df_shader->SetUniform( UniViewInv, ViewInvMat );
     ShaderUniform UniProj = m_df_shader->GetUniformLocation("proj_mat");
-    m_df_shader->SetUniform( UniProj, RenderCtxt.m_ProjMat );
+    m_df_shader->SetUniform( UniProj, RenderCtxt.m_proj_mat );
 
 	ShaderUniform UniSR = m_df_shader->GetUniformLocation("screen_res");
 	m_df_shader->SetUniform( UniSR, screen_res );

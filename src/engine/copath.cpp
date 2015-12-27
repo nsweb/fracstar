@@ -68,7 +68,7 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
 	// Temp : creating a test path procedurally
 	//m_LevelPaths.push_back( LevelPath() );
 	//LevelPath& LPath = m_LevelPaths.Last();
-    m_level_name = "Level_0";
+    m_level_name = "mbox";
 	
 	const int32 cp_count = 10;
 	m_ctrl_points.resize( cp_count );
@@ -474,7 +474,7 @@ bool CoPath::InsertControlPoint( float knot_dist_along_path )
     if( cp_count >= 3 )
     {
         CubicSpline new_sp;
-        m_splines.insert( new_sp, cp_idx );
+        m_splines.insert( new_sp, cp_idx - 1 );
         ComputeSplines( cp_idx - 3, cp_idx + 2 );
     }
     
@@ -518,6 +518,31 @@ void CoPath::OnControlPointMoved( int at_cp_idx )
 
 bool CoPath::Serialize( bigball::Archive& file )
 {
+    int version = 0;
+    file.SerializeRaw( version );
+    
+    /*String str_level = m_level_name.ToString();
+    file.SerializeString(str_level);
+    if( file.IsReading() )
+        m_level_name = str_level;*/
+    
+    int cp_count = m_ctrl_points.size();
+    file.SerializeRaw(cp_count);
+    if( file.IsReading() )
+        m_ctrl_points.resize(cp_count);
+    for( int cp_idx = 0; cp_idx < cp_count; cp_idx++ )
+        file.SerializeRaw( m_ctrl_points[cp_idx] );
+    
+    int sp_count = m_splines.size();
+    file.SerializeRaw(sp_count);
+    if( file.IsReading() )
+        m_splines.resize(sp_count);
+    for( int sp_idx = 0; sp_idx < sp_count; sp_idx++ )
+        file.SerializeRaw( m_splines[sp_idx] );
+
+    file.SerializeRaw(m_sum_distance);
+    file.SerializeRaw(m_sum_knot_distance);
+    
     return true;
 }
 

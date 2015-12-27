@@ -67,7 +67,7 @@ public:
 	virtual void		AddToWorld();
 	virtual void		RemoveFromWorld();
 	virtual void		Tick( TickContext& tick_ctxt );
-    void                _DrawDebug( RenderContext& render_ctxt );
+    void                _DrawDebug( bigball::RenderContext& render_ctxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
     
 	void                InterpPathKnotDist( float knot_dist_along_path, vec3& pos, vec3& tan ) const;

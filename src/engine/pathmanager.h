@@ -10,6 +10,7 @@ namespace bigball
 {
 	class BIGBALL_API Component;
 	class BIGBALL_API Shader;
+    struct BIGBALL_API RenderContext;
 };
 class CoPath;
 
@@ -29,7 +30,7 @@ public:
 	virtual void		AddComponentToWorld( Component* pComponent );
 	virtual void		RemoveComponentFromWorld( Component* pComponent );
 	virtual void		Tick( struct TickContext& TickCtxt );
-	virtual void		_Render( struct RenderContext& RenderCtxt );
+    virtual void		_Render( bigball::RenderContext& RenderCtxt );
 
 	Array<CoPath*> const& GetPathArray()	{ return m_paths;	}
 	CoPath*				_GetCurrentPath()	{ if( m_paths.size() > 0 ) { return m_paths[0]; } return nullptr; }

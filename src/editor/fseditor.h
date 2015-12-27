@@ -7,6 +7,11 @@
 
 #include "engine/engine.h"
 
+namespace bigball
+{
+    struct BIGBALL_API RenderContext;
+};
+
 class FSEditor
 {
 
@@ -19,7 +24,7 @@ public:
     
     static FSEditor*	Get()		{ return ms_peditor;	}
     
-    void                UIDrawEditor( bool* bshow_editor );
+    void                UIDrawEditor( bool* bshow_editor, bigball::RenderContext& render_ctxt );
     
     int                 m_current_cp_idx;
     

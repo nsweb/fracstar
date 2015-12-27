@@ -9,6 +9,7 @@
 #include "engine/controller.h"
 //#include "engine/coposition.h"
 #include "ui/uimanager.h"
+#include "gfx/rendercontext.h"
 
 #include "../engine/copath.h"
 #include "../engine/pathmanager.h"
@@ -65,9 +66,9 @@ static void UIOnToggleEditorCB( bool bshow_editor )
     }
 }
 
-static void UIDrawEditorCB( bool* bshow_editor )
+static void UIDrawEditorCB( bool* bshow_editor, bigball::RenderContext& render_ctxt )
 {
-    FSEditor::Get()->UIDrawEditor( bshow_editor );
+    FSEditor::Get()->UIDrawEditor( bshow_editor, render_ctxt );
 }
 
 bool FSEditor::GetItemStringArray( void* data, int idx, const char** out_text )
@@ -82,10 +83,15 @@ bool FSEditor::GetItemStringArray( void* data, int idx, const char** out_text )
 	return false;
 }
 
-void FSEditor::UIDrawEditor( bool* bshow_editor )
+void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
 {
 	CoShip* pcoship = ShipManager::GetStaticInstance()->_GetShip();
     CoPath* pcopath = PathManager::GetStaticInstance()->_GetCurrentPath();
+    
+    CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetActiveCameraCtrl();
+    FSCameraCtrl_EditPath* cam_edit = nullptr;
+    if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_EditPath::StaticClass() ) )
+        cam_edit = static_cast<FSCameraCtrl_EditPath*>( cam_ctrl );
     
     ImGui::Begin("Editor", bshow_editor, ImVec2(200,400), -1.f, 0/*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar*/ );
 
@@ -93,13 +99,50 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
 	ImGui::ShowTestWindow();
 #else
 
+    if( ImGui::CollapsingHeader("Camera") )
+    {
+        ImGui::SliderFloat("strafe_speed", &cam_edit->m_strafe_speed, 0.f, 2.f);
+        bool left = ImGui::Button( "left" );
+        ImGui::SameLine();
+        bool right = ImGui::Button( "right" );
+        ImGui::SameLine();
+        bool front = ImGui::Button( "front" );
+        ImGui::SameLine();
+        bool back = ImGui::Button( "back" );
+        ImGui::SameLine();
+        bool up = ImGui::Button( "up" );
+        ImGui::SameLine();
+        bool down = ImGui::Button( "down" );
+        
+        uint32 modifiers = 0;
+        if( left )
+            Controller::GetStaticInstance()->OnInputX( modifiers, -render_ctxt.m_delta_seconds );
+        if( right )
+            Controller::GetStaticInstance()->OnInputX( modifiers, render_ctxt.m_delta_seconds );
+        if( front )
+            Controller::GetStaticInstance()->OnInputY( modifiers, render_ctxt.m_delta_seconds );
+        if( back )
+            Controller::GetStaticInstance()->OnInputY( modifiers, -render_ctxt.m_delta_seconds );
+        if( up )
+            Controller::GetStaticInstance()->OnInputZ( modifiers, render_ctxt.m_delta_seconds );
+        if( down )
+            Controller::GetStaticInstance()->OnInputZ( modifiers, -render_ctxt.m_delta_seconds );
+    }
 	if( ImGui::CollapsingHeader("Path") )
 	{
-        CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetActiveCameraCtrl();
-        FSCameraCtrl_EditPath* cam_edit = nullptr;
-        if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_EditPath::StaticClass() ) )
-            cam_edit = static_cast<FSCameraCtrl_EditPath*>( cam_ctrl );
-            
+        bool save_path = ImGui::Button( "save" );
+        ImGui::SameLine();
+        bool load_path = ImGui::Button( "load" );
+        if( save_path || load_path )
+        {
+            bigball::File lvl_path;
+            String str_file = String::Printf("../data/level/%s/path.fs", pcopath->m_level_name.ToString().c_str());
+            if( lvl_path.Open( str_file.c_str(), save_path ) )
+            {
+                pcopath->Serialize(lvl_path);
+            }
+        }
+        
         if( ImGui::SliderFloat("knot_dist", &pcoship->m_path_knot_dist_level, 0.f, pcopath->m_sum_knot_distance) )
         {
             pcoship->m_path_knot_dist_level = bigball::clamp( pcoship->m_path_knot_dist_level, 0.f, pcopath->m_sum_knot_distance );
@@ -141,7 +184,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
             }
             
             float delta = cam_edit ? cam_edit->m_edit_slide : 0.f;
-            if( delta > 1e-2f || delta < -1e-2f )
+            if( pcopath->m_ctrl_points.size() > 1 && (delta > 1e-2f || delta < -1e-2f) )
             {
                 ImGui::SameLine();
                 if( ImGui::Button( "ins. here" ) )
@@ -151,10 +194,15 @@ void FSEditor::UIDrawEditor( bool* bshow_editor )
             }
 
             // disable if one remaining ctrl point...
-            ImGui::SameLine();
-            if( pcopath->m_ctrl_points.size() > 1 && ImGui::Button( "del" ) )
+            if( pcopath->m_ctrl_points.size() > 1 )
             {
-                pcopath->DeleteControlPoint( m_current_cp_idx );
+                ImGui::SameLine();
+                if( ImGui::Button( "del" ) )
+                {
+                    pcopath->DeleteControlPoint( m_current_cp_idx );
+                    if( cam_edit )
+                        m_current_cp_idx = cam_edit->ResetEdit( pcoship->m_path_knot_dist_level );
+                }
             }
             if( cam_edit)
             {
