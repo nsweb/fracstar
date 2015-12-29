@@ -11,6 +11,8 @@
 #include "../engine/pathmanager.h"
 #include "../game/coship.h"
 #include "../game/shipmanager.h"
+#include "../game/colevel.h"
+#include "../game/fsworld.h"
 #include "../engine/dfmanager.h"
 #include "../engine/fscamera.h"
 #include "../editor/fseditor.h"
@@ -38,11 +40,13 @@ bool FSEngine::Init( bool bCreateWindow )
 
 	//////////////////////////////////////////////////////////////////////////
 	// Scene description
-	Entity* pShip = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
-	EntityManager::GetStaticInstance()->AddEntityToWorld( pShip );
+    FSWorld::GetStaticInstance()->InitLevels( "../data/world.json" );
+    
+	Entity* pship = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/ship.json", "Ship" );
+	EntityManager::GetStaticInstance()->AddEntityToWorld( pship );
 
-	Entity* pLevel = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/level_0.json", "Level_0" );
-	EntityManager::GetStaticInstance()->AddEntityToWorld( pLevel );
+	//Entity* plevel = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/level_0.json", "Level_0" );
+	//EntityManager::GetStaticInstance()->AddEntityToWorld( plevel );
 
 #if 0
 	Entity* pSun = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/sun.json", "Sun" );
@@ -53,9 +57,9 @@ bool FSEngine::Init( bool bCreateWindow )
 		pSunCoPos->SetPosition( dvec3( 0, -162e9, -81e9 ) );	// 230 million km
 	}
 #endif
-	Entity* pEntCamera = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/defaultcamera.json" );
-	EntityManager::GetStaticInstance()->AddEntityToWorld( pEntCamera );
-	if( pEntCamera->IsA( Camera::StaticClass() ) )
+	Entity* pent_camera = EntityManager::GetStaticInstance()->CreateEntityFromJson( "../data/defaultcamera.json" );
+	EntityManager::GetStaticInstance()->AddEntityToWorld( pent_camera );
+	if( pent_camera->IsA( Camera::StaticClass() ) )
 	{
 #if 0
 		double CameraDistance = 1000.0;
@@ -75,13 +79,13 @@ bool FSEngine::Init( bool bCreateWindow )
 
 
 	// Link scene objects
-	CameraCtrl_Base* pCamCtrl = Controller::GetStaticInstance()->GetCameraCtrl( FSCameraCtrl_Fly::StaticClass() );
-	if( pCamCtrl && pCamCtrl->IsA( FSCameraCtrl_Fly::StaticClass() ) )
-		((FSCameraCtrl_Fly*)pCamCtrl)->SetTarget( pShip );
+	CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetCameraCtrl( FSCameraCtrl_Fly::StaticClass() );
+	if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_Fly::StaticClass() ) )
+		((FSCameraCtrl_Fly*)cam_ctrl)->SetTarget( pship );
 
-	CoShip* pCoShip = static_cast<CoShip*>( pShip->GetComponent( CoShip::StaticClass() ) );
-	if( pCoShip )
-		pCoShip->SetCurrentLevel( pLevel );
+	//CoShip* pcoship = static_cast<CoShip*>( pship->GetComponent( CoShip::StaticClass() ) );
+	//if( pcoship )
+	//	pcoship->SetCurrentLevel( plevel );
 
 	return bInit;
 }
@@ -105,9 +109,10 @@ void FSEngine::DeclareComponentsAndEntities()
 
 	DECLARE_COMPONENT_MGR( CoPath, PathManager );
 	DECLARE_COMPONENT_MGR( CoShip, ShipManager );
+    DECLARE_COMPONENT_MGR( CoLevel, FSWorld );
 	//DECLARE_COMPONENT( CoPath );
 	DECLARE_ENTITYPATTERN( Ship, Entity, (2, "CoPosition", "CoShip"), (0) );
-	DECLARE_ENTITYPATTERN( Level, Entity, (2, "CoPosition", "CoPath"), (0) );
+	DECLARE_ENTITYPATTERN( Level, Entity, (3, "CoPosition", "CoPath", "CoLevel"), (0) );
 }
 
 void FSEngine::CreateGameCameras()
@@ -122,17 +127,21 @@ void FSEngine::InitManagers()
 {
 	Super::InitManagers();
 
-	ShipManager* pShipManager = new ShipManager();
-	pShipManager->Create();
-	m_Managers.push_back( pShipManager );
+    FSWorld* pworld = new FSWorld();
+    pworld->Create();
+    m_Managers.push_back( pworld );
+    
+	ShipManager* pship_manager = new ShipManager();
+	pship_manager->Create();
+	m_Managers.push_back( pship_manager );
 
-	PathManager* pPathManager = new PathManager();
-	pPathManager->Create();
-	m_Managers.push_back( pPathManager );
+	PathManager* ppath_manager = new PathManager();
+	ppath_manager->Create();
+	m_Managers.push_back( ppath_manager );
 
-	DFManager* pDFManager = new DFManager();
-	pDFManager->Create();
-	m_Managers.push_back( pDFManager );
+	DFManager* pdf_manager = new DFManager();
+	pdf_manager->Create();
+	m_Managers.push_back( pdf_manager );
 }
 
 void FSEngine::DestroyManagers()
@@ -140,25 +149,15 @@ void FSEngine::DestroyManagers()
 	Super::DestroyManagers();
 }
 
-bool FSEngine::RunCommand( String const& CmdType, Array<String> const& Switches, Array<String> const& Tokens )
+bool FSEngine::RunCommand( String const& cmd_type, Array<String> const& switches, Array<String> const& tokens )
 {
 #if 0
-	if( CmdType == "builddata" )
+	if( cmd_type == "builddata" )
 	{
-		CmdBuildData Cmd;
-		return Cmd.Run( Switches, Tokens );
-	}
-	else if( CmdType == "testksvd" )
-	{
-		CmdTestKSVD Cmd;
-		return Cmd.Run( Switches, Tokens );
-	}
-	else if( CmdType == "testavi" )
-	{
-		CmdTestAVI Cmd;
-		return Cmd.Run( Switches, Tokens );
+		CmdBuildData cmd;
+		return cmd.Run( switches, tokens );
 	}
 #endif
 
-	return Engine::RunCommand( CmdType, Switches, Tokens );
+	return Engine::RunCommand( cmd_type, switches, tokens );
 }

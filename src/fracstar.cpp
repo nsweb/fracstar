@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	String CmdType;
 	if( CmdLine.IsCommand( CmdType ) )
 	{
-		g_pEngine->RunCommand( CmdType, CmdLine.Switches, CmdLine.Tokens );
+		g_pEngine->RunCommand( CmdType, CmdLine.switches, CmdLine.tokens );
 	}
 	else
 	{
