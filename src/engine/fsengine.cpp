@@ -83,9 +83,10 @@ bool FSEngine::Init( bool bCreateWindow )
 	if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_Fly::StaticClass() ) )
 		((FSCameraCtrl_Fly*)cam_ctrl)->SetTarget( pship );
 
-	//CoShip* pcoship = static_cast<CoShip*>( pship->GetComponent( CoShip::StaticClass() ) );
-	//if( pcoship )
-	//	pcoship->SetCurrentLevel( plevel );
+    CoLevel* level = FSWorld::GetStaticInstance()->GetCurrentLevel();
+	CoShip* pcoship = static_cast<CoShip*>( pship->GetComponent( CoShip::StaticClass() ) );
+	if( pcoship )
+		pcoship->SetCurrentLevel( level->GetEntity() );
 
 	return bInit;
 }

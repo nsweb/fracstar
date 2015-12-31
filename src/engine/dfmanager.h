@@ -43,7 +43,7 @@ protected:
 
 	GLuint				m_df_vao;
 	GLuint				m_df_vbo;
-	Shader*				m_df_shader;
+	//Shader*				m_df_shader;
 };
 
 

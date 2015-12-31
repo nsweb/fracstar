@@ -33,7 +33,7 @@ public:
     virtual void		_Render( bigball::RenderContext& RenderCtxt );
 
 	Array<CoPath*> const& GetPathArray()	{ return m_paths;	}
-	CoPath*				_GetCurrentPath()	{ if( m_paths.size() > 0 ) { return m_paths[0]; } return nullptr; }
+	//CoPath*				_GetCurrentPath()	{ if( m_paths.size() > 0 ) { return m_paths[0]; } return nullptr; }
 
 protected:
 	Array<CoPath*>		m_paths;

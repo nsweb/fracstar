@@ -65,7 +65,6 @@ void CoShip::Tick( TickContext& tick_ctxt )
 	if( !m_pcurrent_level )
 		return;
 
-	//Name const& LevelName = m_pCurrentLevel->GetName();
 	CoPath* ppath = static_cast<CoPath*>( m_pcurrent_level->GetComponent( CoPath::StaticClass() ) );
     
     if( m_state == eShipState::Run )
@@ -76,6 +75,7 @@ void CoShip::Tick( TickContext& tick_ctxt )
         
         m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, ppath->m_sum_distance );
         m_path_knot_dist_level = ppath->ConvertDistanceToKnot(m_path_dist_level);
+        
     }
     else
     {

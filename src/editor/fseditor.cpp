@@ -16,8 +16,9 @@
 #include "../engine/fscamera.h"
 #include "../game/coship.h"
 #include "../game/shipmanager.h"
+#include "../game/fsworld.h"
+#include "../game/colevel.h"
 //#include "dfmanager.h"
-////#include "../cmd/cmdbuilddata.h"
 
 FSEditor* FSEditor::ms_peditor = nullptr;
 
@@ -35,7 +36,8 @@ FSEditor::~FSEditor()
 static void UIOnToggleEditorCB( bool bshow_editor )
 {
     CoShip* pcoship = ShipManager::GetStaticInstance()->_GetShip();
-    CoPath* pcopath = PathManager::GetStaticInstance()->_GetCurrentPath();
+    CoLevel* level = FSWorld::GetStaticInstance()->GetCurrentLevel();
+    CoPath* pcopath = level ? static_cast<CoPath*>( level->GetEntityComponent( CoPath::StaticClass() ) ) : nullptr;
     
     if( bshow_editor )
     {
@@ -86,7 +88,8 @@ bool FSEditor::GetItemStringArray( void* data, int idx, const char** out_text )
 void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
 {
 	CoShip* pcoship = ShipManager::GetStaticInstance()->_GetShip();
-    CoPath* pcopath = PathManager::GetStaticInstance()->_GetCurrentPath();
+    CoLevel* level = FSWorld::GetStaticInstance()->GetCurrentLevel();
+    CoPath* pcopath = level ? static_cast<CoPath*>( level->GetEntityComponent( CoPath::StaticClass() ) ) : nullptr;
     
     CameraCtrl_Base* cam_ctrl = Controller::GetStaticInstance()->GetActiveCameraCtrl();
     FSCameraCtrl_EditPath* cam_edit = nullptr;

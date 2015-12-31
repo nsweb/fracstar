@@ -10,13 +10,16 @@
 #include "gfx/rendercontext.h"
 #include "system/profiler.h"
 
+#include "../game/fsworld.h"
+#include "../game/colevel.h"
+
 
 STATIC_MANAGER_CPP(DFManager);
 
 DFManager::DFManager() :
 	m_df_vao(0),
-	m_df_vbo(0),
-	m_df_shader(nullptr)
+	m_df_vbo(0)
+	//m_df_shader(nullptr)
 {
 	m_pStaticInstance = this;
 }
@@ -28,7 +31,7 @@ DFManager::~DFManager()
 
 void DFManager::Create()
 {
-	m_df_shader = GfxManager::GetStaticInstance()->LoadShader( "df" );
+	//m_df_shader = GfxManager::GetStaticInstance()->LoadShader( "df" );
 
 	DFVertex ScreenVertices[] = { { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(-1.f,1.f), vec2(-1.f,1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) },
 								  { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) },	{ vec2(1.f,-1.f), vec2(1.f,-1.f) } };
@@ -53,7 +56,7 @@ void DFManager::Create()
 
 void DFManager::Destroy()
 {
-	m_df_shader = nullptr;
+	//m_df_shader = nullptr;
 }
 
 
@@ -87,7 +90,9 @@ void DFManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
     
-    //return;
+    CoLevel* level = FSWorld::GetStaticInstance()->GetCurrentLevel();
+    if( !level )
+        return;
 
 	static float GlobalTime = 0.f;
 	GlobalTime += RenderCtxt.m_delta_seconds;
@@ -107,20 +112,22 @@ void DFManager::_Render( RenderContext& RenderCtxt )
 	z_var.x = (z_far + z_near) / (z_far - z_near);
 	z_var.y = 2.0f*z_far*z_near / (z_far - z_near);
 
-	m_df_shader->Bind();
-	ShaderUniform UniGTime = m_df_shader->GetUniformLocation("global_time");
-	m_df_shader->SetUniform( UniGTime, GlobalTime );
-    ShaderUniform UniCamera = m_df_shader->GetUniformLocation("camera_pos");
-    m_df_shader->SetUniform( UniCamera, CamPos );
-    ShaderUniform UniViewInv = m_df_shader->GetUniformLocation("viewinv_mat");
-    m_df_shader->SetUniform( UniViewInv, ViewInvMat );
-    ShaderUniform UniProj = m_df_shader->GetUniformLocation("proj_mat");
-    m_df_shader->SetUniform( UniProj, RenderCtxt.m_proj_mat );
+    Shader*	df_shader = level->m_df_shader;
+    
+	df_shader->Bind();
+	ShaderUniform UniGTime = df_shader->GetUniformLocation("global_time");
+	df_shader->SetUniform( UniGTime, GlobalTime );
+    ShaderUniform UniCamera = df_shader->GetUniformLocation("camera_pos");
+    df_shader->SetUniform( UniCamera, CamPos );
+    ShaderUniform UniViewInv = df_shader->GetUniformLocation("viewinv_mat");
+    df_shader->SetUniform( UniViewInv, ViewInvMat );
+    ShaderUniform UniProj = df_shader->GetUniformLocation("proj_mat");
+    df_shader->SetUniform( UniProj, RenderCtxt.m_proj_mat );
 
-	ShaderUniform UniSR = m_df_shader->GetUniformLocation("screen_res");
-	m_df_shader->SetUniform( UniSR, screen_res );
-	ShaderUniform UniZVar = m_df_shader->GetUniformLocation("z_var");
-	m_df_shader->SetUniform( UniZVar, z_var );
+	ShaderUniform UniSR = df_shader->GetUniformLocation("screen_res");
+	df_shader->SetUniform( UniSR, screen_res );
+	ShaderUniform UniZVar = df_shader->GetUniformLocation("z_var");
+	df_shader->SetUniform( UniZVar, z_var );
 
 	glBindVertexArray( m_df_vao );
 
@@ -128,6 +135,6 @@ void DFManager::_Render( RenderContext& RenderCtxt )
 
 	glBindVertexArray(0);
 
-	m_df_shader->Unbind();
+	df_shader->Unbind();
 }
 

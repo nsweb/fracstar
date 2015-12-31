@@ -16,7 +16,8 @@
 
 STATIC_MANAGER_CPP(FSWorld);
 
-FSWorld::FSWorld()
+FSWorld::FSWorld() :
+    m_current_level_idx(INDEX_NONE)
 {
 	m_pStaticInstance = this;
 }
@@ -61,7 +62,18 @@ bool FSWorld::InitLevels( char const* json_path )
             EntityManager::GetStaticInstance()->AddEntityToWorld( plevel );
     }
     
+    if( m_levels.size() )
+        m_current_level_idx = 0;
+    
     return true;
+}
+
+CoLevel* FSWorld::GetCurrentLevel()
+{
+    if( m_current_level_idx >= 0 )
+        return m_levels[m_current_level_idx];
+    
+    return nullptr;
 }
 
 void FSWorld::AddComponentToWorld( Component* component )

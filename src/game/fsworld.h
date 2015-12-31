@@ -34,9 +34,11 @@ public:
 
     bool                InitLevels( char const* json_path );
 	Array<CoLevel*> const& GetLevelArray()	{ return m_levels;	}
+    CoLevel*            GetCurrentLevel();
 
 protected:
 	Array<CoLevel*>		m_levels;
+    int                 m_current_level_idx;
 };
 
 
