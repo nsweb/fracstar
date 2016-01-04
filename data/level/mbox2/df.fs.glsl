@@ -17,12 +17,12 @@ uniform vec2 screen_res;
 #define MaxSteps 		50
 #define PI 				3.141592
 #define FudgeFactor 	0.6
-#define normalDistance  0.002
+#define normalDistance  0.001
 #define MinimumDistance 0.001
 #define Ambient 		0.32184
 
 // 2.28 1.5 1.0
-const float mb_scale = 2.5;//2.320;//-2.5;
+const float mb_scale = 2.3;//2.320;//-2.5;
 const float fixed_radius2 = 1.0;//2.5;//1.0 * 1.0;
 const float min_radius2 = 0.5;//0.1;//0.5 * 0.5;
 const float fixed2_over_min2 = fixed_radius2 / min_radius2;
@@ -55,7 +55,7 @@ float mandelbox( in vec3 z )
 {
     vec3 offset = z;
     float dz = 1.0;	// mb_scale ?
-    for(int n = 0; n < 10; ++n) 
+    for(int n = 0; n < 12; ++n)
     {
         //box_fold(z, dr);
         z = clamp(z, -folding_limit, folding_limit) * 2.0 - z;
@@ -137,30 +137,6 @@ vec2 rayMarch( in vec3 from, in vec3 dir, in float MaxDistance )
 }
 
 
-vec3 camera()
-{
-    /*vec3 p = vec3( 1.58093041374559, 3.8640507877609, -1.64185034532454 );
-    return p;*/
-
-    float stime = sin(global_time*0.1); 
- 	float ctime = cos(global_time*0.1); 
-	vec3 p = vec3( 3.0*stime, 4.0*ctime, -2.9 + 0.0*stime );
-    return p;
-
-} 
-
-vec3 cameraTarget()
-{
-    /*vec3 p = vec3( 1.58093041374559, 3.8640507877609, -1.64185034532454 );
-    return p;*/
-
-    float stime = sin(global_time*0.1 + 0.1); 
- 	float ctime = cos(global_time*0.1 + 0.1); 
-	vec3 p = vec3( 3.0*stime, 4.0*ctime, -2.9 + 0.0*stime );
-    return p;
-
-} 
-
 void main(void)
 {
     vec3 camPos     = viewinv_mat[3].xyz;
@@ -174,9 +150,9 @@ void main(void)
 	vec3 rayDir = normalize(camDir + screen_coord.x*camRight + screen_coord.y*camUp);
     
     //
-	vec3 l0 = vec3(1.0, 0.75, 0.05);
+	vec3 l0 = vec3(1.0, 0.1, 0.05);
     vec3 d0 = normalize( vec3(1.0, 1.0, 1.0) );
-	vec3 l1 = vec3(0.4, 0.8, 0.9);//vec3(0.8, 0.2, 0.1);//
+	vec3 l1 = vec3(0.2, 0.4, 0.9);//vec3(0.8, 0.2, 0.1);//
     vec3 d1 = normalize( vec3(1.0, -0.5, -1.0) );
     vec4 bg_color = vec4( vec3(0.05, 0.14, 0.27)*0.5, 1.0 );
     

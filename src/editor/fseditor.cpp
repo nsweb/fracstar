@@ -23,7 +23,8 @@
 FSEditor* FSEditor::ms_peditor = nullptr;
 
 FSEditor::FSEditor() :
-    m_current_cp_idx(0)
+    m_current_cp_idx(0),
+    m_current_lvl_idx(0)
 {
     ms_peditor = this;
 }
@@ -102,6 +103,26 @@ void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
 	ImGui::ShowTestWindow();
 #else
 
+    if( ImGui::CollapsingHeader("Level") )
+    {
+        Array<String> str_level_array;
+        Array<CoLevel*> const& levels = FSWorld::GetStaticInstance()->GetLevelArray();
+        for( int lvl_idx = 0; lvl_idx < levels.size(); lvl_idx++ )
+            str_level_array.push_back( String::Printf( "%s", levels[lvl_idx]->m_level_name.c_str() ) );
+        
+        ImGui::PushItemWidth( 50 );
+        if( ImGui::ListBox( "Levels", &m_current_lvl_idx, GetItemStringArray, &str_level_array, str_level_array.size(), 6 ) )
+        {
+            if( m_current_lvl_idx >= 0 && m_current_lvl_idx < levels.size() )
+            {
+                FSWorld::GetStaticInstance()->SetCurrentLevel(m_current_lvl_idx);
+                level = FSWorld::GetStaticInstance()->GetCurrentLevel();
+                pcopath = level ? static_cast<CoPath*>( level->GetEntityComponent( CoPath::StaticClass() ) ) : nullptr;
+                pcoship->SetCurrentLevel( level->GetEntity() );
+            }
+        }
+        ImGui::PopItemWidth();
+    }
     if( ImGui::CollapsingHeader("Camera") )
     {
         ImGui::SliderFloat("strafe_speed", &cam_edit->m_strafe_speed, 0.f, 2.f);

@@ -96,3 +96,11 @@ void CoShip::ChangeState( eShipState new_state )
 {
     m_state = new_state;
 }
+
+void CoShip::SetCurrentLevel( Entity* pcurrent_level )
+{
+    m_pcurrent_level = pcurrent_level;
+    
+    m_path_dist_level = 0.f;
+    m_path_knot_dist_level = 0.f;
+}

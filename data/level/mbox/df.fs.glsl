@@ -55,7 +55,7 @@ float mandelbox( in vec3 z )
 {
     vec3 offset = z;
     float dz = 1.0;	// mb_scale ?
-    for(int n = 0; n < 10; ++n) 
+    for(int n = 0; n < 12; ++n)
     {
         //box_fold(z, dr);
         z = clamp(z, -folding_limit, folding_limit) * 2.0 - z;
@@ -119,7 +119,7 @@ vec2 rayMarch( in vec3 from, in vec3 dir, in float MaxDistance )
     float dist = MinimumDistance*2.0;
     float sum_dist = 0.0;
     int sum_steps = 0;
-    for( int i=0; i<150; i++ )
+    for( int i=0; i<120; i++ )
     {
         pos = from + sum_dist * dir;
         dist = DE(pos);
@@ -135,31 +135,6 @@ vec2 rayMarch( in vec3 from, in vec3 dir, in float MaxDistance )
     float ao = float(sum_steps) / 150.0;
     return vec2(sum_dist, ao);   
 }
-
-
-vec3 camera()
-{
-    /*vec3 p = vec3( 1.58093041374559, 3.8640507877609, -1.64185034532454 );
-    return p;*/
-
-    float stime = sin(global_time*0.1); 
- 	float ctime = cos(global_time*0.1); 
-	vec3 p = vec3( 3.0*stime, 4.0*ctime, -2.9 + 0.0*stime );
-    return p;
-
-} 
-
-vec3 cameraTarget()
-{
-    /*vec3 p = vec3( 1.58093041374559, 3.8640507877609, -1.64185034532454 );
-    return p;*/
-
-    float stime = sin(global_time*0.1 + 0.1); 
- 	float ctime = cos(global_time*0.1 + 0.1); 
-	vec3 p = vec3( 3.0*stime, 4.0*ctime, -2.9 + 0.0*stime );
-    return p;
-
-} 
 
 void main(void)
 {

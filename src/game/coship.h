@@ -37,7 +37,7 @@ public:
 	virtual void		Tick( TickContext& tick_ctxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
 
-	void				SetCurrentLevel( Entity* pcurrent_level ) { m_pcurrent_level = pcurrent_level; }
+    void				SetCurrentLevel( Entity* pcurrent_level );
     void                ChangeState( eShipState new_state );
 
 public:

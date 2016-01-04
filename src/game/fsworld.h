@@ -22,19 +22,20 @@ private:
     typedef ComponentManager Super;
 
 public:
-						FSWorld();
-	virtual				~FSWorld();
+                            FSWorld();
+	virtual                 ~FSWorld();
 
-	virtual void		Create();
-	virtual void		Destroy();
-	virtual void		AddComponentToWorld( Component* pComponent );
-	virtual void		RemoveComponentFromWorld( Component* pComponent );
-	virtual void		Tick( struct TickContext& TickCtxt );
-    virtual void		_Render( bigball::RenderContext& RenderCtxt );
+	virtual void            Create();
+	virtual void            Destroy();
+	virtual void            AddComponentToWorld( Component* pComponent );
+	virtual void            RemoveComponentFromWorld( Component* pComponent );
+	virtual void            Tick( struct TickContext& TickCtxt );
+    virtual void            _Render( bigball::RenderContext& RenderCtxt );
 
-    bool                InitLevels( char const* json_path );
-	Array<CoLevel*> const& GetLevelArray()	{ return m_levels;	}
-    CoLevel*            GetCurrentLevel();
+    bool                    InitLevels( char const* json_path );
+	Array<CoLevel*> const&  GetLevelArray()	{ return m_levels;	}
+    CoLevel*                GetCurrentLevel();
+    bool                    SetCurrentLevel( int level_idx );
 
 protected:
 	Array<CoLevel*>		m_levels;

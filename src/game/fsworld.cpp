@@ -76,6 +76,16 @@ CoLevel* FSWorld::GetCurrentLevel()
     return nullptr;
 }
 
+bool FSWorld::SetCurrentLevel( int level_idx )
+{
+    if( level_idx >= 0 && level_idx < m_levels.size() )
+    {
+        m_current_level_idx = level_idx;
+        return true;
+    }
+    return false;
+}
+
 void FSWorld::AddComponentToWorld( Component* component )
 {
 	if( component->IsA( CoLevel::StaticClass() ) )

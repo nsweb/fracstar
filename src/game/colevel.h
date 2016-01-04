@@ -5,7 +5,7 @@
 #define FSCOLEVEL_H
 
 #include "engine/component.h"
-
+#include "gfx/shader.h"
 
 namespace bigball
 {
@@ -14,6 +14,11 @@ namespace bigball
 	struct BIGBALL_API RenderContext;
 };
 
+class UniformVariable : public ShaderUniformDetail
+{
+public:
+    int     m_buffer_offset;
+};
 
 class CoLevel : public Component 
 {
@@ -33,10 +38,13 @@ public:
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
 
 public:
-    Name            m_level_name;
-    Shader*			m_df_shader;
+    Name                    m_level_name;
+    Shader*                 m_df_shader;
+    Array<UniformVariable>  m_shader_variables;
+    Array<uint8>            m_uniform_buffer;
     
     bool                LoadShader();
+    void                CreateUniformVariables();
 };
 
 #endif // FSCOLEVEL_H

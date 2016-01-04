@@ -27,6 +27,7 @@ public:
     void                UIDrawEditor( bool* bshow_editor, bigball::RenderContext& render_ctxt );
     
     int                 m_current_cp_idx;
+    int                 m_current_lvl_idx;
     
 private:
     static FSEditor*    ms_peditor;

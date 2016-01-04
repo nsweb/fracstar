@@ -43,6 +43,8 @@ void CoLevel::Create( Entity* owner, class json::Object* proto )
 	}*/
     
     LoadShader();
+    
+    CreateUniformVariables();
 }
     
 bool CoLevel::LoadShader()
@@ -71,6 +73,47 @@ bool CoLevel::LoadShader()
     m_df_shader = GfxManager::GetStaticInstance()->LoadShaderFromMemory( m_level_name.c_str(), src_buffers );
     
     return m_df_shader ? true : false;
+}
+
+void CoLevel::CreateUniformVariables()
+{
+    Array<ShaderUniformDetail> uniforms;
+    m_df_shader->GetActiveUniforms( uniforms );
+
+    String str_lvl("lvl_");
+    for( int uni_idx = 0; uni_idx < uniforms.size(); uni_idx++ )
+    {
+        ShaderUniformDetail const& uni = uniforms[uni_idx];
+        String str_name = uni.m_name.c_str();
+        if( str_name.StartsWith( str_lvl ) )
+        {
+            int req_size = 0;
+            switch (uni.m_type)
+            {
+                case GL_FLOAT: req_size = sizeof(float); break;
+                case GL_FLOAT_VEC2: req_size = sizeof(vec2); break;
+                case GL_FLOAT_VEC3: req_size = sizeof(vec3); break;
+                case GL_FLOAT_VEC4: req_size = sizeof(vec4); break;
+                case GL_INT: req_size = sizeof(float); break;
+                case GL_INT_VEC2: req_size = sizeof(ivec2); break;
+                case GL_INT_VEC3: req_size = sizeof(ivec3); break;
+                case GL_INT_VEC4: req_size = sizeof(ivec4); break;
+                default:
+                    break;
+            }
+            
+            if( req_size > 0 )
+            {
+                UniformVariable new_var;
+                ShaderUniformDetail* new_var_detail = &new_var;
+                *new_var_detail = uni;
+                //new_var.m_var_name = str_name.Sub(4, str_name.Len());
+                new_var.m_buffer_offset = m_uniform_buffer.size();
+                m_shader_variables.push_back(new_var);
+                m_uniform_buffer.resize(m_uniform_buffer.size() + req_size);
+            }
+        }
+    }
 }
 
 void CoLevel::Destroy()
