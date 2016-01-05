@@ -87,30 +87,39 @@ void CoLevel::CreateUniformVariables()
         String str_name = uni.m_name.c_str();
         if( str_name.StartsWith( str_lvl ) )
         {
-            int req_size = 0;
+            LevelVariableTrackBase* new_track = nullptr;
+            //m_var_tracks
             switch (uni.m_type)
             {
-                case GL_FLOAT: req_size = sizeof(float); break;
-                case GL_FLOAT_VEC2: req_size = sizeof(vec2); break;
-                case GL_FLOAT_VEC3: req_size = sizeof(vec3); break;
-                case GL_FLOAT_VEC4: req_size = sizeof(vec4); break;
-                case GL_INT: req_size = sizeof(float); break;
-                case GL_INT_VEC2: req_size = sizeof(ivec2); break;
-                case GL_INT_VEC3: req_size = sizeof(ivec3); break;
-                case GL_INT_VEC4: req_size = sizeof(ivec4); break;
+                case GL_FLOAT:      new_track = new LevelVariableTrack<float>(); break;
+                case GL_FLOAT_VEC2: new_track = new LevelVariableTrack<vec2>(); break;
+                case GL_FLOAT_VEC3: new_track = new LevelVariableTrack<vec3>(); break;
+                case GL_FLOAT_VEC4: new_track = new LevelVariableTrack<vec4>(); break;
+                case GL_INT:        new_track = new LevelVariableTrack<int>(); break;
+                case GL_INT_VEC2:   new_track = new LevelVariableTrack<ivec2>(); break;
+                case GL_INT_VEC3:   new_track = new LevelVariableTrack<ivec3>(); break;
+                case GL_INT_VEC4:   new_track = new LevelVariableTrack<ivec4>(); break;
                 default:
                     break;
             }
             
-            if( req_size > 0 )
+            if( new_track )
             {
+                m_var_tracks.push_back(new_track);
+                new_track->m_var_index = m_shader_variables.size();
+                
+                const int req_size = new_track->GetVarSize();
+                const int old_size = m_uniform_buffer.size();
+                
                 UniformVariable new_var;
                 ShaderUniformDetail* new_var_detail = &new_var;
                 *new_var_detail = uni;
-                //new_var.m_var_name = str_name.Sub(4, str_name.Len());
-                new_var.m_buffer_offset = m_uniform_buffer.size();
+                new_var.m_buffer_offset = old_size;
                 m_shader_variables.push_back(new_var);
-                m_uniform_buffer.resize(m_uniform_buffer.size() + req_size);
+                m_uniform_buffer.resize(old_size + req_size);
+                
+                // Get default value
+                new_track->GetShaderUniformValue( m_df_shader, uni, &m_uniform_buffer[old_size] );
             }
         }
     }

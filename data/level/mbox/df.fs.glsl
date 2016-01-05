@@ -22,7 +22,7 @@ uniform vec2 screen_res;
 #define Ambient 		0.32184
 
 // 2.28 1.5 1.0
-const float mb_scale = 2.5;//2.320;//-2.5;
+uniform float lvl_mb_scale = 2.5;//2.320;//-2.5;
 const float fixed_radius2 = 1.0;//2.5;//1.0 * 1.0;
 const float min_radius2 = 0.5;//0.1;//0.5 * 0.5;
 const float fixed2_over_min2 = fixed_radius2 / min_radius2;
@@ -54,7 +54,7 @@ void box_fold( inout vec3 z, inout float dz )
 float mandelbox( in vec3 z )
 {
     vec3 offset = z;
-    float dz = 1.0;	// mb_scale ?
+    float dz = 1.0;
     for(int n = 0; n < 12; ++n)
     {
         //box_fold(z, dr);
@@ -79,8 +79,8 @@ float mandelbox( in vec3 z )
             return 1000.0;
         }
 
-        z = mb_scale * z + offset;
-        dz = dz * abs(mb_scale) + 1.0;
+        z = lvl_mb_scale * z + offset;
+        dz = dz * abs(lvl_mb_scale) + 1.0;
     }
 	
     float r = length(z);
