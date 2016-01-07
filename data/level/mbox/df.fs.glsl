@@ -23,36 +23,36 @@ uniform vec2 screen_res;
 
 // 2.28 1.5 1.0
 uniform float lvl_mb_scale = 2.5;//2.320;//-2.5;
-const float fixed_radius2 = 1.0;//2.5;//1.0 * 1.0;
-const float min_radius2 = 0.5;//0.1;//0.5 * 0.5;
-const float fixed2_over_min2 = fixed_radius2 / min_radius2;
+uniform float lvl_fixed_radius2 = 1.0;//2.5;//1.0 * 1.0;
+uniform float lvl_min_radius2 = 0.5;//0.1;//0.5 * 0.5;
 const float folding_limit = 1.0;
 
 //vec3 mtl = vec3(1.0, 1.3, 1.23)*0.8;
 
-void sphere_fold( inout vec3 z, inout float dz ) 
-{
-    float r2 = dot(z, z);
-    if(r2 < min_radius2) 
-    {
-        z *= fixed2_over_min2;
-        dz *= fixed2_over_min2;
-    }
-    else if(r2 < fixed_radius2)
-    {
-        float temp = (fixed_radius2 / r2);
-        z *= temp;
-        dz *= temp;
-    }
-}
-
-void box_fold( inout vec3 z, inout float dz ) 
-{
-    z = clamp(z, -folding_limit, folding_limit) * 2.0 - z;
-}
+//void sphere_fold( inout vec3 z, inout float dz ) 
+//{
+//    float r2 = dot(z, z);
+//    if(r2 < lvl_min_radius2) 
+//    {
+//        z *= fixed2_over_min2;
+//        dz *= fixed2_over_min2;
+//    }
+//    else if(r2 < lvl_fixed_radius2)
+//    {
+//        float temp = (lvl_fixed_radius2 / r2);
+//        z *= temp;
+//        dz *= temp;
+//    }
+//}
+//
+//void box_fold( inout vec3 z, inout float dz ) 
+//{
+//    z = clamp(z, -folding_limit, folding_limit) * 2.0 - z;
+//}
 
 float mandelbox( in vec3 z )
 {
+	float fixed2_over_min2 = lvl_fixed_radius2 / lvl_min_radius2;
     vec3 offset = z;
     float dz = 1.0;
     for(int n = 0; n < 12; ++n)
@@ -62,18 +62,18 @@ float mandelbox( in vec3 z )
         
         //sphere_fold(z, dr);
         float r2 = dot(z, z);
-        if(r2 < min_radius2)
+        if(r2 < lvl_min_radius2)
         {
             z *= fixed2_over_min2;
             dz *= fixed2_over_min2;
         }
-        else if(r2 < fixed_radius2)
+        else if(r2 < lvl_fixed_radius2)
         {
-            float temp = (fixed_radius2 / r2);
+            float temp = (lvl_fixed_radius2 / r2);
             z *= temp;
             dz *= temp;
         }
-        else if( r2 > 1e8f )
+        else if( r2 > 1e20f )
         {
             // prevent z to go over control (nan)
             return 1000.0;
@@ -119,7 +119,7 @@ vec2 rayMarch( in vec3 from, in vec3 dir, in float MaxDistance )
     float dist = MinimumDistance*2.0;
     float sum_dist = 0.0;
     int sum_steps = 0;
-    for( int i=0; i<120; i++ )
+    for( int i=0; i<150; i++ )
     {
         pos = from + sum_dist * dir;
         dist = DE(pos);

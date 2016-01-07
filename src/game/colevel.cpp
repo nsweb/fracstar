@@ -95,10 +95,10 @@ void CoLevel::CreateUniformVariables()
                 case GL_FLOAT_VEC2: new_track = new LevelVariableTrack<vec2>(); break;
                 case GL_FLOAT_VEC3: new_track = new LevelVariableTrack<vec3>(); break;
                 case GL_FLOAT_VEC4: new_track = new LevelVariableTrack<vec4>(); break;
-                case GL_INT:        new_track = new LevelVariableTrack<int>(); break;
-                case GL_INT_VEC2:   new_track = new LevelVariableTrack<ivec2>(); break;
-                case GL_INT_VEC3:   new_track = new LevelVariableTrack<ivec3>(); break;
-                case GL_INT_VEC4:   new_track = new LevelVariableTrack<ivec4>(); break;
+                //case GL_INT:        new_track = new LevelVariableTrack<int>(); break;
+                //case GL_INT_VEC2:   new_track = new LevelVariableTrack<ivec2>(); break;
+                //case GL_INT_VEC3:   new_track = new LevelVariableTrack<ivec3>(); break;
+                //case GL_INT_VEC4:   new_track = new LevelVariableTrack<ivec4>(); break;
                 default:
                     break;
             }
@@ -119,8 +119,37 @@ void CoLevel::CreateUniformVariables()
                 m_uniform_buffer.resize(old_size + req_size);
                 
                 // Get default value
-                new_track->GetShaderUniformValue( m_df_shader, uni, &m_uniform_buffer[old_size] );
+                new_track->RetrieveShaderUniformValue( m_df_shader, uni, &m_uniform_buffer[old_size] );
             }
+#define TEST_UNI_TRACK	1
+#if TEST_UNI_TRACK
+			if( str_name == "lvl_mb_scale" )
+			{
+				LevelVariableTrack<float>* test_track = static_cast<LevelVariableTrack<float>*>( new_track );
+				float* default_value = test_track->GetUniformBufferValue( m_shader_variables, m_uniform_buffer );
+				const int key_count = 40;
+				for( int key_idx = 0; key_idx < key_count; key_idx++ )
+				{
+					float curve_val = bigball::sin( 8.f * F_PI * (float)key_idx / key_count );
+					LevelVariableTrack<float>::Key new_key = { (float)key_idx * 0.5f, *default_value + 0.15f*curve_val };
+					test_track->m_keys.push_back( new_key );
+				}
+				
+			}
+			else if( str_name == "lvl_min_radius2" )
+			{
+				LevelVariableTrack<float>* test_track = static_cast<LevelVariableTrack<float>*>( new_track );
+				float* default_value = test_track->GetUniformBufferValue( m_shader_variables, m_uniform_buffer );
+				const int key_count = 40;
+				for( int key_idx = 0; key_idx < key_count; key_idx++ )
+				{
+					float curve_val = bigball::cos( 8.f * F_PI * (float)key_idx / key_count );
+					LevelVariableTrack<float>::Key new_key = { (float)key_idx * 0.5f, *default_value + 0.15f*curve_val };
+					test_track->m_keys.push_back( new_key );
+				}
+
+			}
+#endif // TEST_UNI_TRACK
         }
     }
 }
@@ -146,6 +175,15 @@ void CoLevel::RemoveFromWorld()
 void CoLevel::Tick( TickContext& tick_ctxt )
 {
 
+}
+
+void CoLevel::InterpAndSetUniforms( float time )
+{
+	for( int track_idx = 0; track_idx < m_var_tracks.size(); track_idx++ )
+	{
+		m_var_tracks[track_idx]->InterpUniformValue( time, m_shader_variables, m_uniform_buffer );
+		m_var_tracks[track_idx]->SetShaderUniformValue( m_df_shader, m_shader_variables, m_uniform_buffer );
+	}
 }
 
 

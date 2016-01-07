@@ -12,6 +12,8 @@
 
 #include "../game/fsworld.h"
 #include "../game/colevel.h"
+#include "../game/shipmanager.h"
+#include "../game/coship.h"
 
 
 STATIC_MANAGER_CPP(DFManager);
@@ -89,16 +91,19 @@ void DFManager::Tick( TickContext& TickCtxt )
 void DFManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
-    
+   
     CoLevel* level = FSWorld::GetStaticInstance()->GetCurrentLevel();
     if( !level )
         return;
 
-	static float GlobalTime = 0.f;
-	GlobalTime += RenderCtxt.m_delta_seconds;
+	CoShip* ship = ShipManager::GetStaticInstance()->_GetShip();
+	float ship_time = ship ? ship->m_path_knot_dist_level : 0.f;
+
+	static float global_time = 0.f;
+	global_time += RenderCtxt.m_delta_seconds;
     
-    vec3 CamPos = RenderCtxt.m_view.m_Transform.GetTranslation();
-    mat4 ViewInvMat( RenderCtxt.m_view.m_Transform.GetRotation(), RenderCtxt.m_view.m_Transform.GetTranslation(), (float)RenderCtxt.m_view.m_Transform.GetScale() );
+    vec3 cam_pos = RenderCtxt.m_view.m_Transform.GetTranslation();
+    mat4 view_inv_mat( RenderCtxt.m_view.m_Transform.GetRotation(), RenderCtxt.m_view.m_Transform.GetTranslation(), (float)RenderCtxt.m_view.m_Transform.GetScale() );
 	
 	const float fov_y = RenderCtxt.m_view.m_fParameters[eCP_FOV] * (F_PI / 180.0f);
 	const float z_near = RenderCtxt.m_view.m_fParameters[eCP_NEAR];
@@ -115,19 +120,21 @@ void DFManager::_Render( RenderContext& RenderCtxt )
     Shader*	df_shader = level->m_df_shader;
     
 	df_shader->Bind();
-	ShaderUniform UniGTime = df_shader->GetUniformLocation("global_time");
-	df_shader->SetUniform( UniGTime, GlobalTime );
-    ShaderUniform UniCamera = df_shader->GetUniformLocation("camera_pos");
-    df_shader->SetUniform( UniCamera, CamPos );
-    ShaderUniform UniViewInv = df_shader->GetUniformLocation("viewinv_mat");
-    df_shader->SetUniform( UniViewInv, ViewInvMat );
-    ShaderUniform UniProj = df_shader->GetUniformLocation("proj_mat");
-    df_shader->SetUniform( UniProj, RenderCtxt.m_proj_mat );
+	ShaderUniform uni_gtime = df_shader->GetUniformLocation("global_time");
+	df_shader->SetUniform( uni_gtime, global_time );
+    ShaderUniform uni_camera = df_shader->GetUniformLocation("camera_pos");
+    df_shader->SetUniform( uni_camera, cam_pos );
+    ShaderUniform uni_view_inv = df_shader->GetUniformLocation("viewinv_mat");
+    df_shader->SetUniform( uni_view_inv, view_inv_mat );
+    ShaderUniform uni_proj = df_shader->GetUniformLocation("proj_mat");
+    df_shader->SetUniform( uni_proj, RenderCtxt.m_proj_mat );
 
-	ShaderUniform UniSR = df_shader->GetUniformLocation("screen_res");
-	df_shader->SetUniform( UniSR, screen_res );
-	ShaderUniform UniZVar = df_shader->GetUniformLocation("z_var");
-	df_shader->SetUniform( UniZVar, z_var );
+	ShaderUniform uni_sr = df_shader->GetUniformLocation("screen_res");
+	df_shader->SetUniform( uni_sr, screen_res );
+	ShaderUniform uni_zvar = df_shader->GetUniformLocation("z_var");
+	df_shader->SetUniform( uni_zvar, z_var );
+
+	level->InterpAndSetUniforms( ship_time );
 
 	glBindVertexArray( m_df_vao );
 
