@@ -2,7 +2,7 @@
 
 #include "../fracstar.h"
 #include "coship.h"
-#include "../engine/copath.h"
+
 #include "core/json.h"
 #include "system/file.h"
 #include "engine/coposition.h"
@@ -13,6 +13,8 @@
 #include "gfx/gfxmanager.h"
 #include "gfx/shader.h"
 #include "gfx/rendercontext.h"
+#include "../engine/copath.h"
+#include "../engine/dfmanager.h"
 
 CLASS_EQUIP_CPP(CoShip);
 
@@ -43,10 +45,14 @@ void CoShip::Create( Entity* owner, class json::Object* proto )
 		if( ParamTok != INDEX_NONE )
 			m_speed = proto->GetFloatValue( ParamTok, m_speed );
 	}
+
+	m_ship_shader = GfxManager::GetStaticInstance()->LoadShader( "ship" );
 }
 
 void CoShip::Destroy()
 {
+	m_ship_shader = nullptr;
+
 	Super::Destroy();
 }
 
@@ -84,12 +90,54 @@ void CoShip::Tick( TickContext& tick_ctxt )
         m_path_dist_level = ppath->ConvertKnotToDistance(m_path_knot_dist_level);
     }
     
-    transform tf;
-    ppath->InterpPathKnotDist( m_path_knot_dist_level, tf );
+    ppath->InterpPathKnotDist( m_path_knot_dist_level, m_path_frame );
 
-    CoPosition* ppos = static_cast<CoPosition*>( GetEntity()->GetComponent( CoPosition::StaticClass() ) );
-    ppos->SetPosition( tf.GetTranslation() );
-    ppos->SetRotation( tf.GetRotation() );
+	//vec3 front_dir = m_path_frame.TransformVector( vec3(0.f,0.f,-1.f) );
+	//vec3 right_dir = m_path_frame.TransformVector( vec3(1.f,0.f,0.f) );
+	//vec3 up_dir = m_path_frame.TransformVector( vec3(0.f,1.f,0.f) );
+	//vec3 ship_pos = m_path_frame.GetTranslation();
+
+	static vec3 offset_cam(-0.02f,0.01f,0.05f);
+	vec3 ship_pos = offset_cam;
+	//ship_pos += front_dir*offset_cam.z + right_dir*offset_cam.x + up_dir*offset_cam.y;
+
+	// Ship position is relative to cam
+    CoPosition* ppos = static_cast<CoPosition*>( GetEntityComponent( CoPosition::StaticClass() ) );
+    ppos->SetPosition( ship_pos );
+    ppos->SetRotation( quat(1.f) /*m_path_frame.GetRotation()*/ );
+}
+
+void CoShip::_Render( RenderContext& render_ctxt )
+{
+	static float global_time = 0.f;
+	global_time += render_ctxt.m_delta_seconds;
+
+	transform cam2world_transform( render_ctxt.m_view.m_Transform.GetRotation(), render_ctxt.m_view.m_Transform.GetTranslation(), (float)render_ctxt.m_view.m_Transform.GetScale() );
+
+	vec3 cam_pos = cam2world_transform.GetTranslation();
+	mat4 view_inv_mat( cam2world_transform.GetRotation(), cam2world_transform.GetTranslation(), cam2world_transform.GetScale() );
+
+	CoPosition* ppos = static_cast<CoPosition*>( GetEntityComponent( CoPosition::StaticClass() ) );
+	transform ship2cam_transform = ppos->GetTransform();	// relative to cam
+	transform ship_transform = ship2cam_transform * cam2world_transform;
+	mat4 world_mat( ship_transform.GetRotation(), ship_transform.GetTranslation(), (float)ship_transform.GetScale()*0.005f );
+	mat4 view_mat = bigball::inverse(view_inv_mat);
+	mat4 world_view_mat = view_mat * world_mat;
+
+	m_ship_shader->Bind();
+	{
+		ShaderUniform uni_world = m_ship_shader->GetUniformLocation("world_mat");
+		m_ship_shader->SetUniform( uni_world, world_mat );
+		ShaderUniform uni_view = m_ship_shader->GetUniformLocation("view_mat");
+		m_ship_shader->SetUniform( uni_view, view_mat );
+		ShaderUniform uni_proj = m_ship_shader->GetUniformLocation("proj_mat");
+		m_ship_shader->SetUniform( uni_proj, render_ctxt.m_proj_mat );
+		ShaderUniform uni_vtb = m_ship_shader->GetUniformLocation("viewtobox_mat");
+		m_ship_shader->SetUniform( uni_vtb, bigball::inverse(world_view_mat) );
+		
+		DFManager::GetStaticInstance()->DrawCube();
+	}
+	m_ship_shader->Unbind();
 }
 
 void CoShip::ChangeState( eShipState new_state )

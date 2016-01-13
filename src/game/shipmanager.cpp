@@ -65,6 +65,9 @@ void ShipManager::_Render( RenderContext& RenderCtxt )
 {
 	PROFILE_SCOPE( __FUNCTION__ );
 
-
+	for( int32 i = 0; i < m_ships.size(); ++i )
+	{
+		m_ships[i]->_Render( RenderCtxt );
+	}
 }
 

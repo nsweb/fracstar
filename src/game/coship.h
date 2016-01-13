@@ -35,13 +35,16 @@ public:
 	virtual void		AddToWorld();
 	virtual void		RemoveFromWorld();
 	virtual void		Tick( TickContext& tick_ctxt );
-	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
+	void				_Render( RenderContext& render_ctxt );
 
     void				SetCurrentLevel( Entity* pcurrent_level );
     void                ChangeState( eShipState new_state );
+	const transform&	GetPathTransform()	{ return m_path_frame;	}
 
 public:
 	Entity*		m_pcurrent_level;
+	Shader*     m_ship_shader;
+	transform	m_path_frame;
     
     eShipState  m_state;
     float       m_speed;

@@ -3,6 +3,7 @@
 #include "fscamera.h"
 #include "engine/coposition.h"
 #include "engine/controller.h"
+#include "../game/coship.h"
 
 
 
@@ -17,10 +18,11 @@ FSCameraCtrl_Fly::FSCameraCtrl_Fly() :
 
 void FSCameraCtrl_Fly::UpdateView( CameraView& cam_view, float delta_seconds )
 {
-	// Retrieve frame along path (ship coposition)
-	CoPosition* target_copos = static_cast<CoPosition*>( m_ptarget ? m_ptarget->GetComponent( CoPosition::StaticClass() ) : nullptr );
-	cam_view.m_Transform.SetTranslation( target_copos->GetPosition() );
-	cam_view.m_Transform.SetRotation( target_copos->GetRotation() );
+	// Retrieve frame along path
+	CoShip* target_ship = static_cast<CoShip*>( m_ptarget ? m_ptarget->GetComponent( CoShip::StaticClass() ) : nullptr );
+	const transform& path_transform = target_ship->GetPathTransform();
+	cam_view.m_Transform.SetTranslation( path_transform.GetTranslation() );
+	cam_view.m_Transform.SetRotation( path_transform.GetRotation() );
 
 
 	//CoDPosition* pTargetCoPos = static_cast<CoDPosition*>( m_ptargetPlanet ? m_ptargetPlanet->GetComponent( CoDPosition::StaticClass() ) : nullptr );

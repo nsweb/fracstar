@@ -36,14 +36,26 @@ public:
 	virtual void		RemoveComponentFromWorld( Component* pcomponent );
 	virtual void		Tick( struct TickContext& tick_ctxt );
 	virtual void		_Render( struct RenderContext& render_ctxt );
-
-	//Array<CoBlocks*> const& GetBlocksArray()	{ return m_Blocks;	}
+	void				DrawCube();
 
 protected:
 
-	GLuint				m_df_vao;
-	GLuint				m_df_vbo;
-	//Shader*				m_df_shader;
+	enum eVAType
+	{
+		eVAScene = 0,
+		eVACube,
+		eVACount
+	};
+	enum eVBType
+	{
+		eVBScene = 0,        /** Dynamic VB used to render segments */
+		eVBCube,
+		eVBCubeElt,
+		eVBCount
+	};
+
+	GLuint			m_varrays[eVACount];
+	GLuint			m_vbuffers[eVBCount];
 };
 
 
