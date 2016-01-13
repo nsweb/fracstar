@@ -12,6 +12,8 @@ namespace bigball
 	class BIGBALL_API Shader;
 	struct BIGBALL_API TickContext;
 	struct BIGBALL_API RenderContext;
+    class BIGBALL_API Camera;
+    struct ControllerInput;
 };
 
 enum class eShipState
@@ -36,6 +38,7 @@ public:
 	virtual void		RemoveFromWorld();
 	virtual void		Tick( TickContext& tick_ctxt );
 	void				_Render( RenderContext& render_ctxt );
+    bool                OnControllerInput( Camera* pCamera, ControllerInput const& Input );
 
     void				SetCurrentLevel( Entity* pcurrent_level );
     void                ChangeState( eShipState new_state );
@@ -47,7 +50,13 @@ public:
 	transform	m_path_frame;
     
     eShipState  m_state;
+    vec3        m_ship_cam_pos;
+    /** Prototype parameters */
     float       m_speed;
+    float       m_speed_lateral;
+    float       m_cam_zoffset;
+    float       m_ship_scale;
+    float       m_move_range;
 	/** Current distance along path in a given level */
 	float		m_path_dist_level;
     float       m_path_knot_dist_level;

@@ -57,6 +57,10 @@ void FSCameraCtrl_Fly::UpdateView( CameraView& cam_view, float delta_seconds )
 
 bool FSCameraCtrl_Fly::OnControllerInput( Camera* pcamera, ControllerInput const& input )
 {
+    CoShip* target_ship = static_cast<CoShip*>( m_ptarget ? m_ptarget->GetComponent( CoShip::StaticClass() ) : nullptr );
+    if( target_ship && target_ship->OnControllerInput(pcamera, input) )
+        return true;
+    
 	return Super::OnControllerInput( pcamera, input );
 }
 

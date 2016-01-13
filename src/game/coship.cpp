@@ -22,6 +22,10 @@ CoShip::CoShip() :
 	m_pcurrent_level(nullptr),
     m_state(eShipState::Run),
     m_speed(1.f),
+    m_speed_lateral(0.1f),
+    m_cam_zoffset(0.05f),
+    m_ship_scale(0.005f),
+    m_move_range(0.03f),
 	m_path_dist_level(0.f)
 
 {
@@ -37,14 +41,25 @@ void CoShip::Create( Entity* owner, class json::Object* proto )
 {
 	Super::Create( owner, proto );
 
-	json::TokenIdx EntTok = proto->GetToken( "entity", json::OBJECT );
-	json::TokenIdx ShipTok = proto->GetToken( "Ship", json::OBJECT, EntTok );
-	if( ShipTok != INDEX_NONE )
+	json::TokenIdx ent_tok = proto->GetToken( "entity", json::OBJECT );
+	json::TokenIdx ship_tok = proto->GetToken( "Ship", json::OBJECT, ent_tok );
+	if( ship_tok != INDEX_NONE )
 	{
-		json::TokenIdx ParamTok = proto->GetToken( "speed", json::PRIMITIVE, ShipTok );
-		if( ParamTok != INDEX_NONE )
-			m_speed = proto->GetFloatValue( ParamTok, m_speed );
+		json::TokenIdx param_tok = proto->GetToken( "speed", json::PRIMITIVE, ship_tok );
+		if( param_tok != INDEX_NONE )
+			m_speed = proto->GetFloatValue( param_tok, m_speed );
+        param_tok = proto->GetToken( "cam_zoffset", json::PRIMITIVE, ship_tok );
+        if( param_tok != INDEX_NONE )
+            m_cam_zoffset = proto->GetFloatValue( param_tok, m_cam_zoffset );
+        param_tok = proto->GetToken( "ship_scale", json::PRIMITIVE, ship_tok );
+        if( param_tok != INDEX_NONE )
+            m_ship_scale = proto->GetFloatValue( param_tok, m_ship_scale );
+        param_tok = proto->GetToken( "move_range", json::PRIMITIVE, ship_tok );
+        if( param_tok != INDEX_NONE )
+            m_move_range = proto->GetFloatValue( param_tok, m_move_range );
 	}
+    
+    m_ship_cam_pos = vec3( 0.f, 0.f, -m_cam_zoffset);
 
 	m_ship_shader = GfxManager::GetStaticInstance()->LoadShader( "ship" );
 }
@@ -97,14 +112,23 @@ void CoShip::Tick( TickContext& tick_ctxt )
 	//vec3 up_dir = m_path_frame.TransformVector( vec3(0.f,1.f,0.f) );
 	//vec3 ship_pos = m_path_frame.GetTranslation();
 
-	static vec3 offset_cam(-0.02f,0.01f,0.05f);
-	vec3 ship_pos = offset_cam;
+	//static vec3 offset_cam(-0.02f,0.01f,-0.05f);
+    //static vec3 offset_cam(0.0f,0.0f,0.0f);
+	//vec3 ship_pos = offset_cam;
 	//ship_pos += front_dir*offset_cam.z + right_dir*offset_cam.x + up_dir*offset_cam.y;
 
 	// Ship position is relative to cam
     CoPosition* ppos = static_cast<CoPosition*>( GetEntityComponent( CoPosition::StaticClass() ) );
-    ppos->SetPosition( ship_pos );
+    ppos->SetPosition( m_ship_cam_pos );
     ppos->SetRotation( quat(1.f) /*m_path_frame.GetRotation()*/ );
+}
+
+bool CoShip::OnControllerInput( Camera* pcamera, ControllerInput const& input )
+{
+    m_ship_cam_pos.x = bigball::clamp( m_ship_cam_pos.x + input.m_delta.x * m_speed_lateral, -m_move_range, m_move_range );
+    m_ship_cam_pos.y = bigball::clamp( m_ship_cam_pos.y + input.m_delta.y * m_speed_lateral, -m_move_range, m_move_range );
+    
+    return true;
 }
 
 void CoShip::_Render( RenderContext& render_ctxt )
@@ -114,13 +138,13 @@ void CoShip::_Render( RenderContext& render_ctxt )
 
 	transform cam2world_transform( render_ctxt.m_view.m_Transform.GetRotation(), render_ctxt.m_view.m_Transform.GetTranslation(), (float)render_ctxt.m_view.m_Transform.GetScale() );
 
-	vec3 cam_pos = cam2world_transform.GetTranslation();
+	//vec3 cam_pos = cam2world_transform.GetTranslation();
 	mat4 view_inv_mat( cam2world_transform.GetRotation(), cam2world_transform.GetTranslation(), cam2world_transform.GetScale() );
 
 	CoPosition* ppos = static_cast<CoPosition*>( GetEntityComponent( CoPosition::StaticClass() ) );
 	transform ship2cam_transform = ppos->GetTransform();	// relative to cam
-	transform ship_transform = ship2cam_transform * cam2world_transform;
-	mat4 world_mat( ship_transform.GetRotation(), ship_transform.GetTranslation(), (float)ship_transform.GetScale()*0.005f );
+	transform ship_transform = cam2world_transform * ship2cam_transform;
+	mat4 world_mat( ship_transform.GetRotation(), ship_transform.GetTranslation(), (float)ship_transform.GetScale() * m_ship_scale );
 	mat4 view_mat = bigball::inverse(view_inv_mat);
 	mat4 world_view_mat = view_mat * world_mat;
 
