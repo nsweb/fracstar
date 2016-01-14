@@ -33,8 +33,8 @@ void DFManager::Create()
 	//m_df_shader = GfxManager::GetStaticInstance()->LoadShader( "df" );
 
 	// SCENE
-	DFVertex screen_vertices[] = { { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(-1.f,1.f), vec2(-1.f,1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) },
-								  { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) },	{ vec2(1.f,-1.f), vec2(1.f,-1.f) } };
+	DFVertex screen_vertices[] = { { vec2(-1.f,-1.f), vec2(-1.f,-1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) }, { vec2(-1.f,1.f), vec2(-1.f,1.f) },
+								  { vec2(-1.f,-1.f), vec2(-1.f,-1.f) },	{ vec2(1.f,-1.f), vec2(1.f,-1.f) }, { vec2(1.f,1.f), vec2(1.f,1.f) } };
 
 	glGenVertexArrays( eVACount, m_varrays );
 	glGenBuffers( eVBCount, m_vbuffers );

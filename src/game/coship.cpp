@@ -148,6 +148,9 @@ void CoShip::_Render( RenderContext& render_ctxt )
 	mat4 view_mat = bigball::inverse(view_inv_mat);
 	mat4 world_view_mat = view_mat * world_mat;
 
+	// Draw reverse faces, so that we can still display something inside cube
+	glCullFace(GL_FRONT);
+
 	m_ship_shader->Bind();
 	{
 		ShaderUniform uni_world = m_ship_shader->GetUniformLocation("world_mat");
@@ -162,6 +165,8 @@ void CoShip::_Render( RenderContext& render_ctxt )
 		DFManager::GetStaticInstance()->DrawCube();
 	}
 	m_ship_shader->Unbind();
+
+	glCullFace(GL_BACK);
 }
 
 void CoShip::ChangeState( eShipState new_state )

@@ -13,6 +13,7 @@
 layout (location = 0) in vec4 position;
 //layout (location = 2) in mat4 world_mat;
 
+out vec3 vs_fs_pos;
 out vec3 vs_fs_view_dir;
 
 void main(void)
@@ -28,6 +29,7 @@ void main(void)
  //   vec3 camUp      = viewinv_mat[1].xyz;
  //   vec3 camDir     = -viewinv_mat[2].xyz;
 	
+	vs_fs_pos = position.xyz;
 	vs_fs_view_dir = normalize( view_dir_local );
 		//vs_fs_texcoord.xy * screen_res * 1.0;
 	
