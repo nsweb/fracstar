@@ -131,18 +131,18 @@ void FSEngine::InitManagers()
     FSWorld* pworld = new FSWorld();
     pworld->Create();
     m_managers.push_back( pworld );
-    
-	ShipManager* pship_manager = new ShipManager();
-	pship_manager->Create();
-	m_managers.push_back( pship_manager );
 
 	PathManager* ppath_manager = new PathManager();
 	ppath_manager->Create();
 	m_managers.push_back( ppath_manager );
 
-	DFManager* pdf_manager = new DFManager();
-	pdf_manager->Create();
-	m_managers.push_back( pdf_manager );
+    DFManager* pdf_manager = new DFManager();
+    pdf_manager->Create();
+    m_managers.push_back( pdf_manager );
+    
+    ShipManager* pship_manager = new ShipManager();
+    pship_manager->Create();
+    m_managers.push_back( pship_manager );
 }
 
 void FSEngine::DestroyManagers()

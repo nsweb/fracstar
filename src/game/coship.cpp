@@ -150,6 +150,8 @@ void CoShip::_Render( RenderContext& render_ctxt )
 
 	// Draw reverse faces, so that we can still display something inside cube
 	glCullFace(GL_FRONT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	m_ship_shader->Bind();
 	{
