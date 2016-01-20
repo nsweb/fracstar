@@ -65,28 +65,38 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
 {
 	Super::Create( owner, proto );
 
-	// Temp : creating a test path procedurally
-	//m_LevelPaths.push_back( LevelPath() );
-	//LevelPath& LPath = m_LevelPaths.Last();
-    m_level_name = "mbox";
-	
-	const int32 cp_count = 10;
-	m_ctrl_points.resize( cp_count );
-	for( int i = 0; i < cp_count; i++ )
-	{
-		float stime, ctime;
-		bigball::sincos( i * 0.6f, &stime, &ctime );
-		vec3 p = vec3( 3.0f*stime, 4.0f*ctime, -2.9f + 2.f*stime );
-        m_ctrl_points[i].m_pos = p;
-	}
-
-    ComputeKnotDistances();
-
-	// Compute cubic splines
-	m_splines.resize(cp_count - 3);
-	ComputeSplines( 0, m_splines.size()-1 );
+    //m_level_name = "mbox";
+    m_level_name = GetEntity()->GetName();
     
-    ComputeSplineDistances();
+    bool serialize_ok = false;
+    bigball::File lvl_path;
+    String str_file = String::Printf("../data/level/%s/path.fs", m_level_name.ToString().c_str());
+    if( lvl_path.Open( str_file.c_str(), false ) )
+    {
+        serialize_ok = Serialize(lvl_path);
+    }
+	
+    if( !serialize_ok )
+    {
+        // creating a test path procedurally
+        const int32 cp_count = 10;
+        m_ctrl_points.resize( cp_count );
+        for( int i = 0; i < cp_count; i++ )
+        {
+            float stime, ctime;
+            bigball::sincos( i * 0.6f, &stime, &ctime );
+            vec3 p = vec3( 3.0f*stime, 4.0f*ctime, -2.9f + 2.f*stime );
+            m_ctrl_points[i].m_pos = p;
+        }
+
+        ComputeKnotDistances();
+
+        // Compute cubic splines
+        m_splines.resize(cp_count - 3);
+        ComputeSplines( 0, m_splines.size()-1 );
+    
+        ComputeSplineDistances();
+    }
 }
 
 void CoPath::ComputeKnotDistances()
