@@ -1,7 +1,13 @@
 #version 330
 
 layout (location = 0) out vec4 frag_color;
- 
+
+const float c_normal_distance = 0.002;
+const float c_minimun_distance = 0.001;
+const int c_max_march_steps = 150;
+
+#include "common/dftools.h"
+
 smooth in vec2 vs_fs_texcoord;
 smooth in vec4 vs_fs_color;
 
@@ -14,11 +20,7 @@ uniform float global_time;
 uniform vec2 z_var;	
 uniform vec2 screen_res;
 
-#define MaxSteps 		50
-#define PI 				3.141592
 #define FudgeFactor 	0.6
-#define normalDistance  0.002
-#define MinimumDistance 0.001
 #define Ambient 		0.32184
 
 // 2.28 1.5 1.0
@@ -87,7 +89,7 @@ float mandelbox( in vec3 z )
     return r / abs(dz);
 }
 
-float DE(in vec3 Pos)
+float DE(vec3 Pos)
 {
     return mandelbox( Pos );
     
@@ -99,31 +101,17 @@ float DE(in vec3 Pos)
 	// return d-0.001;
 }
 
-// Finite difference normal
-vec3 getNormal(in vec3 pos) 
-{
-	vec3 e = vec3(0.0,normalDistance,0.0);
-
-    return normalize(vec3(
-			DE(pos+e.yxx)-DE(pos-e.yxx),
-			DE(pos+e.xyx)-DE(pos-e.xyx),
-			DE(pos+e.xxy)-DE(pos-e.xxy)
-			 )
-		);
-}
-
-
-vec2 rayMarch( in vec3 from, in vec3 dir, in float MaxDistance )
+vec2 rayMarch( vec3 from, vec3 dir, float MaxDistance )
 {
  	vec3 pos;
-    float dist = MinimumDistance*2.0;
+    float dist = c_minimun_distance*2.0;
     float sum_dist = 0.0;
     int sum_steps = 0;
-    for( int i=0; i<150; i++ )
+    for( int i=0; i<c_max_march_steps; i++ )
     {
         pos = from + sum_dist * dir;
         dist = DE(pos);
-        if( dist < MinimumDistance ) 
+        if( dist < c_minimun_distance ) 
             break;
         sum_dist += dist * 1.0;
         sum_steps++;
@@ -132,7 +120,7 @@ vec2 rayMarch( in vec3 from, in vec3 dir, in float MaxDistance )
     if( sum_dist >= MaxDistance ) 
         sum_dist = -1.0;
 
-    float ao = float(sum_steps) / 150.0;
+    float ao = float(sum_steps) / float(c_max_march_steps);
     return vec2(sum_dist, ao);   
 }
 
