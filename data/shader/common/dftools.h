@@ -1,19 +1,18 @@
 
-#define PI 3.14159265
+#define GL_PI 3.14159265
 
-float DE( vec3 pos );
+// Returns vec2( min_distance, material_id )
+vec2 map( vec3 pos );
 
 // Finite difference normal
-vec3 getNormal( vec3 pos ) 
+vec3 getNormal( vec3 pos )
 {
-	vec3 e = vec3(0.0,c_normal_distance,0.0);
-
-	return normalize(vec3(
-		DE(pos+e.yxx)-DE(pos-e.yxx),
-		DE(pos+e.xyx)-DE(pos-e.xyx),
-		DE(pos+e.xxy)-DE(pos-e.xxy)
-		)
-		);
+	vec3 eps = vec3( c_normal_distance, 0.0, 0.0 );
+	vec3 nor = vec3(
+		map(pos+eps.xyy).x - map(pos-eps.xyy).x,
+		map(pos+eps.yxy).x - map(pos-eps.yxy).x,
+		map(pos+eps.yyx).x - map(pos-eps.yyx).x );
+	return normalize(nor);
 }
 
 // The "Chamfer" flavour makes a 45-degree chamfered edge (the diagonal of a square of size <r>):

@@ -114,11 +114,12 @@ public:
 public:
     Name                            m_level_name;
     Shader*                         m_df_shader;
+	Shader*                         m_hit_shader;
     Array<UniformVariable>          m_shader_variables;
     Array<uint8>                    m_uniform_buffer;
     Array<LevelVariableTrackBase*>  m_var_tracks;
     
-    bool                LoadShader();
+    bool                LoadShaders();
     void                CreateUniformVariables();
 };
 

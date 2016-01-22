@@ -93,10 +93,13 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
 
         // Compute cubic splines
         m_splines.resize(cp_count - 3);
-        ComputeSplines( 0, m_splines.size()-1 );
+        //ComputeSplines( 0, m_splines.size()-1 );
     
-        ComputeSplineDistances();
+        //ComputeSplineDistances();
     }
+
+	ComputeSplines( 0, m_splines.size()-1 );
+	ComputeSplineDistances();
 }
 
 void CoPath::ComputeKnotDistances()

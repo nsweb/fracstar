@@ -17,7 +17,8 @@
 CLASS_EQUIP_CPP(CoLevel);
 
 CoLevel::CoLevel() :
-    m_df_shader(nullptr)
+    m_df_shader(nullptr),
+	m_hit_shader(nullptr)
 {
 
 }
@@ -42,13 +43,14 @@ void CoLevel::Create( Entity* owner, class json::Object* proto )
 			m_speed = proto->GetFloatValue( ParamTok, m_speed );
 	}*/
     
-    LoadShader();
+    LoadShaders();
     
     CreateUniformVariables();
 }
     
-bool CoLevel::LoadShader()
+bool CoLevel::LoadShaders()
 {
+	// Load distance field shader
     char const* src_buffers[Shader::MAX] = { nullptr };
     File shader_file;
     String vs_name = String::Printf( "../data/level/%s/df.vs.glsl", m_level_name.c_str() );
@@ -71,8 +73,26 @@ bool CoLevel::LoadShader()
     src_buffers[Shader::Fragment] = fs_src.c_str();
     
     m_df_shader = GfxManager::GetStaticInstance()->LoadShaderFromMemory( m_level_name.c_str(), src_buffers );
-    
-    return m_df_shader ? true : false;
+
+	// Load hit test shader
+#if 0
+	String cs_name = String::Printf( "../data/level/%s/hittest.cs.glsl", m_level_name.c_str() );
+	String cs_src;
+
+	if( !shader_file.Open( cs_name.c_str(), false /*bWrite*/) )
+		return false;
+
+	shader_file.SerializeString( cs_src );
+	shader_file.Close();
+	src_buffers[Shader::Vertex] = nullptr;
+	src_buffers[Shader::Fragment] = nullptr;
+	src_buffers[Shader::Compute] = cs_src.c_str();
+
+	String hit_shader_name = String::Printf( "%s_hit", m_level_name.c_str() );
+	m_hit_shader = GfxManager::GetStaticInstance()->LoadShaderFromMemory( hit_shader_name.c_str(), src_buffers );
+#endif
+
+    return m_df_shader /*&& m_hit_shader*/ ? true : false;
 }
 
 void CoLevel::CreateUniformVariables()
