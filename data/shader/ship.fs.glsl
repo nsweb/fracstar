@@ -1,4 +1,3 @@
-#version 330
 
 const float c_normal_distance = 0.0001;
 const float c_minimun_distance = 0.001;

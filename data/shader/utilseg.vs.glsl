@@ -1,4 +1,3 @@
-#version 330
 
 //layout (std140, binding = 0) uniform WVP
 //{

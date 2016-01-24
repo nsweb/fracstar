@@ -1,6 +1,6 @@
-#ifdef SHADER_SECTION
-	#version 330
 
+
+#ifdef SHADER_SECTION
 	layout (location = 0) out vec4 frag_color;
 #endif
 
@@ -9,7 +9,7 @@ const float c_minimun_distance = 0.001;
 const int c_max_march_steps = 150;
 const float c_fudge_factor = 0.7;
 const float c_folding_limit = 1.0;
-
+ 
 #include "common/dftools.h"
 
 #ifdef SHADER_SECTION
@@ -17,22 +17,24 @@ const float c_folding_limit = 1.0;
 	smooth in vec4 vs_fs_color;
 #endif
 
-uniform mat4 viewinv_mat;
-uniform mat4 proj_mat;
-uniform vec3 camera_pos;
-uniform float global_time;
-// z_var.x = (far+near)/(far-near);
-// z_var.y = 2.0*far*near/(far-near);
-uniform vec2 z_var;	
-uniform vec2 screen_res;
-
-#define Ambient 		0.32184
+#ifdef SHADER_SECTION
+    uniform mat4 viewinv_mat;
+    uniform mat4 proj_mat;
+    uniform vec3 camera_pos;
+    uniform float global_time;
+    // z_var.x = (far+near)/(far-near);
+    // z_var.y = 2.0*far*near/(far-near);
+    uniform vec2 z_var;
+    uniform vec2 screen_res;
+#endif
 
 // 2.28 1.5 1.0
-uniform float lvl_mb_scale = 2.5;//2.320;//-2.5;
-uniform float lvl_fixed_radius2 = 1.0;//2.5;//1.0 * 1.0;
-uniform float lvl_min_radius2 = 0.5;//0.1;//0.5 * 0.5;
+UNIFORM_LEVEL( float, lvl_mb_scale, 2.5f )
+UNIFORM_LEVEL( float, lvl_fixed_radius2, 1.0f )
+UNIFORM_LEVEL( float, lvl_min_radius2, 0.5f )
 
+
+#define Ambient 		0.32184
 
 //vec3 mtl = vec3(1.0, 1.3, 1.23)*0.8;
 
@@ -57,7 +59,7 @@ uniform float lvl_min_radius2 = 0.5;//0.1;//0.5 * 0.5;
 //    z = clamp(z, -c_folding_limit, c_folding_limit) * 2.0 - z;
 //}
 
-vec2 mandelbox( in vec3 z )
+vec2 mandelbox( vec3 z )
 {
 	float fixed2_over_min2 = lvl_fixed_radius2 / lvl_min_radius2;
     vec3 offset = z;
@@ -65,7 +67,7 @@ vec2 mandelbox( in vec3 z )
     for(int n = 0; n < 11; ++n)
     {
         //box_fold(z, dr);
-        z = clamp(z, -c_folding_limit, c_folding_limit) * 2.0 - z;
+        z = clamp(z, -c_folding_limit, c_folding_limit) * 2.0f - z;
         
         //sphere_fold(z, dr);
         float r2 = dot(z, z);
