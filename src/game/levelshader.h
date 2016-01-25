@@ -15,28 +15,11 @@ namespace bigball
 };
 
 ////////////////////////////////////////////////////////////////////////////
-template <typename type>
-struct UniformVariableCpp
-{
-public:
-	UniformVariableCpp(type val, const char* sz_name) : m_var(val), m_name(sz_name)
-	{
-		LevelShader::GetStaticInstance()->RegisterVariable(this);
-	}
-	operator type & ()
-	{
-		return m_var;
-	}
-
-	type m_var;
-	Name m_name;
-};
-
-////////////////////////////////////////////////////////////////////////////
 class LevelCppAccess
 {
 public:
 	LevelCppAccess(Name level_name) : m_level_name(level_name) {}
+    virtual ~LevelCppAccess() {}
 
 	virtual vec2 map(vec3 Pos) = 0;
 	virtual vec3 rayMarch(vec3 from, vec3 dir, float MaxDistance) = 0;
@@ -45,6 +28,9 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////
+template <typename type>
+struct UniformVariableCpp;
+
 class LevelShader
 {
 public:
@@ -63,6 +49,24 @@ public:
 public:
 	static LevelShader*		m_static_instance;
 	Array<LevelCppAccess*>	m_all_levels;
+};
+
+////////////////////////////////////////////////////////////////////////////
+template <typename type>
+struct UniformVariableCpp
+{
+public:
+    UniformVariableCpp(type val, const char* sz_name) : m_var(val), m_name(sz_name)
+    {
+        LevelShader::GetStaticInstance()->RegisterVariable(this);
+    }
+    operator type & ()
+    {
+        return m_var;
+    }
+    
+    type m_var;
+    Name m_name;
 };
 
 #endif // FSLEVELSHADER_H
