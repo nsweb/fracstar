@@ -3,6 +3,7 @@
 #include "../fracstar.h"
 #include "fsworld.h"
 #include "colevel.h"
+#include "levelshader.h"
 #include "core/json.h"
 #include "engine/controller.h"
 #include "engine/camera.h"
@@ -17,7 +18,8 @@
 STATIC_MANAGER_CPP(FSWorld);
 
 FSWorld::FSWorld() :
-    m_current_level_idx(INDEX_NONE)
+    m_current_level_idx(INDEX_NONE),
+	m_levelshader(nullptr)
 {
 	m_pStaticInstance = this;
 }
@@ -29,12 +31,12 @@ FSWorld::~FSWorld()
 
 void FSWorld::Create()
 {
-
+	m_levelshader = new LevelShader();
 }
 
 void FSWorld::Destroy()
 {
-	
+	BB_DELETE(m_levelshader);
 }
 
 bool FSWorld::InitLevels( char const* json_path )

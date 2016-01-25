@@ -13,6 +13,7 @@ namespace bigball
     struct BIGBALL_API RenderContext;
 };
 class CoLevel;
+class LevelShader;
 
 class FSWorld : public ComponentManager
 {
@@ -40,6 +41,8 @@ public:
 protected:
 	Array<CoLevel*>		m_levels;
     int                 m_current_level_idx;
+
+	LevelShader*		m_levelshader;
 };
 
 

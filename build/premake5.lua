@@ -108,7 +108,7 @@ workspace "fracstar"
 		defines { "_CRT_SECURE_NO_WARNINGS", "_WINDOWS", "_USRDLL" }
 		flags { "NoPCH", "NoNativeWChar", "NoEditAndContinue" }
 
-		includedirs { "../../engine/src/", "../../3rdparty", "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/zlib-1.2.8", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty/eigen3" }
+		includedirs { "../../engine/src/", "../../3rdparty", "../../3rdparty/SDL2-2.0.3/include", "../../3rdparty/glew-1.13.0/include", "../../3rdparty/zlib-1.2.8", "../../3rdparty/jsmn", "../../3rdparty/imgui", "../../3rdparty/eigen3", "../data/shader" }
 
 		configuration "windows"	
 			links { "bigball", "glew32", "sdl2", "sdl2main", "opengl32", "imgui", "jsmn" }

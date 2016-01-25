@@ -14,38 +14,55 @@ namespace bigball
 	struct BIGBALL_API RenderContext;
 };
 
-#if 0
-
-class CoLevel : public Component 
+////////////////////////////////////////////////////////////////////////////
+template <typename type>
+struct UniformVariableCpp
 {
-	CLASS_EQUIP_H(CoLevel, Component)
-
 public:
-						CoLevel();
-	virtual				~CoLevel();
+	UniformVariableCpp(type val, const char* sz_name) : m_var(val), m_name(sz_name)
+	{
+		LevelShader::GetStaticInstance()->RegisterVariable(this);
+	}
+	operator type & ()
+	{
+		return m_var;
+	}
 
-	static Component*	NewComponent()		{ return new CoLevel();	}
-
-	virtual void		Create( Entity* owner, class json::Object* proto = nullptr );
-	virtual void		Destroy();	
-	virtual void		AddToWorld();
-	virtual void		RemoveFromWorld();
-	virtual void		Tick( TickContext& tick_ctxt );
-	void				InterpAndSetUniforms( float time );
-	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
-
-public:
-    Name                            m_level_name;
-    Shader*                         m_df_shader;
-	Shader*                         m_hit_shader;
-    Array<UniformVariable>          m_shader_variables;
-    Array<uint8>                    m_uniform_buffer;
-    Array<LevelVariableTrackBase*>  m_var_tracks;
-    
-    bool                LoadShaders();
-    void                CreateUniformVariables();
+	type m_var;
+	Name m_name;
 };
 
-#endif // 0
+////////////////////////////////////////////////////////////////////////////
+class LevelCppAccess
+{
+public:
+	LevelCppAccess(Name level_name) : m_level_name(level_name) {}
+
+	virtual vec2 map(vec3 Pos) = 0;
+	virtual vec3 rayMarch(vec3 from, vec3 dir, float MaxDistance) = 0;
+
+	Name m_level_name;
+};
+
+////////////////////////////////////////////////////////////////////////////
+class LevelShader
+{
+public:
+						LevelShader();
+	virtual				~LevelShader();
+	virtual void		Tick( TickContext& tick_ctxt );
+
+	template <typename type>
+	static void RegisterVariable(UniformVariableCpp<type>* v)
+	{
+
+	}
+
+	static LevelShader*	GetStaticInstance()		{ return m_static_instance; }
+
+public:
+	static LevelShader*		m_static_instance;
+	Array<LevelCppAccess*>	m_all_levels;
+};
 
 #endif // FSLEVELSHADER_H

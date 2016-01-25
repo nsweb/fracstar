@@ -4,11 +4,11 @@
 	layout (location = 0) out vec4 frag_color;
 #endif
 
-const float c_normal_distance = 0.002;
-const float c_minimun_distance = 0.001;
+const float c_normal_distance = 0.002f;
+const float c_minimun_distance = 0.001f;
 const int c_max_march_steps = 150;
-const float c_fudge_factor = 0.7;
-const float c_folding_limit = 1.0;
+const float c_fudge_factor = 0.7f;
+const float c_folding_limit = 1.0f;
  
 #include "common/dftools.h"
 
@@ -32,7 +32,6 @@ const float c_folding_limit = 1.0;
 UNIFORM_LEVEL( float, lvl_mb_scale, 2.5f )
 UNIFORM_LEVEL( float, lvl_fixed_radius2, 1.0f )
 UNIFORM_LEVEL( float, lvl_min_radius2, 0.5f )
-
 
 #define Ambient 		0.32184
 
@@ -89,11 +88,11 @@ vec2 mandelbox( vec3 z )
         }
 
         z = lvl_mb_scale * z + offset;
-        dz = dz * abs(lvl_mb_scale) + 1.0;
+        dz = dz * abs(lvl_mb_scale) + 1.0f;
     }
 	
     float r = length(z);
-    float mat = 0.0;//abs( clamp(z, -2.0*c_folding_limit, 2.0*c_folding_limit) ) / 2.0;
+    float mat = 0.0f;//abs( clamp(z, -2.0f*c_folding_limit, 2.0f*c_folding_limit) ) / 2.0f;
     return vec2( r / abs(dz), mat );
 }
 
@@ -112,7 +111,7 @@ vec2 map(vec3 Pos)
 vec3 rayMarch( vec3 from, vec3 dir, float MaxDistance )
 {
  	vec3 pos;
-    vec2 dist_mat = vec2( c_minimun_distance*2.0, 0.0 );
+    vec2 dist_mat = vec2( c_minimun_distance*2.0f, 0.0f );
     float sum_dist = 0.0;
     int sum_steps = 0;
     for( int i=0; i<c_max_march_steps; i++ )
@@ -121,7 +120,7 @@ vec3 rayMarch( vec3 from, vec3 dir, float MaxDistance )
         dist_mat = map(pos);
         if( dist_mat.x < c_minimun_distance ) 
             break;
-        sum_dist += dist_mat.x * 1.0;
+        sum_dist += dist_mat.x * 1.0f;
         sum_steps++;
     }
 
