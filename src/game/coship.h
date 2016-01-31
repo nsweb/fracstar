@@ -60,6 +60,8 @@ public:
 	/** Current distance along path in a given level */
 	float		m_path_dist_level;
     float       m_path_knot_dist_level;
+	/** Current distance to nearest obstacle */
+	float		m_current_collision_dist;
 };
 
 #endif // FSCOSHIP_H

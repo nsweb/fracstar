@@ -2,6 +2,7 @@
 
 #include "../fracstar.h"
 #include "colevel.h"
+#include "levelshader.h"
 #include "../engine/copath.h"
 #include "core/json.h"
 #include "system/file.h"
@@ -125,6 +126,7 @@ void CoLevel::CreateUniformVariables()
             
             if( new_track )
             {
+				new_track->m_var_name = str_name.c_str();
                 m_var_tracks.push_back(new_track);
                 new_track->m_var_index = m_shader_variables.size();
                 
@@ -146,7 +148,7 @@ void CoLevel::CreateUniformVariables()
 			if( str_name == "lvl_mb_scale" )
 			{
 				LevelVariableTrack<float>* test_track = static_cast<LevelVariableTrack<float>*>( new_track );
-				float* default_value = test_track->GetUniformBufferValue( m_shader_variables, m_uniform_buffer );
+				float* default_value = GetUniformBufferValue<float>(new_track->m_var_index);
 				const int key_count = 40;
 				for( int key_idx = 0; key_idx < key_count; key_idx++ )
 				{
@@ -159,7 +161,7 @@ void CoLevel::CreateUniformVariables()
 			else if( str_name == "lvl_min_radius2" )
 			{
 				LevelVariableTrack<float>* test_track = static_cast<LevelVariableTrack<float>*>( new_track );
-				float* default_value = test_track->GetUniformBufferValue( m_shader_variables, m_uniform_buffer );
+				float* default_value = GetUniformBufferValue<float>(new_track->m_var_index);
 				const int key_count = 40;
 				for( int key_idx = 0; key_idx < key_count; key_idx++ )
 				{
@@ -201,8 +203,10 @@ void CoLevel::InterpAndSetUniforms( float time )
 {
 	for( int track_idx = 0; track_idx < m_var_tracks.size(); track_idx++ )
 	{
-		m_var_tracks[track_idx]->InterpUniformValue( time, m_shader_variables, m_uniform_buffer );
-		m_var_tracks[track_idx]->SetShaderUniformValue( m_df_shader, m_shader_variables, m_uniform_buffer );
+		m_var_tracks[track_idx]->InterpUniformValue( time, this );
+		m_var_tracks[track_idx]->SetShaderUniformValue( m_df_shader, this );
+
+		LevelShader::GetStaticInstance()->SetCppUniformValue(this, m_var_tracks[track_idx]->m_var_name, m_var_tracks[track_idx]->m_var_index);
 	}
 }
 

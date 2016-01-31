@@ -2,6 +2,7 @@
 
 #include "../fracstar.h"
 #include "coship.h"
+#include "levelshader.h"
 
 #include "core/json.h"
 #include "system/file.h"
@@ -13,6 +14,7 @@
 #include "gfx/gfxmanager.h"
 #include "gfx/shader.h"
 #include "gfx/rendercontext.h"
+#include "gfx/drawutils.h"
 #include "../engine/copath.h"
 #include "../engine/dfmanager.h"
 
@@ -26,8 +28,8 @@ CoShip::CoShip() :
     m_cam_zoffset(0.05f),
     m_ship_scale(0.005f),
     m_move_range(0.03f),
-	m_path_dist_level(0.f)
-
+	m_path_dist_level(0.f),
+	m_current_collision_dist(1e8f)
 {
 
 }
@@ -120,7 +122,14 @@ void CoShip::Tick( TickContext& tick_ctxt )
 	// Ship position is relative to cam
     CoPosition* ppos = static_cast<CoPosition*>( GetEntityComponent( CoPosition::StaticClass() ) );
     ppos->SetPosition( m_ship_cam_pos );
-    ppos->SetRotation( quat(1.f) /*m_path_frame.GetRotation()*/ );
+	ppos->SetRotation(quat(1.f) /*m_path_frame.GetRotation()*/);
+
+	// Check collisions
+	{
+		vec3 ship_world_pos = m_path_frame.TransformPosition(m_ship_cam_pos);
+		m_current_collision_dist = LevelShader::GetStaticInstance()->EstimateLevelDistance(m_pcurrent_level->GetName(), ship_world_pos);
+		//DrawUtils::GetStaticInstance()->PushAABB(ship_world_pos, level_dist*0.5f, u8vec4(255,0,0,124));
+	}
 }
 
 bool CoShip::OnControllerInput( Camera* pcamera, ControllerInput const& input )
@@ -147,6 +156,8 @@ void CoShip::_Render( RenderContext& render_ctxt )
 	mat4 world_mat( ship_transform.GetRotation(), ship_transform.GetTranslation(), (float)ship_transform.GetScale() * m_ship_scale );
 	mat4 view_mat = bigball::inverse(view_inv_mat);
 	mat4 world_view_mat = view_mat * world_mat;
+	static float coll_threshold = 0.1f;
+	float collision_dist = clamp(m_current_collision_dist / coll_threshold, 0.0f, 1.0f);
 
 	// Draw reverse faces, so that we can still display something inside cube
 	glCullFace(GL_FRONT);
@@ -163,6 +174,8 @@ void CoShip::_Render( RenderContext& render_ctxt )
 		m_ship_shader->SetUniform( uni_proj, render_ctxt.m_proj_mat );
 		ShaderUniform uni_vtb = m_ship_shader->GetUniformLocation("viewtobox_mat");
 		m_ship_shader->SetUniform( uni_vtb, bigball::inverse(world_view_mat) );
+		ShaderUniform uni_cdist = m_ship_shader->GetUniformLocation("collision_dist");
+		m_ship_shader->SetUniform(uni_cdist, collision_dist);
 		
 		DFManager::GetStaticInstance()->DrawCube();
 	}

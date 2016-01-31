@@ -23,46 +23,47 @@ public:
 class LevelVariableTrackBase
 {
 public:
-    int        m_var_index;
+    int		m_var_index;
+	Name	m_var_name;
     
     virtual int GetVarSize() const = 0;
     virtual void RetrieveShaderUniformValue( Shader* shader, ShaderUniform const& uni, void* var_buffer ) = 0;
-	virtual void InterpUniformValue( float time, Array<UniformVariable> const& vars, Array<uint8> const& uni_buffer ) = 0;
-	virtual void SetShaderUniformValue( Shader* shader, Array<UniformVariable> const& vars, Array<uint8> const& uni_buffer ) = 0;
+	virtual void InterpUniformValue(float time, class CoLevel* parent_level) = 0;
+	virtual void SetShaderUniformValue(Shader* shader, class CoLevel* parent_level) = 0;
 };
 
-template <typename VarType>
+template <typename type>
 class LevelVariableTrack : public LevelVariableTrackBase
 {
 public:
     struct Key
     {
 		float       m_time;
-        VarType     m_value;
+		type     m_value;
     };
 
     Array<Key>  m_keys;
     
-    virtual int GetVarSize() const   { return sizeof(VarType);   }
-    virtual void RetrieveShaderUniformValue( Shader* shader, ShaderUniform const& uni, void* var_buffer )
+	virtual int GetVarSize() const   { return sizeof(type); }
+	virtual void RetrieveShaderUniformValue(Shader* shader, ShaderUniform const& uni, void* var_buffer) override
     {
-        shader->GetUniform( uni, *(VarType*)var_buffer );
+		shader->GetUniform(uni, *(type*)var_buffer);
     }
 
-	VarType* GetUniformBufferValue( Array<UniformVariable> const& vars, Array<uint8> const& uni_buffer )
-	{
-		int buf_location = vars[m_var_index].m_buffer_offset;
-		return (VarType*)&uni_buffer[buf_location];
-	}
+	//VarType* GetUniformBufferValue( Array<UniformVariable> const& vars, Array<uint8> const& uni_buffer )
+	//{
+	//	int buf_location = vars[m_var_index].m_buffer_offset;
+	//	return (VarType*)&uni_buffer[buf_location];
+	//}
 
-	virtual void InterpUniformValue( float time, Array<UniformVariable> const& vars, Array<uint8> const& uni_buffer )
+	virtual void InterpUniformValue( float time, class CoLevel* parent_level ) override
 	{
 		if( !m_keys.size() )
 			return;
 
 		time = bigball::clamp( time, 0.f, m_keys.Last().m_time );
 
-		VarType* value_addr = GetUniformBufferValue( vars, uni_buffer );
+		type* value_addr = parent_level->GetUniformBufferValue<type>(m_var_index);
 		if( m_keys.size() == 1 )
 		{
 			*value_addr = m_keys[0].m_value;
@@ -83,13 +84,13 @@ public:
 		*value_addr = bigball::lerp( m_keys[found_key_idx].m_value, m_keys[found_key_idx + 1].m_value, time_ratio );
 	}
 
-	virtual void SetShaderUniformValue( Shader* shader, Array<UniformVariable> const& vars, Array<uint8> const& uni_buffer )
+	virtual void SetShaderUniformValue(Shader* shader, class CoLevel* parent_level) override
 	{
 		if( !m_keys.size() )
 			return;
 
-		VarType* value_addr = GetUniformBufferValue( vars, uni_buffer );
-		shader->SetUniform( vars[m_var_index], *value_addr );
+		type* value_addr = parent_level->GetUniformBufferValue<type>(m_var_index);
+		shader->SetUniform(parent_level->m_shader_variables[m_var_index], *value_addr);
 	}
 };
 
@@ -110,6 +111,13 @@ public:
 	virtual void		Tick( TickContext& tick_ctxt );
 	void				InterpAndSetUniforms( float time );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
+
+	template <typename type>
+	type* GetUniformBufferValue(int var_idx)
+	{
+		int buf_location = m_shader_variables[var_idx].m_buffer_offset;
+		return (type*)&m_uniform_buffer[buf_location];
+	}
 
 public:
     Name                            m_level_name;

@@ -2,6 +2,7 @@
 
 #include "../fracstar.h"
 #include "levelshader.h"
+#include "colevel.h"
 
 // not great but force compiler to use our math functions
 #define sqrt bigball::sqrt    
@@ -9,7 +10,7 @@
 #define cos bigball::cos
 #define sin bigball::sin
 
-#define UNIFORM_LEVEL( type, lvl_name, value )     UniformVariableCpp<type> lvl_name = { value, #lvl_name };
+#define UNIFORM_LEVEL( type, lvl_name, value )     UniformVariableCpp<type> lvl_name = { value, #lvl_name, this };
 
 class mbox : public LevelCppAccess
 {
@@ -20,6 +21,26 @@ public:
 
 #include "../../data/level/mbox/df.fs.glsl"
 };
+
+////////////////////////////////////////////////////////////////
+
+void LevelCppAccess::RegisterVariable(UniformVariableCppBase* v)
+{
+	m_cpp_vars.push_back(v);
+}
+void LevelCppAccess::SetCppUniformValue(class CoLevel* level, Name const& var_name, int var_idx)
+{
+	for (int idx = 0; idx < m_cpp_vars.size(); idx++)
+	{
+		if (m_cpp_vars[idx]->m_name == var_name)
+		{
+			m_cpp_vars[idx]->SetValue(level, var_idx);
+			break;
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////
 
 LevelShader* LevelShader::m_static_instance = nullptr;
 
@@ -43,6 +64,32 @@ LevelShader::~LevelShader()
 void LevelShader::Tick(TickContext& tick_ctxt)
 {
 
+}
+
+void LevelShader::SetCppUniformValue(CoLevel* level, Name const& var_name, int var_idx)
+{
+	for (int level_idx = 0; level_idx < m_all_levels.size(); level_idx++)
+	{
+		if (m_all_levels[level_idx]->m_level_name == level->m_level_name)
+		{
+			m_all_levels[level_idx]->SetCppUniformValue(level, var_name, var_idx);
+			break;
+		}
+	}
+}
+
+float LevelShader::EstimateLevelDistance(Name const& level_name, vec3 pos)
+{
+	for (int level_idx = 0; level_idx < m_all_levels.size(); level_idx++)
+	{
+		if (m_all_levels[level_idx]->m_level_name == level_name)
+		{
+			vec2 map_val = m_all_levels[level_idx]->map(pos);
+			return map_val.x;
+		}
+	}
+
+	return 1e8f;
 }
 
 

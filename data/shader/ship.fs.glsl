@@ -5,6 +5,8 @@ const int c_max_march_steps = 20;
 
 #include "common/dftools.h"
 
+uniform float collision_dist = 1.0;
+
 in vec3 vs_fs_pos;
 in vec3 vs_fs_view_dir;
 
@@ -57,6 +59,9 @@ vec2 map(vec3 p)
     //return min( fCLeft, fCRight );
     d = /*min( fCUp,*/ fOpUnionSoft( d/*fCMain*/, fCRight, 0.2 );// );//, 0.1);
     d = fOpDifferenceRound(d, fCRightHole, 0.04);
+
+	d = min( d, length(p) - 0.9 );
+	//d = length(p) - 0.4;
     
     return vec2( d, 0.0 );
     //return length( p ) - 0.95f;
@@ -117,6 +122,8 @@ void main(void)
         //zn = z_var.x + z_var.y / zeye;
         //frag_color = vec4( vec3( clamp( 0.5 + 0.5*zn , 0.0, 1.0) ), 1 );
     }
+
+	frag_color = mix( vec4(1.0,0.0,0.0,1.0), frag_color, collision_dist );
 
     //color = vec4(vs_fs_pos * 0.5 + 0.5,1.0);//vs_fs_color;
     //frag_color = vec4(dist * 0.5, dist * 0.5, dist * 0.5, 1.0);//vs_fs_color;
