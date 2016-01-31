@@ -6,6 +6,7 @@
 
 #include "engine/component.h"
 #include "gfx/shader.h"
+#include "colevel.h"
 
 namespace bigball
 {
@@ -75,6 +76,7 @@ public:
 
 	static LevelShader*	GetStaticInstance()		{ return m_static_instance; }
 	float				EstimateLevelDistance(Name const& level_name, vec3 pos);
+    vec3				RayMarch(Name const& level_name, vec3 ray_pos, vec3 ray_dir, float max_dist);
 
 public:
 	static LevelShader*		m_static_instance;

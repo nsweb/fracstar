@@ -172,11 +172,10 @@ vec3 rayMarch( vec3 from, vec3 dir, float MaxDistance )
 			zn = z_var.x + z_var.y / zeye;
 			//frag_color = vec4( vec3( clamp( 0.5 + 0.5*zn , 0.0, 1.0) ), 1 );
 		}
-	
-		//float zc = ( proj_mat * vec4( res.x * rayDir, 1.0 ) ).z;
-		//float wc = ( proj_mat * vec4( res.x * rayDir, 1.0 ) ).w;
-		//gl_FragDepth = zc/wc;
-		gl_FragDepth = zn;
+        
+        // need to convert to window coord [0;1], *not* in normalized device coordinate [-1;1]
+        gl_FragDepth = (zn + 1.0) / 2.0;
+		//gl_FragDepth = zn;
     
 		// output in gamma space
 		frag_color.rgb = pow( frag_color.rgb, vec3( 1.0/2.2 ) );

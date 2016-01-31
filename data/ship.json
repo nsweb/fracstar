@@ -8,8 +8,8 @@
   "Ship": 
   {
 	"speed"	: 0.5,
-	"cam_zoffset" : 0.05,
-	"ship_scale" : 0.004,
+	"cam_zoffset" : 0.1,
+	"ship_scale" : 0.005,
 	"move_range" : 0.03
   }
 }

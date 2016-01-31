@@ -109,16 +109,6 @@ void CoShip::Tick( TickContext& tick_ctxt )
     
     ppath->InterpPathKnotDist( m_path_knot_dist_level, m_path_frame );
 
-	//vec3 front_dir = m_path_frame.TransformVector( vec3(0.f,0.f,-1.f) );
-	//vec3 right_dir = m_path_frame.TransformVector( vec3(1.f,0.f,0.f) );
-	//vec3 up_dir = m_path_frame.TransformVector( vec3(0.f,1.f,0.f) );
-	//vec3 ship_pos = m_path_frame.GetTranslation();
-
-	//static vec3 offset_cam(-0.02f,0.01f,-0.05f);
-    //static vec3 offset_cam(0.0f,0.0f,0.0f);
-	//vec3 ship_pos = offset_cam;
-	//ship_pos += front_dir*offset_cam.z + right_dir*offset_cam.x + up_dir*offset_cam.y;
-
 	// Ship position is relative to cam
     CoPosition* ppos = static_cast<CoPosition*>( GetEntityComponent( CoPosition::StaticClass() ) );
     ppos->SetPosition( m_ship_cam_pos );
@@ -128,7 +118,27 @@ void CoShip::Tick( TickContext& tick_ctxt )
 	{
 		vec3 ship_world_pos = m_path_frame.TransformPosition(m_ship_cam_pos);
 		m_current_collision_dist = LevelShader::GetStaticInstance()->EstimateLevelDistance(m_pcurrent_level->GetName(), ship_world_pos);
-		//DrawUtils::GetStaticInstance()->PushAABB(ship_world_pos, level_dist*0.5f, u8vec4(255,0,0,124));
+        //DrawUtils::GetStaticInstance()->PushAABB(ship_world_pos, level_dist*0.5f, u8vec4(255,0,0,124));
+        
+        static float cube_size = 0.01f;
+        vec3 front_dir = m_path_frame.TransformVector( vec3(0.f,0.f,-1.f) );
+        vec3 right_dir = m_path_frame.TransformVector( vec3(1.f,0.f,0.f) );
+        vec3 up_dir = m_path_frame.TransformVector( vec3(0.f,1.f,0.f) );
+        {
+            vec3 ray_pos = ship_world_pos;// + vec3 (0.f, 0.m_ship_scale
+            vec3 front_pos = LevelShader::GetStaticInstance()->RayMarch(m_pcurrent_level->GetName(), ray_pos, front_dir, 10.f);
+            DrawUtils::GetStaticInstance()->PushAABB(front_pos, cube_size, u8vec4(255,0,0,124));
+        }
+        {
+            vec3 ray_pos = ship_world_pos;// + vec3 (0.f, 0.m_ship_scale
+            vec3 right_pos = LevelShader::GetStaticInstance()->RayMarch(m_pcurrent_level->GetName(), ray_pos, right_dir, 10.f);
+            DrawUtils::GetStaticInstance()->PushAABB(right_pos, cube_size, u8vec4(0,255,0,124));
+        }
+        {
+            vec3 ray_pos = ship_world_pos;// + vec3 (0.f, 0.m_ship_scale
+            vec3 down_pos = LevelShader::GetStaticInstance()->RayMarch(m_pcurrent_level->GetName(), ray_pos, -up_dir, 10.f);
+            DrawUtils::GetStaticInstance()->PushAABB(down_pos, cube_size, u8vec4(0,0,255,124));
+        }
 	}
 }
 
@@ -156,7 +166,7 @@ void CoShip::_Render( RenderContext& render_ctxt )
 	mat4 world_mat( ship_transform.GetRotation(), ship_transform.GetTranslation(), (float)ship_transform.GetScale() * m_ship_scale );
 	mat4 view_mat = bigball::inverse(view_inv_mat);
 	mat4 world_view_mat = view_mat * world_mat;
-	static float coll_threshold = 0.1f;
+	static float coll_threshold = 0.05f;
 	float collision_dist = clamp(m_current_collision_dist / coll_threshold, 0.0f, 1.0f);
 
 	// Draw reverse faces, so that we can still display something inside cube

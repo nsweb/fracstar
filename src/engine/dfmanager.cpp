@@ -132,6 +132,8 @@ void DFManager::_Render( RenderContext& render_ctxt )
 	vec2 z_var;	
 	z_var.x = (z_far + z_near) / (z_far - z_near);
 	z_var.y = 2.0f*z_far*z_near / (z_far - z_near);
+    //float near_clip_test = z_var.x + z_var.y / -z_near;
+    //float far_clip_test = z_var.x + z_var.y / -z_far;
 
     Shader*	df_shader = level->m_df_shader;
     
