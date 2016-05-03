@@ -62,10 +62,10 @@ public:
 
 	static Component*	NewComponent()		{ return new CoPath();	}
 
-	virtual void		Create( Entity* owner, class json::Object* proto = nullptr );
-	virtual void		Destroy();	
-	virtual void		AddToWorld();
-	virtual void		RemoveFromWorld();
+	virtual void		Create( Entity* owner, class json::Object* proto = nullptr ) override;
+	virtual void		Destroy() override;
+	virtual void		AddToWorld() override;
+	virtual void		RemoveFromWorld() override;
 	virtual void		Tick( TickContext& tick_ctxt );
     void                _DrawDebug( bigball::RenderContext& render_ctxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );

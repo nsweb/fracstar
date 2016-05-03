@@ -19,8 +19,8 @@ public:
 	//float			m_RotationSpeed;
 
 public:
-	virtual void		UpdateView( CameraView& cam_view, float delta_seconds );
-	virtual bool		OnControllerInput( Camera* pcamera, struct ControllerInput const& input );
+	virtual void		UpdateView( CameraView& cam_view, float delta_seconds ) override;
+	virtual bool		OnControllerInput( Camera* pcamera, struct ControllerInput const& input ) override;
 	void				SetTarget( Entity* ptarget )		{ m_ptarget = ptarget; }
 
 protected:
@@ -34,8 +34,8 @@ class BIGBALL_API FSCameraCtrl_EditPath : public CameraCtrl_Base
 public:
 	FSCameraCtrl_EditPath();
 
-	virtual void		UpdateView( CameraView& cam_view, float delta_seconds );
-	virtual bool		OnControllerInput( Camera* pcamera, struct ControllerInput const& input );
+	virtual void		UpdateView( CameraView& cam_view, float delta_seconds ) override;
+	virtual bool		OnControllerInput( Camera* pcamera, struct ControllerInput const& input ) override;
 	void				SetTarget( CoPath* ptarget )		{ m_ptarget = ptarget; }
 	//void				ResetEdit( int at_cp_idx );
 	//void				ResetEdit( float nearest_dist_level );

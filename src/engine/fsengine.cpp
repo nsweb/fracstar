@@ -29,9 +29,9 @@ FSEngine::~FSEngine()
 	ms_pengine = nullptr;
 }
 
-bool FSEngine::Init( bool bCreateWindow )
+bool FSEngine::Init(EngineInitParams const& init_params)
 {
-	bool bInit = Engine::Init( bCreateWindow );
+	bool bInit = Engine::Init(init_params);
     
     //////////////////////////////////////////////////////////////////////////
 	m_peditor = new FSEditor();

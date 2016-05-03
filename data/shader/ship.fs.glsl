@@ -45,9 +45,9 @@ vec2 map(vec3 p)
     vec3 pa = p;
     pa.x = abs(pa.x);
     vec3 pry = pa;
-    pRY(pry, -0.12 * GL_PI);
+    pry = pRY(pry, -0.12 * GL_PI);
     vec3 prx = pa;
-    pRX(prx, -0.12 * GL_PI);
+    prx = pRX(prx, -0.12 * GL_PI);
     
     //float fCLeft = fCylinderZ( p - vec3(-0.5, -0.2, 0.2), 0.4, 0.7 );
     float fCMain = fCylinderZ( prx - vec3(0.0, 0.05, 0.3), 0.45, 0.6 );
@@ -60,7 +60,7 @@ vec2 map(vec3 p)
     d = /*min( fCUp,*/ fOpUnionSoft( d/*fCMain*/, fCRight, 0.2 );// );//, 0.1);
     d = fOpDifferenceRound(d, fCRightHole, 0.04);
 
-	d = min( d, length(p) - 0.9 );
+	//d = min( d, length(p) - 0.9 );
 	//d = length(p) - 0.4;
     
     return vec2( d, 0.0 );

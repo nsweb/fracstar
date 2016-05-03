@@ -155,7 +155,7 @@ void CoShip::_Render( RenderContext& render_ctxt )
 	static float global_time = 0.f;
 	global_time += render_ctxt.m_delta_seconds;
 
-	transform cam2world_transform( render_ctxt.m_view.m_Transform.GetRotation(), render_ctxt.m_view.m_Transform.GetTranslation(), (float)render_ctxt.m_view.m_Transform.GetScale() );
+	transform cam2world_transform( render_ctxt.m_view.m_transform.GetRotation(), render_ctxt.m_view.m_transform.GetTranslation(), (float)render_ctxt.m_view.m_transform.GetScale() );
 
 	//vec3 cam_pos = cam2world_transform.GetTranslation();
 	mat4 view_inv_mat( cam2world_transform.GetRotation(), cam2world_transform.GetTranslation(), cam2world_transform.GetScale() );

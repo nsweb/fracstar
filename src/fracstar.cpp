@@ -23,7 +23,13 @@ int main(int argc, char *argv[])
 	g_pEngine = new FSEngine();
 	CommandLine& CmdLine = g_pEngine->GetCommandLine();
 	CmdLine.Parse( argc, argv );
-	g_pEngine->Init( true );
+    
+    EngineInitParams init_params;
+    init_params.resizable_window = false;
+    init_params.mouse_capture = true;
+    init_params.default_res_x = 800;
+    init_params.default_res_y = 600;
+	g_pEngine->Init( init_params );
 
 	String CmdType;
 	if( CmdLine.IsCommand( CmdType ) )

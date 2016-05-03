@@ -21,8 +21,8 @@ void FSCameraCtrl_Fly::UpdateView( CameraView& cam_view, float delta_seconds )
 	// Retrieve frame along path
 	CoShip* target_ship = static_cast<CoShip*>( m_ptarget ? m_ptarget->GetComponent( CoShip::StaticClass() ) : nullptr );
 	const transform& path_transform = target_ship->GetPathTransform();
-	cam_view.m_Transform.SetTranslation( path_transform.GetTranslation() );
-	cam_view.m_Transform.SetRotation( path_transform.GetRotation() );
+	cam_view.m_transform.SetTranslation( path_transform.GetTranslation() );
+	cam_view.m_transform.SetRotation( path_transform.GetRotation() );
 
 
 	//CoDPosition* pTargetCoPos = static_cast<CoDPosition*>( m_ptargetPlanet ? m_ptargetPlanet->GetComponent( CoDPosition::StaticClass() ) : nullptr );
@@ -89,8 +89,8 @@ void FSCameraCtrl_EditPath::UpdateView( CameraView& cam_view, float delta_second
 	m_interp_tan = tf.TransformVector( vec3(0.f,0.f,-1.f) );
 	
 
-    cam_view.m_Transform.SetTranslation( tf.GetTranslation() );
-    cam_view.m_Transform.SetRotation( tf.GetRotation() );
+    cam_view.m_transform.SetTranslation( tf.GetTranslation() );
+    cam_view.m_transform.SetRotation( tf.GetRotation() );
 
 	Super::UpdateView( cam_view, delta_seconds );
 }
@@ -101,7 +101,7 @@ bool FSCameraCtrl_EditPath::OnControllerInput( Camera* pcamera, ControllerInput 
     
     if( input.m_type == eCIT_Key )
     {
-        mat4 cam_to_world( cam_view.m_Transform.GetRotation() );
+        mat4 cam_to_world( cam_view.m_transform.GetRotation() );
         vec3 right = cam_to_world.v0.xyz;
         vec3 up = cam_to_world.v1.xyz;
         vec3 front = -cam_to_world.v2.xyz;
