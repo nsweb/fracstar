@@ -13,43 +13,11 @@
 #include "gfx/shader.h"
 #include "gfx/rendercontext.h"
 #include "gfx/drawutils.h"
-//#include "math/frustum.h"
+//#include "math/splines.h"
 //#include "math/intersections.h"
 
 
 CLASS_EQUIP_CPP(CoPath);
-
-
-void CubicSpline::InitNonuniformCatmullRom( const vec3& p0, const vec3& p1, const vec3& p2, const vec3& p3, float dt0, float dt1, float dt2 )
-{
-	// compute tangents when parameterized in [t1,t2]
-	vec3 t1 = (p1 - p0) / dt0 - (p2 - p0) / (dt0 + dt1) + (p2 - p1) / dt1;
-	vec3 t2 = (p2 - p1) / dt1 - (p3 - p1) / (dt1 + dt2) + (p3 - p2) / dt2;
-
-	// rescale tangents for parametrization in [0,1]
-	t1 *= dt1;
-	t2 *= dt1;
-
-	InitCubicSpline( p1, p2, t1, t2 );
-}
-
-/*
- * Compute coefficients for a cubic polynomial
- *   p(s) = c0 + c1*s + c2*s^2 + c3*s^3
- * such that
- *   p(0) = x0, p(1) = x1
- *  and
- *   p'(0) = t0, p'(1) = t1.
- */
-void CubicSpline::InitCubicSpline( const vec3& p0, const vec3& p1, const vec3& t0, const vec3& t1 )
-{
-	c0 = p0;
-	c1 = t0;
-	c2 = -3.f*p0 + 3.f*p1 - 2.f*t0 - t1;
-	c3 = 2.f*p0 - 2.f*p1 + t0 + t1;
-}
-
-
 
 CoPath::CoPath()
 {
@@ -73,7 +41,7 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
     String str_file = String::Printf("../data/level/%s/path.fs", m_level_name.ToString().c_str());
     if( lvl_path.Open( str_file.c_str(), false ) )
     {
-        serialize_ok = Serialize(lvl_path);
+        Serialize(lvl_path);
     }
 	
     if( !serialize_ok )
@@ -529,7 +497,7 @@ void CoPath::OnControlPointMoved( int at_cp_idx )
     
 }
 
-bool CoPath::Serialize( bigball::Archive& file )
+void CoPath::Serialize( bigball::Archive& file )
 {
     int version = 0;
     file.SerializeRaw( version );
@@ -555,8 +523,6 @@ bool CoPath::Serialize( bigball::Archive& file )
 
     file.SerializeRaw(m_sum_distance);
     file.SerializeRaw(m_sum_knot_distance);
-    
-    return true;
 }
 
 void CoPath::_DrawDebug( RenderContext& render_ctxt )
