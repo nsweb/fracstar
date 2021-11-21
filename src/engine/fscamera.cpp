@@ -142,8 +142,8 @@ void FSCameraCtrl_EditPath::BuildGui()
     }
 	ImGui::InputFloat("knot", (float*)&m_ptarget->m_ctrl_points[m_current_cp_edit].m_knot);
 
-	ImGui::InputFloat3("cam_pos", (float*)&m_interp_pos, -1, ImGuiInputTextFlags_ReadOnly);
-	ImGui::InputFloat3("cam_dir", (float*)&m_interp_tan, -1, ImGuiInputTextFlags_ReadOnly);
+	ImGui::InputFloat3("cam_pos", (float*)&m_interp_pos, "%.3f",/*-1,*/ ImGuiInputTextFlags_ReadOnly);
+	ImGui::InputFloat3("cam_dir", (float*)&m_interp_tan, "%.3f",/*-1,*/ ImGuiInputTextFlags_ReadOnly);
 
 	m_dist_before = m_ptarget->GetSumDistance(m_current_cp_edit) - m_ptarget->GetSumDistance(m_current_cp_edit-1);
 	m_dist_after = m_ptarget->GetSumDistance(m_current_cp_edit+1) - m_ptarget->GetSumDistance(m_current_cp_edit);

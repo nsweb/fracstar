@@ -97,7 +97,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
     if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_EditPath::StaticClass() ) )
         cam_edit = static_cast<FSCameraCtrl_EditPath*>( cam_ctrl );
     
-    ImGui::Begin("Editor", bshow_editor, ImVec2(200,400), -1.f, 0/*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar*/ );
+    ImGui::Begin("Editor", bshow_editor, /*ImVec2(200, 400), -1.f,*/ 0/*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar*/);
 
 #if 0
 	ImGui::ShowTestWindow();
@@ -175,7 +175,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
         }
         ImGui::InputFloat("sum_dist", &pcoship->m_path_dist_level, -1, ImGuiInputTextFlags_ReadOnly);
         
-		ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, 5.0f);
+		//ImGui::PushStyleVar(ImGuiStyleVar_ChildWindowRounding, 5.0f);
 		ImGui::BeginChild("Sub2", ImVec2(0,400), true);
 		ImGui::Text("Control points");
 
