@@ -1,12 +1,10 @@
-
-
 #ifdef SHADER_SECTION
 	layout (location = 0) out vec4 frag_color;
 #endif
 
 const float c_normal_distance = 0.002f;
 const float c_minimun_distance = 0.001f;
-const int c_max_march_steps = 150;
+const int c_max_march_steps = 50;
 const float c_fudge_factor = 0.7f;
 const float c_folding_limit = 1.0f;
  

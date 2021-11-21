@@ -1,7 +1,7 @@
 
-#define GL_PI 3.14159265
-
 #ifdef SHADER_SECTION
+const float GL_PI = 3.14159265f;
+
 // Returns vec2( min_distance, material_id )
 vec2 map( vec3 pos );
 #endif
