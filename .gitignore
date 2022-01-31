@@ -1,0 +1,6 @@
+# Build generated files
+build/
+
+# Keep various files
+!*.lua
+!*.bat
