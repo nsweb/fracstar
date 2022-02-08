@@ -5,10 +5,10 @@
 #include "colevel.h"
 
 // not great but force compiler to use our math functions
-#define sqrt bigball::sqrt    
-#define abs bigball::abs
-#define cos bigball::cos
-#define sin bigball::sin
+#define sqrt bx::sqrt
+#define abs bx::abs
+#define cos bx::cos
+#define sin bx::sin
 
 #define UNIFORM_LEVEL( type, lvl_name, value )     UniformVariableCpp<type> lvl_name = { value, #lvl_name, this };
 

@@ -10,8 +10,9 @@
 #include <tchar.h>
 #endif
 
-#include "bigball.h"
+#include "bigfx.h"
 
-using namespace bigball;
+using namespace bigfx;
+
 
 #include "engine/fsengine.h"

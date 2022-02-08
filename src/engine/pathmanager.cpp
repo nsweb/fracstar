@@ -53,7 +53,8 @@ void PathManager::RemoveComponentFromWorld( Component* pComponent )
 
 void PathManager::Tick( TickContext& TickCtxt )
 {
-	PROFILE_SCOPE( __FUNCTION__ );
+	// (REBIND)
+	//PROFILE_SCOPE( __FUNCTION__ );
 
 	for( int32 i = 0; i < m_paths.size(); ++i )
 	{
@@ -63,7 +64,8 @@ void PathManager::Tick( TickContext& TickCtxt )
 
 void PathManager::_Render( RenderContext& RenderCtxt )
 {
-	PROFILE_SCOPE( __FUNCTION__ );
+	// (REBIND)
+	//PROFILE_SCOPE( __FUNCTION__ );
     
     for( int32 i = 0; i < m_paths.size(); ++i )
     {

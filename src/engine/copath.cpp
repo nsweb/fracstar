@@ -37,7 +37,7 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
     m_level_name = GetEntity()->GetName();
     
     bool serialize_ok = false;
-    bigball::File lvl_path;
+    bigfx::File lvl_path;
     String str_file = String::Printf("../data/level/%s/path.fs", m_level_name.ToString().c_str());
     if( lvl_path.Open( str_file.c_str(), false ) )
     {
@@ -52,7 +52,7 @@ void CoPath::Create( Entity* owner, class json::Object* proto )
         for( int i = 0; i < cp_count; i++ )
         {
             float stime, ctime;
-            bigball::sincos( i * 0.6f, &stime, &ctime );
+            bigfx::sincos( i * 0.6f, &stime, &ctime );
             vec3 p = vec3( 3.0f*stime, 4.0f*ctime, -2.9f + 2.f*stime );
             m_ctrl_points[i].m_pos = p;
         }
@@ -81,8 +81,8 @@ void CoPath::ComputeKnotDistances()
     //m_ctrl_points[0].m_dist = 0.f;
     for( int i = 1; i < cp_count; i++ )
     {
-        float dist = bigball::distance( m_ctrl_points[i].m_pos, m_ctrl_points[i-1].m_pos );
-        sumt += bigball::sqrt( dist );
+        float dist = bigfx::distance( m_ctrl_points[i].m_pos, m_ctrl_points[i-1].m_pos );
+        sumt += bigfx::sqrt( dist );
 		//sumd += dist;
         m_ctrl_points[i].m_knot = sumt;
         //m_ctrl_points[i].m_dist = sumd;
@@ -102,7 +102,7 @@ void CoPath::ComputeSplineDistances()
     for( int i = 1; i < cp_count; i++ )
     {
         if( i == 1 || i == cp_count - 1 )
-            dist = bigball::distance( m_ctrl_points[i].m_pos, m_ctrl_points[i-1].m_pos );
+            dist = bigfx::distance( m_ctrl_points[i].m_pos, m_ctrl_points[i-1].m_pos );
         else
             dist = EvaluateSplineArcDistance( i-2, 1.f );
 
@@ -139,7 +139,7 @@ float CoPath::EvaluateSplineArcDistance( int spline_idx, float knot_ratio ) cons
 			m_splines[spline_idx].Eval( ratio, pos, tan );
 		}
 			
-		dist += bigball::distance( pos, lastp );
+		dist += bigfx::distance( pos, lastp );
 		lastp = pos;
 	}
 
@@ -158,13 +158,13 @@ float CoPath::EvaluateSplineKnotRatioFromArcDistance( int spline_idx, float arc_
         ratio = (float)j / m_sp_step_count;
         m_splines[spline_idx].Eval( ratio, pos, tan );
         
-        dist += bigball::distance( pos, lastp );
+        dist += bigfx::distance( pos, lastp );
         lastp = pos;
         
         if( arc_dist <= dist )
         {
             float dratio = (arc_dist - lastd) / (dist - lastd);
-            float knot_dist = bigball::lerp( lastr, ratio, dratio );
+            float knot_dist = bigfx::lerp( lastr, ratio, dratio );
             return knot_dist;
         }
     }
@@ -174,8 +174,8 @@ float CoPath::EvaluateSplineKnotRatioFromArcDistance( int spline_idx, float arc_
 
 void CoPath::ComputeSplines( int from_sp_idx, int to_sp_idx )
 {
-	from_sp_idx = bigball::max( 0, from_sp_idx );
-	to_sp_idx = bigball::min( m_splines.size()-1, to_sp_idx );
+	from_sp_idx = bigfx::max( 0, from_sp_idx );
+	to_sp_idx = bigfx::min( m_splines.size()-1, to_sp_idx );
 
 	for( int i = from_sp_idx; i <= to_sp_idx; i++ )
 	{
@@ -227,12 +227,12 @@ float CoPath::ConvertDistanceToKnot( float dist_along_path ) const
     if( cp_count >= 4 && from_cp_idx > 0 && from_cp_idx < cp_count - 2 )
     {
         float knot_ratio = EvaluateSplineKnotRatioFromArcDistance( from_cp_idx - 1, delta_dist );
-        float knot_dist = bigball::lerp( m_ctrl_points[from_cp_idx].m_knot, m_ctrl_points[from_cp_idx + 1].m_knot, knot_ratio );
+        float knot_dist = bigfx::lerp( m_ctrl_points[from_cp_idx].m_knot, m_ctrl_points[from_cp_idx + 1].m_knot, knot_ratio );
         return knot_dist;
     }
     
     float dist_ratio = (dist_along_path - m_ctrl_points[from_cp_idx].m_dist) / (m_ctrl_points[from_cp_idx + 1].m_dist - m_ctrl_points[from_cp_idx].m_dist);
-    float knot_dist = bigball::lerp( m_ctrl_points[from_cp_idx].m_knot, m_ctrl_points[from_cp_idx + 1].m_knot, dist_ratio );
+    float knot_dist = bigfx::lerp( m_ctrl_points[from_cp_idx].m_knot, m_ctrl_points[from_cp_idx + 1].m_knot, dist_ratio );
     return knot_dist;
 }
 
@@ -259,7 +259,7 @@ float CoPath::ConvertKnotToDistance( float knot_dist_along_path ) const
         return dist;
     }
     
-    float dist = bigball::lerp( m_ctrl_points[from_cp_idx].m_dist, m_ctrl_points[from_cp_idx + 1].m_dist, udist );
+    float dist = bigfx::lerp( m_ctrl_points[from_cp_idx].m_dist, m_ctrl_points[from_cp_idx + 1].m_dist, udist );
     return dist;
 }
 
@@ -286,7 +286,7 @@ void CoPath::Tick( TickContext& tick_ctxt )
 
 void CoPath::__InterpPathDist( float dist_along_path, transform& tf ) const
 {
-	float knot_dist = (m_sum_distance > 1e-4f ? bigball::clamp( (dist_along_path / m_sum_distance) * m_sum_knot_distance, 0.f, m_sum_knot_distance ) : 0.f);
+	float knot_dist = (m_sum_distance > 1e-4f ? bigfx::clamp( (dist_along_path / m_sum_distance) * m_sum_knot_distance, 0.f, m_sum_knot_distance ) : 0.f);
 	InterpPathKnotDist( knot_dist, tf );
 }
 
@@ -294,7 +294,7 @@ void CoPath::InterpPathKnotDist( float knot_dist_along_path, transform& tf ) con
 {
     vec3 pos, tan;
     InterpPathKnotDist( knot_dist_along_path, pos, tan );
-    tan = bigball::normalize( tan );
+    tan = bigfx::normalize( tan );
     
     const vec3 up( 0.f, 0.f, 1.f ); // TODO: should be defined per ctrl point
     mat3 cam_rot;
@@ -302,22 +302,22 @@ void CoPath::InterpPathKnotDist( float knot_dist_along_path, transform& tf ) con
     // Back
     cam_rot.v2 = -tan;
     // Right
-    cam_rot.v0 = bigball::normalize( bigball::cross(tan, up) );
+    cam_rot.v0 = bigfx::normalize( bigfx::cross(tan, up) );
     // Up
-    cam_rot.v1 = bigball::cross(cam_rot.v0, tan);
+    cam_rot.v1 = bigfx::cross(cam_rot.v0, tan);
     
     tf.Set( quat(cam_rot), pos, 1.f );
 }
 
 void CoPath::__InterpPathDist( float dist_along_path, vec3& pos, vec3& tan ) const
 {
-	float knot_dist = (m_sum_distance > 1e-4f ? bigball::clamp( (dist_along_path / m_sum_distance) * m_sum_knot_distance, 0.f, m_sum_knot_distance ) : 0.f);
+	float knot_dist = (m_sum_distance > 1e-4f ? bigfx::clamp( (dist_along_path / m_sum_distance) * m_sum_knot_distance, 0.f, m_sum_knot_distance ) : 0.f);
 	InterpPathKnotDist( knot_dist, pos, tan );
 }
 
 void CoPath::InterpPathKnotDist( float knot_dist_along_path, vec3& pos, vec3& tan ) const
 {
-    knot_dist_along_path = bigball::clamp( knot_dist_along_path, 0.f, m_sum_knot_distance );
+    knot_dist_along_path = bigfx::clamp( knot_dist_along_path, 0.f, m_sum_knot_distance );
 	const int cp_count = m_ctrl_points.size();
 	int cp_idx = 0;
 	for( ; cp_idx < m_ctrl_points.size()-1; cp_idx++ )
@@ -334,7 +334,7 @@ void CoPath::InterpPathKnotDist( float knot_dist_along_path, vec3& pos, vec3& ta
 	else if( cp_count > 1 )
 	{
 		float udist = (knot_dist_along_path - m_ctrl_points[cp_idx].m_knot) / (m_ctrl_points[cp_idx + 1].m_knot - m_ctrl_points[cp_idx].m_knot);
-		pos = bigball::lerp( m_ctrl_points[cp_idx].m_pos, m_ctrl_points[cp_idx+1].m_pos, udist );
+		pos = bigfx::lerp( m_ctrl_points[cp_idx].m_pos, m_ctrl_points[cp_idx+1].m_pos, udist );
 		tan = m_ctrl_points[cp_idx + 1].m_pos - m_ctrl_points[cp_idx].m_pos;
 	}
 	else if( cp_count == 1 )
@@ -439,7 +439,7 @@ bool CoPath::InsertControlPoint( float knot_dist_along_path )
     if( cp_idx == 0 || cp_idx == cp_count - 2 )
     {
         // Insert inside first / last segment (can't evaluate curve nearest spline there)
-        new_cp.m_pos = bigball::lerp( m_ctrl_points[cp_idx].m_pos, m_ctrl_points[cp_idx + 1].m_pos, udist );
+        new_cp.m_pos = bigfx::lerp( m_ctrl_points[cp_idx].m_pos, m_ctrl_points[cp_idx + 1].m_pos, udist );
     }
     else
     {
@@ -497,7 +497,7 @@ void CoPath::OnControlPointMoved( int at_cp_idx )
     
 }
 
-void CoPath::Serialize( bigball::Archive& file )
+void CoPath::Serialize( bigfx::Archive& file )
 {
     int version = 0;
     file.SerializeRaw( version );

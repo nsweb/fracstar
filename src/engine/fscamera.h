@@ -8,7 +8,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-class BIGBALL_API FSCameraCtrl_Fly : public CameraCtrl_Base
+class BIGFX_API FSCameraCtrl_Fly : public CameraCtrl_Base
 {
 	CLASS_EQUIP_H(FSCameraCtrl_Fly, CameraCtrl_Base)
 
@@ -27,7 +27,7 @@ protected:
 	Entity*			m_ptarget;
 };
 
-class BIGBALL_API FSCameraCtrl_EditPath : public CameraCtrl_Base
+class BIGFX_API FSCameraCtrl_EditPath : public CameraCtrl_Base
 {
 	CLASS_EQUIP_H(FSCameraCtrl_EditPath, CameraCtrl_Base)
 

@@ -6,11 +6,11 @@
 
 #include "engine/componentmanager.h"
 
-namespace bigball
+namespace bigfx
 {
-	class BIGBALL_API Component;
-	class BIGBALL_API Shader;
-    struct BIGBALL_API RenderContext;
+	class BIGFX_API Component;
+	class BIGFX_API Shader;
+    struct BIGFX_API RenderContext;
 };
 class CoLevel;
 class LevelShader;
@@ -31,7 +31,7 @@ public:
 	virtual void            AddComponentToWorld( Component* pComponent );
 	virtual void            RemoveComponentFromWorld( Component* pComponent );
 	virtual void            Tick( struct TickContext& TickCtxt );
-    virtual void            _Render( bigball::RenderContext& RenderCtxt );
+    virtual void            _Render( bigfx::RenderContext& RenderCtxt );
 
     bool                    InitLevels( char const* json_path );
 	Array<CoLevel*> const&  GetLevelArray()	{ return m_levels;	}

@@ -9,11 +9,11 @@
 #include "math/splines.h"
 
 
-namespace bigball
+namespace bigfx
 {
-	class BIGBALL_API Shader;
-	struct BIGBALL_API TickContext;
-	struct BIGBALL_API RenderContext;
+	class BIGFX_API Shader;
+	struct BIGFX_API TickContext;
+	struct BIGFX_API RenderContext;
     struct CubicSpline;
     struct ControlPoint;
 };
@@ -33,7 +33,7 @@ public:
 	virtual void		AddToWorld() override;
 	virtual void		RemoveFromWorld() override;
 	virtual void		Tick( TickContext& tick_ctxt );
-    void                _DrawDebug( bigball::RenderContext& render_ctxt );
+    void                _DrawDebug( bigfx::RenderContext& render_ctxt );
 	//void				_Render( RenderContext& RenderCtxt, Shader* BlockShader );
     
 	void                InterpPathKnotDist( float knot_dist_along_path, vec3& pos, vec3& tan ) const;
@@ -51,7 +51,7 @@ public:
     int                 GetNearestControlPointIdx( float knot_dist_along_path ) const;
     void                OnControlPointMoved( int at_cp_idx );
     
-    virtual void        Serialize( bigball::Archive& file ) override;
+    virtual void        Serialize( bigfx::Archive& file ) override;
 
 public:
     Name m_level_name;

@@ -96,14 +96,14 @@ void CoShip::Tick( TickContext& tick_ctxt )
         if( m_path_dist_level > ppath->m_sum_distance )
             m_path_dist_level -= ppath->m_sum_distance;
         
-        m_path_dist_level = bigball::clamp( m_path_dist_level, 0.f, ppath->m_sum_distance );
+        m_path_dist_level = bigfx::clamp( m_path_dist_level, 0.f, ppath->m_sum_distance );
         m_path_knot_dist_level = ppath->ConvertDistanceToKnot(m_path_dist_level);
         
     }
     else
     {
         // Ensure path dist in sync with knot dist
-        m_path_knot_dist_level = bigball::clamp( m_path_knot_dist_level, 0.f, ppath->m_sum_knot_distance );
+        m_path_knot_dist_level = bigfx::clamp( m_path_knot_dist_level, 0.f, ppath->m_sum_knot_distance );
         m_path_dist_level = ppath->ConvertKnotToDistance(m_path_knot_dist_level);
     }
     
@@ -144,8 +144,8 @@ void CoShip::Tick( TickContext& tick_ctxt )
 
 bool CoShip::OnControllerInput( Camera* pcamera, ControllerInput const& input )
 {
-    m_ship_cam_pos.x = bigball::clamp( m_ship_cam_pos.x + input.m_delta.x * m_speed_lateral, -m_move_range, m_move_range );
-    m_ship_cam_pos.y = bigball::clamp( m_ship_cam_pos.y + input.m_delta.y * m_speed_lateral, -m_move_range, m_move_range );
+    m_ship_cam_pos.x = bigfx::clamp( m_ship_cam_pos.x + input.m_delta.x * m_speed_lateral, -m_move_range, m_move_range );
+    m_ship_cam_pos.y = bigfx::clamp( m_ship_cam_pos.y + input.m_delta.y * m_speed_lateral, -m_move_range, m_move_range );
     
     return true;
 }

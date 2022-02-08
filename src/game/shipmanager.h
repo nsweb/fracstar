@@ -6,11 +6,11 @@
 
 #include "engine/componentmanager.h"
 
-namespace bigball
+namespace bigfx
 {
-	class BIGBALL_API Component;
-	class BIGBALL_API Shader;
-    struct BIGBALL_API RenderContext;
+	class BIGFX_API Component;
+	class BIGFX_API Shader;
+    struct BIGFX_API RenderContext;
 };
 class CoShip;
 
@@ -30,7 +30,7 @@ public:
 	virtual void		AddComponentToWorld( Component* pComponent );
 	virtual void		RemoveComponentFromWorld( Component* pComponent );
 	virtual void		Tick( struct TickContext& TickCtxt );
-    virtual void		_Render( bigball::RenderContext& RenderCtxt );
+    virtual void		_Render( bigfx::RenderContext& RenderCtxt );
 
 	Array<CoShip*> const& GetShipArray()	{ return m_ships;	}
 	CoShip*				_GetShip()			{ if( m_ships.size() > 0 ) { return m_ships[0]; } return nullptr; }

@@ -34,17 +34,17 @@ void FSCameraCtrl_Fly::UpdateView( CameraView& cam_view, float delta_seconds )
 	//	float GroundDist = pTargetCoBlocks->ComputeGroundSignedDistance( CamPos );
 	//	
 	//	//dvec3 TargetPos = pTargetCoPos->GetPosition();
-	//	//float Dist = bigball::length( CamPos - TargetPos );
+	//	//float Dist = bigfx::length( CamPos - TargetPos );
 
 	//	double OctreeSize = pTargetCoBlocks->GetOctreeSize();
 	//	double MaxDist = 10.0 * OctreeSize;
-	//	float DistRatio = bigball::clamp( (float)((GroundDist) / MaxDist), 0.0f, 1.0f );
-	//	m_StrafeSpeed = bigball::lerp( 1.0f, 4.0f * (float)OctreeSize, DistRatio );
+	//	float DistRatio = bigfx::clamp( (float)((GroundDist) / MaxDist), 0.0f, 1.0f );
+	//	m_StrafeSpeed = bigfx::lerp( 1.0f, 4.0f * (float)OctreeSize, DistRatio );
 
 	//	// Adjust near and far planes
 	//	float NearFarRatio = 100000.0f;
 	//	static float reduce = 0.5f;
-	//	float NearD = bigball::max( 1.0f, (float)((GroundDist) * reduce) );
+	//	float NearD = bigfx::max( 1.0f, (float)((GroundDist) * reduce) );
 	//	cam_view.m_fParameters[eCP_NEAR] = NearD;
 	//	cam_view.m_fParameters[eCP_FAR] = NearD * NearFarRatio;
 

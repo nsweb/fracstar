@@ -8,11 +8,11 @@
 #include "gfx/shader.h"
 #include "colevel.h"
 
-namespace bigball
+namespace bigfx
 {
-	class BIGBALL_API Shader;
-	struct BIGBALL_API TickContext;
-	struct BIGBALL_API RenderContext;
+	class BIGFX_API Shader;
+	struct BIGFX_API TickContext;
+	struct BIGFX_API RenderContext;
 };
 
 struct UniformVariableCppBase

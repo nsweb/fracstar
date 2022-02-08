@@ -6,10 +6,10 @@
 
 #include "engine/componentmanager.h"
 
-namespace bigball
+namespace bigfx
 {
-	class BIGBALL_API Component;
-	class BIGBALL_API Shader;
+	class BIGFX_API Component;
+	class BIGFX_API Shader;
 };
 class CoBlocks;
 

@@ -7,11 +7,11 @@
 #include "engine/component.h"
 #include "gfx/shader.h"
 
-namespace bigball
+namespace bigfx
 {
-	class BIGBALL_API Shader;
-	struct BIGBALL_API TickContext;
-	struct BIGBALL_API RenderContext;
+	class BIGFX_API Shader;
+	struct BIGFX_API TickContext;
+	struct BIGFX_API RenderContext;
 };
 
 class CoLevel;
@@ -103,7 +103,7 @@ public:
         if( !m_keys.size() )
         return;
         
-        time = bigball::clamp( time, 0.f, m_keys.Last().m_time );
+        time = bigfx::clamp( time, 0.f, m_keys.Last().m_time );
         
         type* value_addr = parent_level->GetUniformBufferValue<type>(m_var_index);
         if( m_keys.size() == 1 )
@@ -123,7 +123,7 @@ public:
         }
         
         float time_ratio = (time - m_keys[found_key_idx].m_time) / (m_keys[found_key_idx + 1].m_time - m_keys[found_key_idx].m_time);
-        *value_addr = bigball::lerp( m_keys[found_key_idx].m_value, m_keys[found_key_idx + 1].m_value, time_ratio );
+        *value_addr = bigfx::lerp( m_keys[found_key_idx].m_value, m_keys[found_key_idx + 1].m_value, time_ratio );
     }
     
     virtual void SetShaderUniformValue(Shader* shader, class CoLevel* parent_level) override

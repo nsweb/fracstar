@@ -53,7 +53,8 @@ void ShipManager::RemoveComponentFromWorld( Component* pComponent )
 
 void ShipManager::Tick( TickContext& TickCtxt )
 {
-	PROFILE_SCOPE( __FUNCTION__ );
+	// (REBIND)
+	//PROFILE_SCOPE( __FUNCTION__ );
 
 	for( int32 i = 0; i < m_ships.size(); ++i )
 	{
@@ -63,7 +64,8 @@ void ShipManager::Tick( TickContext& TickCtxt )
 
 void ShipManager::_Render( RenderContext& RenderCtxt )
 {
-	PROFILE_SCOPE( __FUNCTION__ );
+	// (REBIND)
+	//PROFILE_SCOPE( __FUNCTION__ );
 
 	for( int32 i = 0; i < m_ships.size(); ++i )
 	{

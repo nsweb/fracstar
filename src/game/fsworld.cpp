@@ -106,7 +106,8 @@ void FSWorld::RemoveComponentFromWorld( Component* component )
 
 void FSWorld::Tick( TickContext& tick_ctxt )
 {
-	PROFILE_SCOPE( __FUNCTION__ );
+    // (REBIND)
+    //BGFX_PROFILER_SCOPE( __FUNCTION__, 0xffffffff );
 
 	for( int32 i = 0; i < m_levels.size(); ++i )
 	{
@@ -116,7 +117,8 @@ void FSWorld::Tick( TickContext& tick_ctxt )
 
 void FSWorld::_Render( RenderContext& render_ctxt )
 {
-	PROFILE_SCOPE( __FUNCTION__ );
+    // (REBIND)
+    //BGFX_PROFILER_SCOPE( __FUNCTION__, 0xffffffff);
 
 
 }

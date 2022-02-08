@@ -69,7 +69,7 @@ static void UIOnToggleEditorCB( bool bshow_editor )
     }
 }
 
-static void UIDrawEditorCB( bool* bshow_editor, bigball::RenderContext& render_ctxt )
+static void UIDrawEditorCB( bool* bshow_editor, bigfx::RenderContext& render_ctxt )
 {
     FSEditor::Get()->UIDrawEditor( bshow_editor, render_ctxt );
 }
@@ -159,7 +159,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
         bool load_path = ImGui::Button( "load" );
         if( save_path || load_path )
         {
-            bigball::File lvl_path;
+            bigfx::File lvl_path;
             String str_file = String::Printf("../data/level/%s/path.fs", pcopath->m_level_name.ToString().c_str());
             if( lvl_path.Open( str_file.c_str(), save_path ) )
             {
@@ -169,7 +169,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
         
         if( ImGui::SliderFloat("knot_dist", &pcoship->m_path_knot_dist_level, 0.f, pcopath->m_sum_knot_distance) )
         {
-            pcoship->m_path_knot_dist_level = bigball::clamp( pcoship->m_path_knot_dist_level, 0.f, pcopath->m_sum_knot_distance );
+            pcoship->m_path_knot_dist_level = bigfx::clamp( pcoship->m_path_knot_dist_level, 0.f, pcopath->m_sum_knot_distance );
             if( cam_edit )
                 m_current_cp_idx = cam_edit->ResetEdit( pcoship->m_path_knot_dist_level );
         }
