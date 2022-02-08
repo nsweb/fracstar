@@ -1,7 +1,7 @@
 
 function setTarget( _configuration, _platform, _basepath )
-	local strtarget = string.format( "%s/bin/%s_%s/", _basepath, _configuration, _platform )
-	local strobj = string.format( "%s/intermediate/%s_%s", _basepath, _configuration, _platform )
+	local strtarget = string.format( "%s/build/bin/%s_%s/", _basepath, _configuration, _platform )
+	local strobj = string.format( "%s/build/intermediate/%s_%s", _basepath, _configuration, _platform )
 	configuration {_configuration, _platform}
 		targetdir( strtarget )
 		objdir( strobj )
