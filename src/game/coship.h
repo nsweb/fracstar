@@ -1,6 +1,3 @@
-
-
-
 #ifndef FSCOSHIP_H
 #define FSCOSHIP_H
 
@@ -9,7 +6,6 @@
 
 namespace bigfx
 {
-	//class BIGFX_API Shader;
 	struct BIGFX_API TickContext;
 	struct BIGFX_API RenderContext;
     class BIGFX_API Camera;
@@ -38,16 +34,17 @@ public:
 	virtual void		RemoveFromWorld() override;
 	virtual void		Tick( TickContext& tick_ctxt );
 	void				_Render( RenderContext& render_ctxt );
-    bool                OnControllerInput( Camera* pCamera, ControllerInput const& Input );
+    bool                OnControllerInput( Camera* camera, ControllerInput const& input );
 
-    void				SetCurrentLevel( Entity* pcurrent_level );
+    void				SetCurrentLevel( Entity* current_level );
     void                ChangeState( eShipState new_state );
 	const transform&	GetPathTransform()	{ return m_path_frame;	}
 
 public:
-	Entity*		m_pcurrent_level;
-	Shader*     m_ship_shader;
-	transform	m_path_frame;
+	Entity*				m_current_level;
+	bgfx::UniformHandle u_collision_dist;
+	bgfx::ProgramHandle m_ship_program;
+	transform			m_path_frame;
     
     eShipState  m_state;
     vec3        m_ship_cam_pos;

@@ -1,5 +1,3 @@
-
-
 #include "../fracstar.h"
 #include "coship.h"
 #include "levelshader.h"
@@ -21,7 +19,7 @@
 CLASS_EQUIP_CPP(CoShip);
 
 CoShip::CoShip() :
-	m_pcurrent_level(nullptr),
+	m_current_level(nullptr),
     m_state(eShipState::Run),
     m_speed(1.f),
     m_speed_lateral(0.1f),
@@ -63,12 +61,14 @@ void CoShip::Create( Entity* owner, class json::Object* proto )
     
     m_ship_cam_pos = vec3( 0.f, 0.f, -m_cam_zoffset);
 
-	m_ship_shader = GfxManager::GetStaticInstance()->LoadShader( "ship" );
+    m_ship_program = loadProgram("ship_vs", "ship_fs");
+	u_collision_dist = bgfx::createUniform("u_collision_dist", bgfx::UniformType::Vec4);
 }
 
 void CoShip::Destroy()
 {
-	m_ship_shader = nullptr;
+	bgfx::destroy(u_collision_dist);
+    bgfx::destroy(m_ship_program);
 
 	Super::Destroy();
 }
@@ -85,10 +85,10 @@ void CoShip::RemoveFromWorld()
 
 void CoShip::Tick( TickContext& tick_ctxt )
 {
-	if( !m_pcurrent_level )
+	if( !m_current_level )
 		return;
 
-	CoPath* ppath = static_cast<CoPath*>( m_pcurrent_level->GetComponent( CoPath::StaticClass() ) );
+	CoPath* ppath = static_cast<CoPath*>( m_current_level->GetComponent( CoPath::StaticClass() ) );
     
     if( m_state == eShipState::Run )
     {
@@ -117,7 +117,7 @@ void CoShip::Tick( TickContext& tick_ctxt )
 	// Check collisions
 	{
 		vec3 ship_world_pos = m_path_frame.TransformPosition(m_ship_cam_pos);
-		m_current_collision_dist = LevelShader::GetStaticInstance()->EstimateLevelDistance(m_pcurrent_level->GetName(), ship_world_pos);
+		m_current_collision_dist = LevelShader::GetStaticInstance()->EstimateLevelDistance(m_current_level->GetName(), ship_world_pos);
         //DrawUtils::GetStaticInstance()->PushAABB(ship_world_pos, level_dist*0.5f, u8vec4(255,0,0,124));
         
         static float cube_size = 0.01f;
@@ -126,23 +126,23 @@ void CoShip::Tick( TickContext& tick_ctxt )
         vec3 up_dir = m_path_frame.TransformVector( vec3(0.f,1.f,0.f) );
         {
             vec3 ray_pos = ship_world_pos;// + vec3 (0.f, 0.m_ship_scale
-            vec3 front_pos = LevelShader::GetStaticInstance()->RayMarch(m_pcurrent_level->GetName(), ray_pos, front_dir, 10.f);
+            vec3 front_pos = LevelShader::GetStaticInstance()->RayMarch(m_current_level->GetName(), ray_pos, front_dir, 10.f);
             DrawUtils::GetStaticInstance()->PushAABB(front_pos, cube_size, u8vec4(255,0,0,124));
         }
         {
             vec3 ray_pos = ship_world_pos;// + vec3 (0.f, 0.m_ship_scale
-            vec3 right_pos = LevelShader::GetStaticInstance()->RayMarch(m_pcurrent_level->GetName(), ray_pos, right_dir, 10.f);
+            vec3 right_pos = LevelShader::GetStaticInstance()->RayMarch(m_current_level->GetName(), ray_pos, right_dir, 10.f);
             DrawUtils::GetStaticInstance()->PushAABB(right_pos, cube_size, u8vec4(0,255,0,124));
         }
         {
             vec3 ray_pos = ship_world_pos;// + vec3 (0.f, 0.m_ship_scale
-            vec3 down_pos = LevelShader::GetStaticInstance()->RayMarch(m_pcurrent_level->GetName(), ray_pos, -up_dir, 10.f);
+            vec3 down_pos = LevelShader::GetStaticInstance()->RayMarch(m_current_level->GetName(), ray_pos, -up_dir, 10.f);
             DrawUtils::GetStaticInstance()->PushAABB(down_pos, cube_size, u8vec4(0,0,255,124));
         }
 	}
 }
 
-bool CoShip::OnControllerInput( Camera* pcamera, ControllerInput const& input )
+bool CoShip::OnControllerInput( Camera* camera, ControllerInput const& input )
 {
     m_ship_cam_pos.x = bigfx::clamp( m_ship_cam_pos.x + input.m_delta.x * m_speed_lateral, -m_move_range, m_move_range );
     m_ship_cam_pos.y = bigfx::clamp( m_ship_cam_pos.y + input.m_delta.y * m_speed_lateral, -m_move_range, m_move_range );
@@ -155,43 +155,36 @@ void CoShip::_Render( RenderContext& render_ctxt )
 	static float global_time = 0.f;
 	global_time += render_ctxt.m_delta_seconds;
 
-	transform cam2world_transform( render_ctxt.m_view.m_transform.GetRotation(), render_ctxt.m_view.m_transform.GetTranslation(), (float)render_ctxt.m_view.m_transform.GetScale() );
+	transform cam_to_world_transform( render_ctxt.m_view.m_transform.GetRotation(), render_ctxt.m_view.m_transform.GetTranslation(), (float)render_ctxt.m_view.m_transform.GetScale() );
 
-	//vec3 cam_pos = cam2world_transform.GetTranslation();
-	mat4 view_inv_mat( cam2world_transform.GetRotation(), cam2world_transform.GetTranslation(), cam2world_transform.GetScale() );
-
-	CoPosition* ppos = static_cast<CoPosition*>( GetEntityComponent( CoPosition::StaticClass() ) );
-	transform ship2cam_transform = ppos->GetTransform();	// relative to cam
-	transform ship_transform = cam2world_transform * ship2cam_transform;
+	CoPosition* copos = static_cast<CoPosition*>( GetEntityComponent( CoPosition::StaticClass() ) );
+	transform ship_to_cam_transform = copos->GetTransform();	// relative to cam
+	transform ship_transform = cam_to_world_transform * ship_to_cam_transform;
 	mat4 world_mat( ship_transform.GetRotation(), ship_transform.GetTranslation(), (float)ship_transform.GetScale() * m_ship_scale );
-	mat4 view_mat = bigball::inverse(view_inv_mat);
-	mat4 world_view_mat = view_mat * world_mat;
+	mat4 world_to_view_mat = render_ctxt.m_view_mat * world_mat;
 	static float coll_threshold = 0.05f;
 	float collision_dist = clamp(m_current_collision_dist / coll_threshold, 0.0f, 1.0f);
 
+	// Set model matrix for rendering.
+	bgfx::setTransform(&world_mat.v0);
+
+	// Set view and projection matrix for view 0
+	bgfx::setViewTransform(0, &render_ctxt.m_view_mat.v0, &render_ctxt.m_proj_mat.v0);
+
+	bgfx::setUniform(u_collision_dist, &vec4(collision_dist, 0.f, 0.f, 0.f));
+
 	// Draw reverse faces, so that we can still display something inside cube
-	glCullFace(GL_FRONT);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	m_ship_shader->Bind();
-	{
-		ShaderUniform uni_world = m_ship_shader->GetUniformLocation("world_mat");
-		m_ship_shader->SetUniform( uni_world, world_mat );
-		ShaderUniform uni_view = m_ship_shader->GetUniformLocation("view_mat");
-		m_ship_shader->SetUniform( uni_view, view_mat );
-		ShaderUniform uni_proj = m_ship_shader->GetUniformLocation("proj_mat");
-		m_ship_shader->SetUniform( uni_proj, render_ctxt.m_proj_mat );
-		ShaderUniform uni_vtb = m_ship_shader->GetUniformLocation("viewtobox_mat");
-		m_ship_shader->SetUniform( uni_vtb, bigball::inverse(world_view_mat) );
-		ShaderUniform uni_cdist = m_ship_shader->GetUniformLocation("collision_dist");
-		m_ship_shader->SetUniform(uni_cdist, collision_dist);
-		
-		DFManager::GetStaticInstance()->DrawCube();
-	}
-	m_ship_shader->Unbind();
-
-	glCullFace(GL_BACK);
+	uint64 state = 0
+		| BGFX_STATE_WRITE_RGB
+		| BGFX_STATE_WRITE_A
+		| BGFX_STATE_WRITE_Z
+		| BGFX_STATE_DEPTH_TEST_LESS
+		| BGFX_STATE_CULL_CCW
+		| BGFX_STATE_MSAA
+		;
+	bgfx::setState(state);
+    DrawUtils::GetStaticInstance()->SetCubeBuffers();
+	bgfx::submit(0, m_ship_program);
 }
 
 void CoShip::ChangeState( eShipState new_state )
@@ -199,9 +192,9 @@ void CoShip::ChangeState( eShipState new_state )
     m_state = new_state;
 }
 
-void CoShip::SetCurrentLevel( Entity* pcurrent_level )
+void CoShip::SetCurrentLevel( Entity* current_level )
 {
-    m_pcurrent_level = pcurrent_level;
+    m_current_level = current_level;
     
     m_path_dist_level = 0.f;
     m_path_knot_dist_level = 0.f;
