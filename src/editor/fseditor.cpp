@@ -96,6 +96,15 @@ void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
     FSCameraCtrl_EditPath* cam_edit = nullptr;
     if( cam_ctrl && cam_ctrl->IsA( FSCameraCtrl_EditPath::StaticClass() ) )
         cam_edit = static_cast<FSCameraCtrl_EditPath*>( cam_ctrl );
+
+    ImGui::SetNextWindowPos(
+        ImVec2(320.0f, 50.0f)
+        , ImGuiCond_FirstUseEver
+    );
+    ImGui::SetNextWindowSize(
+        ImVec2(300.0f, 400.0f)
+        , ImGuiCond_FirstUseEver
+    );
     
     ImGui::Begin("Editor", bshow_editor, /*ImVec2(200, 400), -1.f,*/ 0/*ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar*/);
 
@@ -184,7 +193,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
 			str_cp_array.push_back( String::Printf( "%d", cp_idx ) );
 
         ImGui::PushItemWidth( 50 );
-		if( ImGui::ListBox( "", &m_current_cp_idx, GetItemStringArray, &str_cp_array, str_cp_array.size(), 11 ) )
+		if( ImGui::ListBox("LB", &m_current_cp_idx, GetItemStringArray, &str_cp_array, str_cp_array.size(), 11 ) )
 		{
 			if( m_current_cp_idx >= 0 && m_current_cp_idx < pcopath->m_ctrl_points.size() )
 			{
@@ -235,7 +244,7 @@ void FSEditor::UIDrawEditor( bool* bshow_editor, RenderContext& render_ctxt )
         }
         ImGui::EndChild();  // Action
 		ImGui::EndChild();  // Sub2
-		ImGui::PopStyleVar();
+		//ImGui::PopStyleVar();
 
 	}
     
