@@ -18,10 +18,10 @@ public:
 
 	virtual bool		Init(EngineInitParams const& init_params) override;
 	virtual void		Shutdown() override;
-	virtual void		MainLoop() override;
+	virtual bool		MainLoop() override;
 	virtual bool		RunCommand( String const& cmd_type, Array<String> const& switches, Array<String> const& tokens ) override;
 
-	static FSEngine*	Get()		{ return ms_pengine;	}
+	static FSEngine*	Get()		{ return static_cast<FSEngine*>(ms_engine);	}
 
 protected:
 	virtual void		DeclareComponentsAndEntities() override;
@@ -29,8 +29,7 @@ protected:
 	virtual void		InitManagers() override;
 	virtual void		DestroyManagers() override;
 
-	static FSEngine*	ms_pengine;
-	class FSEditor*		m_peditor;
+	class FSEditor*		m_editor;
 };
 
 
