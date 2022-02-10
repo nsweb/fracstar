@@ -1,10 +1,9 @@
 
-
-
 #ifndef DFMANAGER_H
 #define DFMANAGER_H
 
 #include "engine/componentmanager.h"
+#include "bgfx_utils.h"
 
 namespace bigfx
 {
@@ -19,8 +18,18 @@ class DFManager : public ComponentManager
 
 	struct DFVertex
 	{
-		vec2	pos;
-		vec2	tex;
+		vec2	m_pos;
+		vec2	m_tex;
+
+		static void init()
+		{
+			ms_layout
+				.begin()
+				.add(bgfx::Attrib::Position, 2, bgfx::AttribType::Float)
+				.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+				.end();
+		};
+		static bgfx::VertexLayout ms_layout;
 	};
 
 private:
@@ -36,27 +45,12 @@ public:
 	virtual void		RemoveComponentFromWorld( Component* pcomponent );
 	virtual void		Tick( struct TickContext& tick_ctxt );
 	virtual void		_Render( struct RenderContext& render_ctxt );
-	void				DrawCube();
 
 protected:
 
-	enum eVAType
-	{
-		eVAScene = 0,
-		eVACube,
-		eVACount
-	};
-	enum eVBType
-	{
-		eVBScene = 0,        /** Dynamic VB used to render segments */
-		eVBCube,
-		eVBCubeElt,
-		eVBCount
-	};
-
-	GLuint			m_varrays[eVACount];
-	GLuint			m_vbuffers[eVBCount];
+	bgfx::VertexBufferHandle	m_vbh_fullscreen_quad;
+	bgfx::UniformHandle			u_z_var_screen_res;
+	bgfx::UniformHandle			u_camera_pos;
 };
-
 
 #endif // DFMANAGER_H

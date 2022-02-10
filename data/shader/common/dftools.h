@@ -9,6 +9,7 @@ vec2 map( vec3 pos );
 // Finite difference normal
 vec3 getNormal( vec3 pos )
 {
+	const float c_normal_distance = 0.002f;
 	vec3 eps = vec3( c_normal_distance, 0.0, 0.0 );
 	vec3 nor = vec3(
 		map(pos+eps.xyy).x - map(pos-eps.xyy).x,
@@ -36,12 +37,12 @@ float fOpDifferenceChamfer (float a, float b, float r) {
 
 // The "Round" variant uses a quarter-circle to join the two objects smoothly:
 float fOpUnionRound(float a, float b, float r) {
-	vec2 u = max(vec2(r - a,r - b), vec2(0));
+	vec2 u = max(vec2(r - a,r - b), vec2(0, 0));
 	return max(r, min (a, b)) - length(u);
 }
 
 float fOpIntersectionRound(float a, float b, float r) {
-	vec2 u = max(vec2(r + a,r + b), vec2(0));
+	vec2 u = max(vec2(r + a,r + b), vec2(0, 0));
 	return min(-r, max (a, b)) + length(u);
 }
 
