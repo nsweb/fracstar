@@ -1,5 +1,7 @@
 # Build generated files
 build/
+# Temp shader files
+.shaders/
 
 # Keep various files
 !*.lua
