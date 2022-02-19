@@ -18,8 +18,8 @@
 CLASS_EQUIP_CPP(CoLevel);
 
 CoLevel::CoLevel() :
-    m_df_shader(nullptr),
-	m_hit_shader(nullptr)
+    m_df_program(BGFX_INVALID_HANDLE),
+	m_hit_program(BGFX_INVALID_HANDLE)
 {
 
 }
@@ -52,28 +52,11 @@ void CoLevel::Create( Entity* owner, class json::Object* proto )
 bool CoLevel::LoadShaders()
 {
 	// Load distance field shader
-    char const* src_buffers[Shader::MAX] = { nullptr };
-    File shader_file;
-    String vs_name = String::Printf( "../data/level/%s/df.vs.glsl", m_level_name.c_str() );
-    String fs_name = String::Printf( "../data/level/%s/df.fs.glsl", m_level_name.c_str() );
-    String vs_src, fs_src;
-    
-    if( !shader_file.Open( vs_name.c_str(), false /*bWrite*/) )
-        return false;
-    
-    shader_file.SerializeString( vs_src );
-    shader_file.Close();
-    
-    if( !shader_file.Open( fs_name.c_str(), false /*bWrite*/) )
-        return false;
-    
-    shader_file.SerializeString( fs_src );
-    shader_file.Close();
-    
-    src_buffers[Shader::Vertex] = vs_src.c_str();
-    src_buffers[Shader::Fragment] = fs_src.c_str();
-    
-    m_df_shader = GfxManager::GetStaticInstance()->LoadShaderFromMemory( m_level_name.c_str(), src_buffers );
+    m_df_vsh = loadShader("df_vs");
+    m_df_fsh = loadShader("df_fs");
+
+    // Create program from shaders.
+    m_df_program = bgfx::createProgram(m_df_vsh, m_df_fsh, true /* destroy shaders when program is destroyed */);
 
 	// Load hit test shader
 #if 0
@@ -93,15 +76,17 @@ bool CoLevel::LoadShaders()
 	m_hit_shader = GfxManager::GetStaticInstance()->LoadShaderFromMemory( hit_shader_name.c_str(), src_buffers );
 #endif
 
-    return m_df_shader /*&& m_hit_shader*/ ? true : false;
+    return isValid(m_df_program) /*&& m_hit_shader*/ ? true : false;
 }
 
 void CoLevel::CreateUniformVariables()
 {
+    // (REBIND)
+#if 0
     Array<ShaderUniformDetail> uniforms;
     m_df_shader->GetActiveUniforms( uniforms );
 
-    String str_lvl("lvl_");
+    String str_lvl("u_lvl_");
     for( int uni_idx = 0; uni_idx < uniforms.size(); uni_idx++ )
     {
         ShaderUniformDetail const& uni = uniforms[uni_idx];
@@ -152,7 +137,7 @@ void CoLevel::CreateUniformVariables()
 				const int key_count = 40;
 				for( int key_idx = 0; key_idx < key_count; key_idx++ )
 				{
-					float curve_val = bigball::sin( 8.f * F_PI * (float)key_idx / key_count );
+					float curve_val = bigfx::sin( 8.f * F_PI * (float)key_idx / key_count );
 					LevelVariableTrack<float>::Key new_key = { (float)key_idx * 0.5f, *default_value + 0.15f*curve_val };
 					test_track->m_keys.push_back( new_key );
 				}
@@ -165,7 +150,7 @@ void CoLevel::CreateUniformVariables()
 				const int key_count = 40;
 				for( int key_idx = 0; key_idx < key_count; key_idx++ )
 				{
-					float curve_val = bigball::cos( 8.f * F_PI * (float)key_idx / key_count );
+					float curve_val = bigfx::cos( 8.f * F_PI * (float)key_idx / key_count );
 					LevelVariableTrack<float>::Key new_key = { (float)key_idx * 0.5f, *default_value + 0.15f*curve_val };
 					test_track->m_keys.push_back( new_key );
 				}
@@ -174,11 +159,16 @@ void CoLevel::CreateUniformVariables()
 #endif // TEST_UNI_TRACK
         }
     }
+#endif
 }
 
 void CoLevel::Destroy()
 {
-    m_df_shader = nullptr;
+    if (isValid(m_df_program))
+        bgfx::destroy(m_df_program);
+
+    if (isValid(m_hit_program))
+        bgfx::destroy(m_hit_program);
     
 	Super::Destroy();
 }
@@ -204,7 +194,7 @@ void CoLevel::InterpAndSetUniforms( float time )
 	for( int track_idx = 0; track_idx < m_var_tracks.size(); track_idx++ )
 	{
 		m_var_tracks[track_idx]->InterpUniformValue( time, this );
-		m_var_tracks[track_idx]->SetShaderUniformValue( m_df_shader, this );
+		m_var_tracks[track_idx]->SetShaderUniformValue( m_df_fsh, this );
 
 		LevelShader::GetStaticInstance()->SetCppUniformValue(this, m_var_tracks[track_idx]->m_var_name, m_var_tracks[track_idx]->m_var_index);
 	}

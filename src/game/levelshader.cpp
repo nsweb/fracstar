@@ -10,7 +10,7 @@
 #define cos bx::cos
 #define sin bx::sin
 
-#define UNIFORM_LEVEL( type, lvl_name, value )     UniformVariableCpp<type> lvl_name = { value, #lvl_name, this };
+#define UNIFORM_LEVEL( type, lvl_name, value )     UniformVariableCpp<type> lvl_name = { (type)value, #lvl_name, this };
 
 class mbox : public LevelCppAccess
 {
@@ -19,7 +19,7 @@ public:
 	{
 	}
 
-#include "../../data/level/mbox/df.fs.glsl"
+#include "../../data/level/mbox/df_fs.sc"
 };
 
 ////////////////////////////////////////////////////////////////

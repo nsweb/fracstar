@@ -1,11 +1,9 @@
-
-
-
 #ifndef FSCOLEVEL_H
 #define FSCOLEVEL_H
 
+//#include "bgfx_utils.h"
 #include "engine/component.h"
-#include "gfx/shader.h"
+//#include "gfx/shader.h"
 
 namespace bigfx
 {
@@ -17,11 +15,12 @@ namespace bigfx
 class CoLevel;
 template <typename type> class LevelVariableTrack;
 
-class UniformVariable : public ShaderUniformDetail
-{
-public:
-    int     m_buffer_offset;
-};
+// (REBIND)
+//class UniformVariable : public ShaderUniformDetail
+//{
+//public:
+//    int     m_buffer_offset;
+//};
 
 class LevelVariableTrackBase
 {
@@ -30,9 +29,9 @@ public:
 	Name	m_var_name;
     
     virtual int GetVarSize() const = 0;
-    virtual void RetrieveShaderUniformValue( Shader* shader, ShaderUniform const& uni, void* var_buffer ) = 0;
+    virtual void RetrieveShaderUniformValue(bgfx::ShaderHandle shader, bgfx::UniformHandle const& uni, void* var_buffer ) = 0;
 	virtual void InterpUniformValue(float time, class CoLevel* parent_level) = 0;
-	virtual void SetShaderUniformValue(Shader* shader, class CoLevel* parent_level) = 0;
+	virtual void SetShaderUniformValue(bgfx::ShaderHandle, class CoLevel* parent_level) = 0;
 };
 
 //////////////////////////////////////////////////
@@ -63,9 +62,13 @@ public:
 
 public:
     Name                            m_level_name;
-    Shader*                         m_df_shader;
-	Shader*                         m_hit_shader;
-    Array<UniformVariable>          m_shader_variables;
+    bgfx::ProgramHandle             m_df_program;
+    bgfx::ShaderHandle              m_df_vsh;
+    bgfx::ShaderHandle              m_df_fsh;
+    bgfx::ProgramHandle             m_hit_program;
+
+    // (REBIND)
+    //Array<UniformVariable>          m_shader_variables;
     Array<uint8>                    m_uniform_buffer;
     Array<LevelVariableTrackBase*>  m_var_tracks;
     
@@ -87,7 +90,7 @@ public:
     Array<Key>  m_keys;
     
     virtual int GetVarSize() const override  { return sizeof(type); }
-    virtual void RetrieveShaderUniformValue(Shader* shader, ShaderUniform const& uni, void* var_buffer) override
+    virtual void RetrieveShaderUniformValue(bgfx::ProgramHandle shader, bgfx::UniformHandle const& uni, void* var_buffer) override
     {
         shader->GetUniform(uni, *(type*)var_buffer);
     }
@@ -126,7 +129,7 @@ public:
         *value_addr = bigfx::lerp( m_keys[found_key_idx].m_value, m_keys[found_key_idx + 1].m_value, time_ratio );
     }
     
-    virtual void SetShaderUniformValue(Shader* shader, class CoLevel* parent_level) override
+    virtual void SetShaderUniformValue(bgfx::ShaderHandle shader, class CoLevel* parent_level) override
     {
         if( !m_keys.size() )
         return;
